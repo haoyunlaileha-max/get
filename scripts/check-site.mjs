@@ -16,15 +16,15 @@ for (const marker of ['<html lang="en">', 'id="language"', 'id="services"', 'id=
 }
 assert.ok(!/<style[\s>]/i.test(html), "Styles must live in the external stylesheet");
 assert.ok(!/<script>/.test(html), "Application JavaScript must live in the external script");
-for (const marker of ["--bg:", ".config-dialog", ".mobile-menu", ".account-card", ".account-password-field", ".order-items", "@media(max-width:640px)"]) assert.ok(css.includes(marker), `Missing stylesheet feature: ${marker}`);
+for (const marker of ["--bg:", ".config-dialog", ".mobile-menu", ".account-card", ".account-password-field", ".order-items", ".account-profile", ".account-language", "@media(max-width:640px)"]) assert.ok(css.includes(marker), `Missing stylesheet feature: ${marker}`);
 for (const marker of ["const translations=", "localStorage.setItem", "document.documentElement.dir=code==='ar'?'rtl':'ltr'", "configureDialog.showModal()", "no order was submitted"]) assert.ok(js.includes(marker), `Missing application behavior: ${marker}`);
 for (const category of ["vps", "dedicated", "rdp", "gpu", "domains"]) assert.ok(html.includes(`data-type="${category}"`), `Missing plan category: ${category}`);
 assert.equal((html.match(/data-type="[^"]+"/g) || []).length, 6, "Expected six demo plan cards");
 assert.ok(!html.includes("anonymoushosting.example"), "Placeholder contact email must not be exposed");
 assert.equal((html.match(/<section\b/g) || []).length, (html.match(/<\/section>/g) || []).length, "Every section must have a closing tag");
 
-for (const marker of ['<title>Customer account', 'id="auth-form"', 'id="auth-setup"', 'id="account-dashboard"', 'id="orders-list"', 'id="toggle-password"', 'assets/js/supabase-config.js', 'assets/js/account.js']) assert.ok(account.includes(marker), `Missing account page feature: ${marker}`);
-for (const marker of ['signInWithPassword', 'signUp', 'resetPasswordForEmail', 'signOut', '.from("ah_orders")', '.eq("user_id", userId)', 'ah_order_items(description_snapshot,quantity,unit_price_minor)', 'toggle-password', 'aria-busy', 'never']) {
+for (const marker of ['<title>Customer account', 'id="auth-form"', 'id="auth-setup"', 'id="account-dashboard"', 'id="orders-list"', 'id="toggle-password"', 'id="account-language"', 'id="profile-form"', 'id="profile-name"', 'assets/js/supabase-config.js', 'assets/js/account.js']) assert.ok(account.includes(marker), `Missing account page feature: ${marker}`);
+for (const marker of ['signInWithPassword', 'signUp', 'resetPasswordForEmail', 'signOut', '.from("ah_orders")', '.eq("user_id", userId)', 'ah_order_items(description_snapshot,quantity,unit_price_minor)', 'toggle-password', 'aria-busy', 'ah_profiles').update', 'applyLanguage', 'ah-language', 'messages =', 'never']) {
   if (marker !== "never") assert.ok(accountJs.includes(marker), `Missing account behavior: ${marker}`);
 }
 assert.ok(config.includes('url: ""') && config.includes('anonKey: ""'), "Supabase browser config must start empty");
