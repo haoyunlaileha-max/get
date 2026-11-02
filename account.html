@@ -26,7 +26,10 @@
         <label for="auth-email">Email address</label>
         <input id="auth-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com">
         <label for="auth-password">Password</label>
-        <input id="auth-password" name="password" type="password" autocomplete="current-password" required minlength="8" maxlength="128" placeholder="At least 8 characters">
+        <div class="account-password-field">
+          <input id="auth-password" name="password" type="password" autocomplete="current-password" required minlength="8" maxlength="128" placeholder="At least 8 characters">
+          <button class="account-password-toggle" id="toggle-password" type="button" aria-label="Show password" aria-pressed="false">Show</button>
+        </div>
         <button class="btn btn-primary account-submit" id="auth-submit" type="submit">Sign in securely</button>
       </form>
       <button class="account-link-button" id="reset-password" type="button">Send password reset email</button>
