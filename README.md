@@ -12,7 +12,7 @@ A responsive, multilingual hosting storefront prototype for the **Anonymous Host
 - Category filtering across all five product groups
 - Local-only plan configurator with region and operating-system selections; it does not submit orders or transmit customer data
 - Accessible mobile navigation dropdown
-- Customer account portal UI with Supabase email/password sign-in, registration, password reset, session handling, and user-scoped order history
+- Customer account portal with six-language UI (including Arabic RTL), Supabase email/password sign-in, registration, password reset, profile display-name editing, and user-scoped order history with line items
 - Supabase browser configuration template starts empty and accepts only the public anon/publishable key
 - Sample global data-center locations
 - Modular static frontend: semantic HTML, external CSS, and external JavaScript
