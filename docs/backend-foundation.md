@@ -79,5 +79,5 @@ No price, currency, user ID, or order status is accepted from the browser.
 ## Current limitations
 
 - The Edge Function creates a pending order only. It does not accept payments, mark orders paid, or provision servers.
-- Payment webhook signature verification, provider API integration, provisioning queues, retry policy, and audit logging must be implemented before production fulfillment.
+- Payment webhook signature verification, provider API integration, provisioning queues, retry policy, audit logging, and per-user/IP rate limiting must be implemented before production fulfillment. CORS origin checks are an additional browser control, not a substitute for authentication or rate limiting.
 - The Edge Function is committed but not deployed to Supabase. No secrets or project credentials are stored in this repository.
