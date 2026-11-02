@@ -33,6 +33,37 @@
       <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="jobs_title">Provisioning jobs</h2><p data-i="jobs_desc">Queue state, attempts and provider references.</p></div></div><div id="jobs-list" class="admin-record-list"></div></section>
       <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="payments_title">Payment events</h2><p data-i="payments_desc">Verified webhook audit records.</p></div></div><div id="payments-list" class="admin-record-list"></div></section>
     </div>
+    <section class="admin-panel" id="catalog-editor">
+      <div class="admin-panel-head"><div><h2 data-i="catalog_manage">Manage products and plans</h2><p data-i="catalog_manage_desc">Create or edit catalog entries. New entries are inactive until explicitly enabled.</p></div></div>
+      <div class="admin-editor-grid">
+        <form id="product-editor" class="admin-editor">
+          <h3 data-i="product_editor_title">Product details</h3>
+          <input type="hidden" name="id">
+          <label><span data-i="product_name">Product name</span><input name="name" required maxlength="100"></label>
+          <label><span data-i="product_slug">Slug</span><input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" maxlength="80"></label>
+          <label><span data-i="product_category">Category</span><select name="category" required><option value="linux_vps">Linux VPS</option><option value="dedicated_server">Dedicated Server</option><option value="windows_rdp">Windows RDP</option><option value="gpu">GPU Compute</option><option value="domain">Domains</option></select></label>
+          <label><span data-i="description">Description</span><textarea name="description" rows="2" maxlength="1000"></textarea></label>
+          <label><span data-i="sort_order">Sort order</span><input name="sort_order" type="number" min="0" max="100000" step="1" value="0"></label>
+          <label class="admin-check"><input name="is_active" type="checkbox"><span data-i="publish_product">Publish product immediately</span></label>
+          <div class="admin-editor-actions"><button class="btn btn-primary" type="submit" data-i="save_product">Save product</button><button class="admin-toggle" type="reset" data-i="clear_form">Clear</button></div>
+        </form>
+        <form id="plan-editor" class="admin-editor">
+          <h3 data-i="plan_editor_title">Plan details</h3>
+          <input type="hidden" name="id">
+          <label><span data-i="plan_product">Product</span><select name="product_id" id="plan-product" required></select></label>
+          <label><span data-i="plan_name">Plan name</span><input name="name" required maxlength="100"></label>
+          <label><span data-i="plan_code">Unique plan code</span><input name="code" required pattern="[A-Za-z0-9_-]+" maxlength="80"></label>
+          <div class="admin-editor-row"><label><span data-i="price">Price (major currency units)</span><input name="price" type="number" required min="0" max="999999999" step="0.01" value="0"></label><label><span data-i="currency">Currency</span><input name="currency" required pattern="[A-Za-z]{3}" maxlength="3" value="USD"></label></div>
+          <label><span data-i="billing_period">Billing period</span><select name="billing_period"><option value="hourly">Hourly</option><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="annually">Annually</option><option value="one_time">One time</option></select></label>
+          <label><span data-i="description">Description</span><textarea name="description" rows="2" maxlength="1000"></textarea></label>
+          <label><span data-i="specs_json">Specifications (JSON)</span><textarea name="specs" rows="5" spellcheck="false">{ "cpu": "2 vCPU", "ram": "4 GB", "storage": "80 GB NVMe", "bandwidth": "4 TB", "os_options": ["Ubuntu 24.04", "Debian 12"] }</textarea></label>
+          <label><span data-i="sort_order">Sort order</span><input name="sort_order" type="number" min="0" max="100000" step="1" value="0"></label>
+          <label class="admin-check"><input name="is_active" type="checkbox"><span data-i="publish_plan">Publish plan immediately</span></label>
+          <div class="admin-editor-actions"><button class="btn btn-primary" type="submit" data-i="save_plan">Save plan</button><button class="admin-toggle" type="reset" data-i="clear_form">Clear</button></div>
+        </form>
+      </div>
+      <p class="admin-editor-note" data-i="catalog_safety">New entries start unpublished by default. Existing prices are never changed unless you edit and save that plan. Validate specifications before publishing.</p>
+    </section>
     <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="catalog_title">Product catalog</h2><p data-i="catalog_desc">Enable or disable products and plans. Price changes are intentionally not exposed here.</p></div></div><div id="catalog-list" class="admin-catalog"></div></section>
     <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="regions_title">Data-center regions</h2><p data-i="regions_desc">Control whether a region is available for new orders.</p></div></div><div id="regions-list" class="admin-catalog"></div></section>
     <p class="admin-footnote" data-i="security_note">Admin access is verified using Supabase app_metadata and enforced again by database RLS. Never share service-role keys with this page.</p>
