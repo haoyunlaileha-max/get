@@ -18,7 +18,7 @@ Open `index.html` in a modern browser, or serve this directory with any static w
 
 ## Automated checks and deployment
 
-Every push to `main` runs the dependency-free storefront smoke checks in `scripts/check-site.mjs`, prepares the static site, and deploys it with GitHub Actions to GitHub Pages. You can also start the workflow manually from the Actions tab. The first deployment may require GitHub Pages to be enabled for the repository with **Build and deployment → Source: GitHub Actions**. The published URL is shown in the workflow run's deployment environment.
+Every push to `main` runs the dependency-free storefront and migration checks in `scripts/check-site.mjs`. The deploy workflow checks whether GitHub Pages is enabled: if it is not, validation still succeeds and deployment is safely skipped; once Pages is enabled with **Settings → Pages → Build and deployment → Source: GitHub Actions**, subsequent pushes deploy automatically. You can also start the workflow manually from the Actions tab. The published URL is shown in the workflow run's deployment environment.
 
 ## Important prototype notes
 
