@@ -21,6 +21,69 @@ ru:{language:"Язык",storefront:"Магазин",eyebrow:"ОПЕРАЦИИ / 
 es:{language:"Idioma",storefront:"Tienda",eyebrow:"OPERACIONES / CONTROL",title:"Consola de operaciones",subtitle:"Supervisa pedidos, pagos, aprovisionamiento y disponibilidad del catálogo.",refresh:"Actualizar datos",login_required:"Se requiere acceso de administrador",login_copy:"Inicia sesión con una cuenta que tenga el rol de administrador verificado.",open_account:"Abrir inicio de sesión",signed_in_as:"Sesión de",sign_out:"Cerrar sesión",orders:"Pedidos",all_records:"Todos los registros",paid:"Pagados",paid_orders:"Pedidos pagados",queued:"Cola de aprovisionamiento",waiting_work:"En espera / reintento",active:"Planes activos",catalog:"Catálogo",orders_title:"Pedidos recientes",orders_desc:"Pedidos de clientes y estado actual.",order:"Pedido",customer:"ID de cliente",status:"Estado",total:"Total",created:"Creado",jobs_title:"Tareas de aprovisionamiento",jobs_desc:"Estado, intentos y referencias del proveedor.",payments_title:"Eventos de pago",payments_desc:"Registros de webhooks verificados.",catalog_title:"Catálogo de productos",catalog_desc:"Activar o desactivar productos y planes. Los precios no se modifican aquí.",regions_title:"Regiones de centros de datos",regions_desc:"Controla la disponibilidad de regiones para nuevos pedidos.",security_note:"El rol de administrador se verifica mediante app_metadata y RLS. Nunca incluyas claves service-role aquí.",loading:"Cargando datos…",empty:"No hay registros.",load_error:"No se pudieron cargar los datos. Comprueba las migraciones 0001–0005 y RLS.",not_admin:"Esta cuenta no tiene el rol de administrador verificado.",setup_error:"Configura la URL de Supabase y la clave pública. Nunca uses la clave service-role.",enabled:"Activo",disabled:"Inactivo",activate:"Activar",deactivate:"Desactivar",region_active:"Activa",region_inactive:"Inactiva",maintenance:"Mantenimiento",set_active:"Marcar activa",set_inactive:"Marcar inactiva",set_maintenance:"Mantenimiento",updated:"Guardado.",update_error:"No se pudo guardar. Comprueba migraciones y RLS.",no_jobs:"No hay tareas.",no_payments:"No hay eventos.",attempts:"Intentos",provider_ref:"Referencia proveedor",event:"Evento",amount:"Importe",refreshing:"Actualizando…",signing_out:"Cerrando sesión…",no_data:"Sin datos"}
 };
 
+
+const editorText = {
+  en:{catalog_manage:"Manage products and plans",catalog_manage_desc:"Create or edit catalog entries. New entries are inactive until explicitly enabled.",product_editor_title:"Product details",product_name:"Product name",product_slug:"Slug",product_category:"Category",description:"Description",sort_order:"Sort order",publish_product:"Publish product immediately",save_product:"Save product",clear_form:"Clear",plan_editor_title:"Plan details",plan_product:"Product",plan_name:"Plan name",plan_code:"Unique plan code",price:"Price (major currency units)",currency:"Currency",billing_period:"Billing period",specs_json:"Specifications (JSON)",publish_plan:"Publish plan immediately",save_plan:"Save plan",edit:"Edit",catalog_safety:"New entries start unpublished by default. Existing prices change only when you edit and save that plan.",invalid_specs:"Specifications must be a valid JSON object.",saved:"Catalog entry saved.",save_failed:"Could not save catalog entry. Check unique slug/code constraints and admin RLS."},
+  zh:{catalog_manage:"商品与套餐管理",catalog_manage_desc:"新增或编辑目录项目；新项目默认停用，需明确启用后才会展示。",product_editor_title:"产品信息",product_name:"产品名称",product_slug:"网址标识（slug）",product_category:"产品类别",description:"描述",sort_order:"排序",publish_product:"保存后立即上架",save_product:"保存产品",clear_form:"清空",plan_editor_title:"套餐信息",plan_product:"所属产品",plan_name:"套餐名称",plan_code:"唯一套餐代码",price:"价格（主要货币单位）",currency:"货币代码",billing_period:"计费周期",specs_json:"规格参数（JSON）",publish_plan:"保存后立即上架",save_plan:"保存套餐",edit:"编辑",catalog_safety:"新项目默认不发布。只有编辑并保存对应套餐时才会更改其价格。",invalid_specs:"规格必须是有效的 JSON 对象。",saved:"商品目录已保存。",save_failed:"保存失败，请检查 slug/code 是否重复以及管理员 RLS 权限。"},
+  ar:{catalog_manage:"إدارة المنتجات والخطط",catalog_manage_desc:"إنشاء عناصر الكتالوج أو تعديلها؛ العناصر الجديدة غير نشطة افتراضياً.",product_editor_title:"تفاصيل المنتج",product_name:"اسم المنتج",product_slug:"المعرّف",product_category:"الفئة",description:"الوصف",sort_order:"الترتيب",publish_product:"نشر المنتج فوراً",save_product:"حفظ المنتج",clear_form:"مسح",plan_editor_title:"تفاصيل الخطة",plan_product:"المنتج",plan_name:"اسم الخطة",plan_code:"رمز فريد",price:"السعر",currency:"العملة",billing_period:"دورة الفوترة",specs_json:"المواصفات (JSON)",publish_plan:"نشر الخطة فوراً",save_plan:"حفظ الخطة",edit:"تعديل",catalog_safety:"العناصر الجديدة غير منشورة افتراضياً. لا يتغير السعر إلا عند تعديل الخطة وحفظها.",invalid_specs:"يجب أن تكون المواصفات كائن JSON صالحاً.",saved:"تم حفظ الكتالوج.",save_failed:"تعذر الحفظ؛ تحقق من الرمز الفريد وسياسات RLS."},
+  fr:{catalog_manage:"Gérer les produits et offres",catalog_manage_desc:"Créer ou modifier le catalogue. Les nouveaux éléments sont désactivés par défaut.",product_editor_title:"Détails du produit",product_name:"Nom du produit",product_slug:"Identifiant",product_category:"Catégorie",description:"Description",sort_order:"Ordre",publish_product:"Publier immédiatement",save_product:"Enregistrer le produit",clear_form:"Effacer",plan_editor_title:"Détails de l’offre",plan_product:"Produit",plan_name:"Nom de l’offre",plan_code:"Code unique",price:"Prix",currency:"Devise",billing_period:"Période de facturation",specs_json:"Caractéristiques (JSON)",publish_plan:"Publier immédiatement",save_plan:"Enregistrer l’offre",edit:"Modifier",catalog_safety:"Les nouveaux éléments sont désactivés par défaut. Un prix ne change qu’après modification et enregistrement.",invalid_specs:"Les caractéristiques doivent être un objet JSON valide.",saved:"Catalogue enregistré.",save_failed:"Échec. Vérifiez l’unicité du code et les règles RLS."},
+  ru:{catalog_manage:"Управление товарами и тарифами",catalog_manage_desc:"Создание и редактирование каталога. Новые записи по умолчанию выключены.",product_editor_title:"Данные продукта",product_name:"Название продукта",product_slug:"Идентификатор",product_category:"Категория",description:"Описание",sort_order:"Порядок",publish_product:"Опубликовать сразу",save_product:"Сохранить продукт",clear_form:"Очистить",plan_editor_title:"Данные тарифа",plan_product:"Продукт",plan_name:"Название тарифа",plan_code:"Уникальный код",price:"Цена",currency:"Валюта",billing_period:"Период оплаты",specs_json:"Характеристики (JSON)",publish_plan:"Опубликовать сразу",save_plan:"Сохранить тариф",edit:"Изменить",catalog_safety:"Новые записи по умолчанию скрыты. Цена меняется только после редактирования и сохранения тарифа.",invalid_specs:"Характеристики должны быть корректным JSON-объектом.",saved:"Каталог сохранён.",save_failed:"Ошибка сохранения. Проверьте уникальность кода и RLS."},
+  es:{catalog_manage:"Gestionar productos y planes",catalog_manage_desc:"Crear o editar el catálogo. Los elementos nuevos están desactivados por defecto.",product_editor_title:"Datos del producto",product_name:"Nombre del producto",product_slug:"Identificador",product_category:"Categoría",description:"Descripción",sort_order:"Orden",publish_product:"Publicar inmediatamente",save_product:"Guardar producto",clear_form:"Limpiar",plan_editor_title:"Datos del plan",plan_product:"Producto",plan_name:"Nombre del plan",plan_code:"Código único",price:"Precio",currency:"Moneda",billing_period:"Periodo de facturación",specs_json:"Especificaciones (JSON)",publish_plan:"Publicar inmediatamente",save_plan:"Guardar plan",edit:"Editar",catalog_safety:"Los elementos nuevos empiezan desactivados. El precio solo cambia al editar y guardar el plan.",invalid_specs:"Las especificaciones deben ser un objeto JSON válido.",saved:"Catálogo guardado.",save_failed:"No se pudo guardar. Comprueba el código único y RLS."}
+};
+function editorTr(key) { return (editorText[language] || editorText.en)[key] || editorText.en[key] || key; }
+function formValues(form) { return Object.fromEntries(new FormData(form).entries()); }
+function fillProductEditor(product) {
+  const form = $("product-editor"); form.reset();
+  for (const key of ["id","name","slug","category","description","sort_order"]) form.elements.namedItem(key).value = product?.[key] ?? (key === "sort_order" ? 0 : "");
+  form.elements.is_active.checked = Boolean(product?.is_active);
+  form.scrollIntoView({ behavior:"smooth", block:"center" });
+}
+function fillPlanEditor(plan) {
+  const form = $("plan-editor"); form.reset();
+  const productSelect = $("plan-product");
+  productSelect.value = plan?.product_id || productSelect.options[0]?.value || "";
+  for (const key of ["id","name","code","currency","billing_period","description","sort_order"]) form.elements.namedItem(key).value = plan?.[key] ?? ({currency:"USD",billing_period:"monthly",sort_order:0}[key] ?? "");
+  form.elements.price.value = plan ? (Number(plan.price_minor)/100).toFixed(2) : "0.00";
+  form.elements.specs.value = JSON.stringify(plan?.specs || {cpu:"2 vCPU",ram:"4 GB",storage:"80 GB NVMe",bandwidth:"4 TB",os_options:["Ubuntu 24.04","Debian 12"]},null,2);
+  form.elements.is_active.checked = Boolean(plan?.is_active);
+  form.scrollIntoView({ behavior:"smooth", block:"center" });
+}
+function renderProductOptions(products) {
+  const select = $("plan-product"); const previous = select.value;
+  select.replaceChildren();
+  for (const product of products) { const option = document.createElement("option"); option.value = product.id; option.textContent = product.name; select.append(option); }
+  if (products.some((p)=>p.id===previous)) select.value=previous;
+}
+async function saveCatalog(form, table) {
+  if (busy) return;
+  const values = formValues(form); const id = values.id || null;
+  let payload;
+  if (table === "ah_products") {
+    payload = {name:values.name.trim(),slug:values.slug.trim().toLowerCase(),category:values.category,description:values.description.trim()||null,sort_order:Number(values.sort_order||0),is_active:form.elements.is_active.checked};
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(payload.slug) || !Number.isSafeInteger(payload.sort_order) || payload.sort_order<0) { show(nodes.error,editorTr("save_failed")); return; }
+  } else {
+    let specs;
+    try { specs=JSON.parse(values.specs); } catch { show(nodes.error,editorTr("invalid_specs")); return; }
+    if (!specs || Array.isArray(specs) || typeof specs!=="object") { show(nodes.error,editorTr("invalid_specs")); return; }
+    const price=Number(values.price); const priceMinor=Math.round(price*100); const currency=values.currency.trim().toUpperCase();
+    if (!Number.isFinite(price)||price<0||priceMinor>Number.MAX_SAFE_INTEGER||!/^[A-Z]{3}$/.test(currency)||!Number.isSafeInteger(Number(values.sort_order))||Number(values.sort_order)<0) { show(nodes.error,editorTr("save_failed")); return; }
+    payload={product_id:values.product_id,name:values.name.trim(),code:values.code.trim(),description:values.description.trim()||null,price_minor:priceMinor,currency,billing_period:values.billing_period,specs,sort_order:Number(values.sort_order||0),is_active:form.elements.is_active.checked};
+    if(!/^[A-Za-z0-9_-]+$/.test(payload.code)||!payload.product_id) { show(nodes.error,editorTr("save_failed")); return; }
+  }
+  busy=true; show(nodes.error,""); show(nodes.success,"");
+  try {
+    const query=id ? supabase.from(table).update(payload).eq("id",id) : supabase.from(table).insert(payload);
+    const {error}=await query;
+    if(error) throw error;
+    show(nodes.success,editorTr("saved")); form.reset();
+    if(table==="ah_products") form.elements.sort_order.value="0";
+    if(table==="ah_plans") { form.elements.currency.value="USD"; form.elements.price.value="0"; form.elements.sort_order.value="0"; }
+    busy=false; await loadDashboard();
+  } catch {
+    show(nodes.error,editorTr("save_failed"));
+  } finally { busy=false; }
+}
+
 function tr(key) { return (messages[language] || messages.en)[key] || messages.en[key] || key; }
 function setText(id, value) { const node = $(id); if (node) node.textContent = value; }
 function show(node, message) { node.hidden = !message; if (message) node.textContent = message; }
@@ -85,6 +148,7 @@ function renderPayments(rows) {
 }
 function renderCatalog(products, plans) {
   const root = $("catalog-list"); root.replaceChildren();
+  renderProductOptions(products);
   const productMap = new Map(products.map((product) => [product.id, product]));
   for (const product of products) {
     const group = document.createElement("div"); group.className = "admin-catalog-group";
@@ -93,7 +157,8 @@ function renderCatalog(products, plans) {
     const toggle = document.createElement("button"); toggle.className = "admin-toggle"; toggle.type = "button";
     toggle.textContent = product.is_active ? tr("deactivate") : tr("activate");
     toggle.addEventListener("click", () => updateRow("ah_products", product.id, { is_active: !product.is_active }));
-    head.append(label, toggle); group.append(head);
+    const editProduct=document.createElement("button"); editProduct.className="admin-toggle"; editProduct.type="button"; editProduct.textContent=editorTr("edit"); editProduct.addEventListener("click",()=>fillProductEditor(product));
+    head.append(label, editProduct, toggle); group.append(head);
     for (const plan of plans.filter((entry) => entry.product_id === product.id)) {
       const line = document.createElement("div"); line.className = "admin-catalog-line";
       const name = document.createElement("span"); name.textContent = `${plan.name} · ${money(plan.price_minor, plan.currency)} / ${plan.billing_period}`;
@@ -101,7 +166,8 @@ function renderCatalog(products, plans) {
       const button = document.createElement("button"); button.className = "admin-toggle"; button.type = "button";
       button.textContent = plan.is_active ? tr("deactivate") : tr("activate");
       button.addEventListener("click", () => updateRow("ah_plans", plan.id, { is_active: !plan.is_active }));
-      line.append(name, state, button); group.append(line);
+      const editPlan=document.createElement("button"); editPlan.className="admin-toggle"; editPlan.type="button"; editPlan.textContent=editorTr("edit"); editPlan.addEventListener("click",()=>fillPlanEditor(plan));
+      line.append(name, state, editPlan, button); group.append(line);
     }
     root.append(group);
   }
@@ -187,6 +253,10 @@ async function initialize() {
     show(nodes.error, tr("load_error"));
   }
 }
+$("product-editor").addEventListener("submit",(event)=>{event.preventDefault();saveCatalog(event.currentTarget,"ah_products");});
+$("plan-editor").addEventListener("submit",(event)=>{event.preventDefault();saveCatalog(event.currentTarget,"ah_plans");});
+$("product-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("product-editor").elements.sort_order.value="0"; },0);});
+$("plan-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("plan-editor").elements.currency.value="USD"; $("plan-editor").elements.price.value="0"; $("plan-editor").elements.sort_order.value="0"; },0);});
 nodes.refresh.addEventListener("click", loadDashboard);
 nodes.signout.addEventListener("click", async () => { if (!supabase) return; nodes.signout.disabled = true; await supabase.auth.signOut(); window.location.replace("account.html"); });
 nodes.language.addEventListener("change", () => { language = languages.includes(nodes.language.value) ? nodes.language.value : "en"; localStorage.setItem("ah-language", language); applyLanguage(); if (!nodes.app.hidden) loadDashboard(); });
