@@ -22,6 +22,7 @@ es:{language:"Idioma",storefront:"Tienda",eyebrow:"OPERACIONES / CONTROL",title:
 };
 
 
+const inventoryText = {"en":{"inventory_title":"Plan availability by data center","inventory_desc":"Assign plans to regions and control sale status and capacity.","inventory_plan":"Plan","inventory_region":"Data-center region","inventory_capacity":"Capacity (units; blank = unlimited)","inventory_available":"Available for new orders","inventory_save":"Save region assignment","inventory_safety":"Allocated units are calculated from non-terminal orders and cannot be edited here. Capacity changes never delete or alter orders. Blank capacity means unlimited.","inventory_unlimited":"Unlimited","inventory_allocated":"Allocated","inventory_remaining":"Remaining","inventory_migration":"Apply migration 0006 to manage plan-region inventory.","inventory_edit":"Edit assignment","inventory_none":"No plan-region assignments yet.","inventory_saved":"Region assignment saved.","inventory_failed":"Could not save assignment. Check duplicate plan/region pairs and admin RLS."},"zh":{"inventory_title":"套餐机房与库存管理","inventory_desc":"为套餐指定可销售机房，并控制销售状态和容量上限。","inventory_plan":"套餐","inventory_region":"数据中心机房","inventory_capacity":"容量（台；留空表示不限量）","inventory_available":"允许新订单购买","inventory_save":"保存机房关联","inventory_safety":"已分配数量根据未终结订单自动计算，不能在此手动修改。调整容量不会删除或修改订单。容量留空表示不限量。","inventory_unlimited":"不限量","inventory_allocated":"已分配","inventory_remaining":"剩余","inventory_migration":"请先执行数据库迁移 0006，才能管理套餐机房库存。","inventory_edit":"编辑关联","inventory_none":"暂时没有套餐机房关联。","inventory_saved":"机房关联已保存。","inventory_failed":"保存失败，请检查套餐与机房是否重复关联以及管理员 RLS 权限。"},"ar":{"inventory_title":"توفر الخطط حسب مركز البيانات","inventory_desc":"اربط الخطط بالمناطق وتحكم في حالة البيع والسعة.","inventory_plan":"الخطة","inventory_region":"منطقة مركز البيانات","inventory_capacity":"السعة؛ فارغ = غير محدود","inventory_available":"متاح للطلبات الجديدة","inventory_save":"حفظ الربط","inventory_safety":"يُحسب العدد المخصص من الطلبات غير النهائية ولا يمكن تعديله هنا. السعة الفارغة تعني غير محدود.","inventory_unlimited":"غير محدود","inventory_allocated":"مخصص","inventory_remaining":"متبقٍ","inventory_migration":"طبّق ترحيل قاعدة البيانات 0006 لإدارة المخزون.","inventory_edit":"تعديل الربط","inventory_none":"لا توجد روابط بعد.","inventory_saved":"تم حفظ الربط.","inventory_failed":"تعذر الحفظ؛ تحقق من التكرار وسياسات RLS."},"fr":{"inventory_title":"Disponibilité des offres par centre","inventory_desc":"Associez les offres aux régions et gérez leur disponibilité et capacité.","inventory_plan":"Offre","inventory_region":"Région du centre","inventory_capacity":"Capacité (unités ; vide = illimitée)","inventory_available":"Disponible pour les nouvelles commandes","inventory_save":"Enregistrer l’affectation","inventory_safety":"Les unités allouées sont calculées depuis les commandes non terminées et ne sont pas modifiables ici. Une capacité vide signifie illimitée.","inventory_unlimited":"Illimitée","inventory_allocated":"Allouées","inventory_remaining":"Restantes","inventory_migration":"Appliquez la migration 0006 pour gérer les stocks.","inventory_edit":"Modifier","inventory_none":"Aucune affectation pour le moment.","inventory_saved":"Affectation enregistrée.","inventory_failed":"Échec. Vérifiez les doublons et les règles RLS."},"ru":{"inventory_title":"Доступность тарифов по дата-центрам","inventory_desc":"Назначайте тарифы регионам и управляйте продажами и ёмкостью.","inventory_plan":"Тариф","inventory_region":"Регион дата-центра","inventory_capacity":"Вместимость (шт.; пусто = без ограничений)","inventory_available":"Доступно для новых заказов","inventory_save":"Сохранить привязку","inventory_safety":"Занятые единицы рассчитываются по незавершённым заказам и не редактируются здесь. Пустая вместимость означает отсутствие лимита.","inventory_unlimited":"Без ограничений","inventory_allocated":"Занято","inventory_remaining":"Осталось","inventory_migration":"Примените миграцию 0006 для управления запасами.","inventory_edit":"Изменить","inventory_none":"Привязок пока нет.","inventory_saved":"Привязка сохранена.","inventory_failed":"Ошибка. Проверьте дубликаты и RLS."},"es":{"inventory_title":"Disponibilidad de planes por centro de datos","inventory_desc":"Asigna planes a regiones y controla su disponibilidad y capacidad.","inventory_plan":"Plan","inventory_region":"Región del centro de datos","inventory_capacity":"Capacidad (unidades; vacío = ilimitada)","inventory_available":"Disponible para nuevos pedidos","inventory_save":"Guardar asignación","inventory_safety":"Las unidades asignadas se calculan a partir de pedidos no terminales y no se pueden editar aquí. Capacidad vacía significa ilimitada.","inventory_unlimited":"Ilimitada","inventory_allocated":"Asignadas","inventory_remaining":"Restantes","inventory_migration":"Aplica la migración 0006 para gestionar el inventario.","inventory_edit":"Editar asignación","inventory_none":"Aún no hay asignaciones.","inventory_saved":"Asignación guardada.","inventory_failed":"No se pudo guardar. Comprueba duplicados y RLS."}};
 const editorText = {
   en:{catalog_manage:"Manage products and plans",catalog_manage_desc:"Create or edit catalog entries. New entries are inactive until explicitly enabled.",product_editor_title:"Product details",product_name:"Product name",product_slug:"Slug",product_category:"Category",description:"Description",sort_order:"Sort order",publish_product:"Publish product immediately",save_product:"Save product",clear_form:"Clear",plan_editor_title:"Plan details",plan_product:"Product",plan_name:"Plan name",plan_code:"Unique plan code",price:"Price (major currency units)",currency:"Currency",billing_period:"Billing period",specs_json:"Specifications (JSON)",publish_plan:"Publish plan immediately",save_plan:"Save plan",edit:"Edit",catalog_safety:"New entries start unpublished by default. Existing prices change only when you edit and save that plan.",invalid_specs:"Specifications must be a valid JSON object.",saved:"Catalog entry saved.",save_failed:"Could not save catalog entry. Check unique slug/code constraints and admin RLS."},
   zh:{catalog_manage:"商品与套餐管理",catalog_manage_desc:"新增或编辑目录项目；新项目默认停用，需明确启用后才会展示。",product_editor_title:"产品信息",product_name:"产品名称",product_slug:"网址标识（slug）",product_category:"产品类别",description:"描述",sort_order:"排序",publish_product:"保存后立即上架",save_product:"保存产品",clear_form:"清空",plan_editor_title:"套餐信息",plan_product:"所属产品",plan_name:"套餐名称",plan_code:"唯一套餐代码",price:"价格（主要货币单位）",currency:"货币代码",billing_period:"计费周期",specs_json:"规格参数（JSON）",publish_plan:"保存后立即上架",save_plan:"保存套餐",edit:"编辑",catalog_safety:"新项目默认不发布。只有编辑并保存对应套餐时才会更改其价格。",invalid_specs:"规格必须是有效的 JSON 对象。",saved:"商品目录已保存。",save_failed:"保存失败，请检查 slug/code 是否重复以及管理员 RLS 权限。"},
@@ -30,7 +31,7 @@ const editorText = {
   ru:{catalog_manage:"Управление товарами и тарифами",catalog_manage_desc:"Создание и редактирование каталога. Новые записи по умолчанию выключены.",product_editor_title:"Данные продукта",product_name:"Название продукта",product_slug:"Идентификатор",product_category:"Категория",description:"Описание",sort_order:"Порядок",publish_product:"Опубликовать сразу",save_product:"Сохранить продукт",clear_form:"Очистить",plan_editor_title:"Данные тарифа",plan_product:"Продукт",plan_name:"Название тарифа",plan_code:"Уникальный код",price:"Цена",currency:"Валюта",billing_period:"Период оплаты",specs_json:"Характеристики (JSON)",publish_plan:"Опубликовать сразу",save_plan:"Сохранить тариф",edit:"Изменить",catalog_safety:"Новые записи по умолчанию скрыты. Цена меняется только после редактирования и сохранения тарифа.",invalid_specs:"Характеристики должны быть корректным JSON-объектом.",saved:"Каталог сохранён.",save_failed:"Ошибка сохранения. Проверьте уникальность кода и RLS."},
   es:{catalog_manage:"Gestionar productos y planes",catalog_manage_desc:"Crear o editar el catálogo. Los elementos nuevos están desactivados por defecto.",product_editor_title:"Datos del producto",product_name:"Nombre del producto",product_slug:"Identificador",product_category:"Categoría",description:"Descripción",sort_order:"Orden",publish_product:"Publicar inmediatamente",save_product:"Guardar producto",clear_form:"Limpiar",plan_editor_title:"Datos del plan",plan_product:"Producto",plan_name:"Nombre del plan",plan_code:"Código único",price:"Precio",currency:"Moneda",billing_period:"Periodo de facturación",specs_json:"Especificaciones (JSON)",publish_plan:"Publicar inmediatamente",save_plan:"Guardar plan",edit:"Editar",catalog_safety:"Los elementos nuevos empiezan desactivados. El precio solo cambia al editar y guardar el plan.",invalid_specs:"Las especificaciones deben ser un objeto JSON válido.",saved:"Catálogo guardado.",save_failed:"No se pudo guardar. Comprueba el código único y RLS."}
 };
-function editorTr(key) { return (editorText[language] || editorText.en)[key] || editorText.en[key] || key; }
+function editorTr(key) { return (inventoryText[language] || inventoryText.en)[key] || (editorText[language] || editorText.en)[key] || inventoryText.en[key] || editorText.en[key] || key; }
 function formValues(form) { return Object.fromEntries(new FormData(form).entries()); }
 function fillProductEditor(product) {
   const form = $("product-editor"); form.reset();
@@ -82,6 +83,64 @@ async function saveCatalog(form, table) {
   } catch {
     show(nodes.error,editorTr("save_failed"));
   } finally { busy=false; }
+}
+
+
+function renderInventoryOptions(plans, regions) {
+  const planSelect=$("inventory-plan"), regionSelect=$("inventory-region");
+  const previousPlan=planSelect.value, previousRegion=regionSelect.value;
+  planSelect.replaceChildren(); regionSelect.replaceChildren();
+  for(const plan of plans){const option=document.createElement("option");option.value=plan.id;option.textContent=plan.name+" · "+plan.code;planSelect.append(option);}
+  for(const region of regions){const option=document.createElement("option");option.value=region.id;option.textContent=region.name+" · "+region.city+" ("+region.code+")";regionSelect.append(option);}
+  if(plans.some(p=>p.id===previousPlan))planSelect.value=previousPlan;
+  if(regions.some(r=>r.id===previousRegion))regionSelect.value=previousRegion;
+}
+function fillInventoryEditor(row) {
+  const form=$("plan-region-editor"); form.reset();
+  form.elements.id.value=row?.id||"";
+  $("inventory-plan").value=row?.plan_id||$("inventory-plan").options[0]?.value||"";
+  $("inventory-region").value=row?.region_id||$("inventory-region").options[0]?.value||"";
+  form.elements.capacity_units.value=row?.capacity_units??"";
+  form.elements.is_available.checked=Boolean(row?.is_available);
+  form.scrollIntoView({behavior:"smooth",block:"center"});
+}
+function renderPlanRegions(rows, plans, regions) {
+  renderInventoryOptions(plans,regions);
+  const root=$("plan-region-list");root.replaceChildren();
+  if(!rows){root.textContent=editorTr("inventory_migration");return;}
+  if(!rows.length){root.textContent=editorTr("inventory_none");return;}
+  const planMap=new Map(plans.map(p=>[p.id,p]));
+  const regionMap=new Map(regions.map(r=>[r.id,r]));
+  for(const row of rows){
+    const plan=planMap.get(row.plan_id),region=regionMap.get(row.region_id);
+    const line=document.createElement("div");line.className="admin-catalog-line";
+    const label=document.createElement("span");label.textContent=(plan?.name||row.plan_id.slice(0,8))+" · "+(region?.name||row.region_id.slice(0,8));
+    const stats=document.createElement("small");
+    const capacity=row.capacity_units===null?editorTr("inventory_unlimited"):String(row.capacity_units);
+    const remaining=row.capacity_units===null?editorTr("inventory_unlimited"):String(Math.max(0,Number(row.capacity_units)-Number(row.allocated_units)));
+    stats.textContent=editorTr("inventory_allocated")+": "+row.allocated_units+" / "+capacity+" · "+editorTr("inventory_remaining")+": "+remaining;
+    const state=document.createElement("span");state.className="admin-catalog-state";state.textContent=row.is_available?tr("enabled"):tr("disabled");
+    const edit=document.createElement("button");edit.className="admin-toggle";edit.type="button";edit.textContent=editorTr("inventory_edit");edit.addEventListener("click",()=>fillInventoryEditor(row));
+    line.append(label,stats,state,edit);root.append(line);
+  }
+}
+async function saveInventory(form) {
+  if(busy)return;
+  const values=formValues(form);
+  const capacityText=values.capacity_units.trim();
+  const capacity=capacityText===""?null:Number(capacityText);
+  if(!values.plan_id||!values.region_id||(capacity!==null&&(!Number.isSafeInteger(capacity)||capacity<0||capacity>2147483647))){show(nodes.error,editorTr("inventory_failed"));return;}
+  const payload={plan_id:values.plan_id,region_id:values.region_id,capacity_units:capacity,is_available:form.elements.is_available.checked};
+  busy=true;show(nodes.error,"");show(nodes.success,"");
+  try{
+    let query;
+    if(values.id)query=supabase.from("ah_plan_regions").update(payload).eq("id",values.id);
+    else query=supabase.from("ah_plan_regions").upsert(payload,{onConflict:"plan_id,region_id"});
+    const {error}=await query;if(error)throw error;
+    show(nodes.success,editorTr("inventory_saved"));form.reset();
+    busy=false;await loadDashboard();
+  }catch{show(nodes.error,editorTr("inventory_failed"));}
+  finally{busy=false;}
 }
 
 function tr(key) { return (messages[language] || messages.en)[key] || messages.en[key] || key; }
@@ -207,7 +266,7 @@ async function loadDashboard() {
   busy = true; nodes.refresh.disabled = true; nodes.refresh.textContent = tr("refreshing");
   show(nodes.error, ""); show(nodes.success, "");
   try {
-    const [orders, jobs, payments, products, plans, regions, ordersCount, paidCount, queuedCount, activePlansCount] = await Promise.all([
+    const [orders, jobs, payments, products, plans, regions, ordersCount, paidCount, queuedCount, activePlansCount, mappings] = await Promise.all([
       supabase.from("ah_orders").select("id,user_id,status,currency,total_minor,created_at").order("created_at", { ascending: false }).limit(50),
       supabase.from("ah_provisioning_jobs").select("id,order_id,status,attempts,max_attempts,provider_reference,last_error_code,created_at").order("created_at", { ascending: false }).limit(30),
       supabase.from("ah_payment_events").select("id,provider,event_id,order_id,event_type,amount_minor,currency,received_at").order("received_at", { ascending: false }).limit(30),
@@ -218,11 +277,13 @@ async function loadDashboard() {
       supabase.from("ah_orders").select("*", { count: "exact", head: true }).eq("status", "paid"),
       supabase.from("ah_provisioning_jobs").select("*", { count: "exact", head: true }).in("status", ["queued", "retry_wait", "processing"]),
       supabase.from("ah_plans").select("*", { count: "exact", head: true }).eq("is_active", true),
+      supabase.from("ah_plan_regions").select("id,plan_id,region_id,is_available,capacity_units,allocated_units").order("created_at", { ascending: false }),
     ]);
     const result = [orders, jobs, payments, products, plans, regions, ordersCount, paidCount, queuedCount, activePlansCount];
     if (result.some((entry) => entry.error)) throw new Error("query_failed");
+    const mappingRows = mappings.error ? null : (mappings.data || []);
     renderOrders(orders.data || []); renderJobs(jobs.data || []); renderPayments(payments.data || []);
-    renderCatalog(products.data || [], plans.data || []); renderRegions(regions.data || []);
+    renderCatalog(products.data || [], plans.data || []); renderRegions(regions.data || []); renderPlanRegions(mappingRows, plans.data || [], regions.data || []);
     setText("metric-orders", String(ordersCount.count ?? 0));
     setText("metric-paid", String(paidCount.count ?? 0));
     setText("metric-queued", String(queuedCount.count ?? 0));
@@ -255,6 +316,8 @@ async function initialize() {
 }
 $("product-editor").addEventListener("submit",(event)=>{event.preventDefault();saveCatalog(event.currentTarget,"ah_products");});
 $("plan-editor").addEventListener("submit",(event)=>{event.preventDefault();saveCatalog(event.currentTarget,"ah_plans");});
+$("plan-region-editor").addEventListener("submit",(event)=>{event.preventDefault();saveInventory(event.currentTarget);});
+$("plan-region-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("plan-region-editor").elements.id.value=""; },0);});
 $("product-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("product-editor").elements.sort_order.value="0"; },0);});
 $("plan-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("plan-editor").elements.currency.value="USD"; $("plan-editor").elements.price.value="0"; $("plan-editor").elements.sort_order.value="0"; },0);});
 nodes.refresh.addEventListener("click", loadDashboard);
