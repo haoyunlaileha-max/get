@@ -8,7 +8,10 @@ A responsive, multilingual hosting storefront prototype for the **Anonymous Host
 - Six-language interface: English (default), Simplified Chinese, Arabic (RTL), French, Russian, and Spanish
 - Language preference saved in browser local storage
 - Product categories: Linux VPS, Dedicated Server, Windows RDP, GPU Compute, and Domains
-- Demo plan cards with category filtering
+- Demo plan cards for Linux VPS, dedicated servers, Windows RDP, GPU compute, and domains
+- Category filtering across all five product groups
+- Local-only plan configurator with region and operating-system selections; it does not submit orders or transmit customer data
+- Accessible mobile navigation dropdown
 - Sample global data-center locations
 - No build step or framework required
 
@@ -23,19 +26,19 @@ Every push to `main` runs the dependency-free storefront and migration checks in
 ## Important prototype notes
 
 - Prices, server specifications, and locations are illustrative demo content, not live inventory or binding offers.
-- Order links are placeholders and do not create orders or accept payments.
+- The plan configurator is a local demonstration only. It does not create orders, collect personal data, contact a provider, or accept payments.
 - Authentication, customer dashboard, database integration, provisioning APIs, billing, and support workflows are not implemented yet.
 - Replace placeholder contact links and demo content before public launch.
 
 ## Suggested next milestones
 
-1. Establish the production frontend structure and reusable components.
-2. Connect Supabase Auth and database tables with reviewed Row Level Security policies.
-3. Implement product, region, pricing, and availability management.
+1. Refactor the single-page prototype into a maintainable production frontend structure.
+2. Connect Supabase Auth and the reviewed database tables with tested Row Level Security policies.
+3. Replace demo catalog data with live product, region, pricing, and availability records.
 4. Build a secure order and payment workflow with server-side validation.
 5. Integrate provider APIs for server provisioning and lifecycle management.
 6. Add customer dashboard, order history, invoices, and support.
-7. Add automated tests, accessibility checks, and deployment configuration.
+7. Expand automated browser, accessibility, and security tests.
 
 ## Brand direction
 
