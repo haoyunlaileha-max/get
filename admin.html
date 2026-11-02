@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#071c1b"><meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Anonymous Hosting operations console.">
+<title>Admin console — Anonymous Hosting</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body class="admin-page">
+<header><div class="wrap nav"><a class="brand" href="index.html"><span class="logo">A</span> ANONYMOUS HOSTING <span class="admin-brand-tag">ADMIN</span></a><div class="account-nav"><label class="sr-only" for="admin-language" data-i="language">Language</label><select id="admin-language" class="account-language" aria-label="Language"><option value="en">English</option><option value="zh">简体中文</option><option value="ar">العربية</option><option value="fr">Français</option><option value="ru">Русский</option><option value="es">Español</option></select><a class="btn btn-ghost" href="index.html" data-i="storefront">Storefront</a></div></div></header>
+<main class="admin-wrap">
+  <div class="admin-heading"><div><div class="kicker" data-i="eyebrow">OPERATIONS / CONTROL PLANE</div><h1 data-i="title">Operations console</h1><p data-i="subtitle">Monitor orders, payments, provisioning and catalog availability.</p></div><button class="btn btn-primary" id="refresh-admin" type="button" data-i="refresh">Refresh data</button></div>
+  <div id="admin-setup" class="account-notice" role="status" hidden></div>
+  <div id="admin-denied" class="account-error" role="alert" hidden></div>
+  <section id="admin-login" class="admin-panel" hidden><h2 data-i="login_required">Administrator sign-in required</h2><p data-i="login_copy">Sign in with an account assigned the verified admin role, then return here.</p><a class="btn btn-primary" href="account.html" data-i="open_account">Open account sign-in</a></section>
+  <section id="admin-app" hidden>
+    <div class="admin-session"><span><span class="admin-live-dot"></span><span data-i="signed_in_as">Signed in as</span> <strong id="admin-email"></strong></span><button id="admin-signout" class="account-link-button" type="button" data-i="sign_out">Sign out</button></div>
+    <div id="admin-error" class="account-error" role="alert" hidden></div>
+    <div id="admin-success" class="account-success" role="status" hidden></div>
+    <div class="admin-metrics" id="admin-metrics">
+      <article class="admin-metric"><span data-i="orders">Orders</span><strong id="metric-orders">—</strong><small data-i="all_records">All records</small></article>
+      <article class="admin-metric"><span data-i="paid">Paid</span><strong id="metric-paid">—</strong><small data-i="paid_orders">Paid orders</small></article>
+      <article class="admin-metric"><span data-i="queued">Provisioning queue</span><strong id="metric-queued">—</strong><small data-i="waiting_work">Waiting / retrying</small></article>
+      <article class="admin-metric"><span data-i="active">Active plans</span><strong id="metric-plans">—</strong><small data-i="catalog">Catalog</small></article>
+    </div>
+    <section class="admin-panel">
+      <div class="admin-panel-head"><div><h2 data-i="orders_title">Recent orders</h2><p data-i="orders_desc">Customer orders and their current lifecycle state.</p></div><span class="admin-count" id="orders-count">0</span></div>
+      <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th data-i="order">Order</th><th data-i="customer">Customer ID</th><th data-i="status">Status</th><th data-i="total">Total</th><th data-i="created">Created</th></tr></thead><tbody id="orders-body"><tr><td colspan="5">—</td></tr></tbody></table></div>
+    </section>
+    <div class="admin-columns">
+      <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="jobs_title">Provisioning jobs</h2><p data-i="jobs_desc">Queue state, attempts and provider references.</p></div></div><div id="jobs-list" class="admin-record-list"></div></section>
+      <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="payments_title">Payment events</h2><p data-i="payments_desc">Verified webhook audit records.</p></div></div><div id="payments-list" class="admin-record-list"></div></section>
+    </div>
+    <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="catalog_title">Product catalog</h2><p data-i="catalog_desc">Enable or disable products and plans. Price changes are intentionally not exposed here.</p></div></div><div id="catalog-list" class="admin-catalog"></div></section>
+    <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="regions_title">Data-center regions</h2><p data-i="regions_desc">Control whether a region is available for new orders.</p></div></div><div id="regions-list" class="admin-catalog"></div></section>
+    <p class="admin-footnote" data-i="security_note">Admin access is verified using Supabase app_metadata and enforced again by database RLS. Never share service-role keys with this page.</p>
+  </section>
+</main>
+<script src="assets/js/supabase-config.js"></script>
+<script type="module" src="assets/js/admin.js"></script>
+</body></html>
