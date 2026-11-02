@@ -65,6 +65,19 @@
       <p class="admin-editor-note" data-i="catalog_safety">New entries start unpublished by default. Existing prices are never changed unless you edit and save that plan. Validate specifications before publishing.</p>
     </section>
     <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="catalog_title">Product catalog</h2><p data-i="catalog_desc">Enable or disable products and plans. Price changes are intentionally not exposed here.</p></div></div><div id="catalog-list" class="admin-catalog"></div></section>
+    <section class="admin-panel" id="plan-region-panel">
+      <div class="admin-panel-head"><div><h2 data-i="inventory_title">Plan availability by data center</h2><p data-i="inventory_desc">Assign plans to regions and control sale status and capacity.</p></div></div>
+      <form id="plan-region-editor" class="admin-inventory-form">
+        <input type="hidden" name="id">
+        <label><span data-i="inventory_plan">Plan</span><select name="plan_id" id="inventory-plan" required></select></label>
+        <label><span data-i="inventory_region">Data-center region</span><select name="region_id" id="inventory-region" required></select></label>
+        <label><span data-i="inventory_capacity">Capacity (units; blank = unlimited)</span><input name="capacity_units" type="number" min="0" max="2147483647" step="1" placeholder="Unlimited"></label>
+        <label class="admin-check"><input name="is_available" type="checkbox"><span data-i="inventory_available">Available for new orders</span></label>
+        <div class="admin-editor-actions"><button class="btn btn-primary" type="submit" data-i="inventory_save">Save region assignment</button><button class="admin-toggle" type="reset" data-i="clear_form">Clear</button></div>
+      </form>
+      <p class="admin-editor-note" data-i="inventory_safety">Allocated units are calculated from non-terminal orders and cannot be edited here. Capacity changes never delete or alter orders. Blank capacity means unlimited.</p>
+      <div id="plan-region-list" class="admin-catalog"></div>
+    </section>
     <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="regions_title">Data-center regions</h2><p data-i="regions_desc">Control whether a region is available for new orders.</p></div></div><div id="regions-list" class="admin-catalog"></div></section>
     <p class="admin-footnote" data-i="security_note">Admin access is verified using Supabase app_metadata and enforced again by database RLS. Never share service-role keys with this page.</p>
   </section>
