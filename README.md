@@ -10,6 +10,7 @@ A responsive, multilingual hosting storefront prototype for the **Anonymous Host
 - Linux VPS, Dedicated Server, Windows RDP, GPU Compute, and Domains product categories with demo plans and filtering
 - Local-only plan configurator; it does not submit orders or transmit customer data
 - Customer account portal with Supabase email/password sign-in, registration, password reset, profile editing, and user-scoped order history
+- Admin operations console for orders, payment events, provisioning queue, product/plan activation, and region availability (verified admin role + RLS required)
 - Modular static frontend with no bundler requirement
 
 ## Run locally
@@ -30,6 +31,7 @@ The additive Supabase schema is namespaced under `ah_*` and does not modify unre
 - Provisioning failures use leased retries with exponential backoff and a bounded attempt count; no provider means no job is claimed.
 - Payment event records are idempotent and protected from browser roles.
 - The webhook is a normalized receiver, **not** a ready-made Stripe/PayPal integration. A provider-specific adapter with native signature verification is required before connecting a real provider.
+- `admin.html` is a protected operations UI; database RLS remains the actual access boundary.
 - No Supabase migration or Edge Function is deployed automatically. No payment, worker, provider, or service-role secrets are stored in this repository.
 - Payments, refunds, disputes, and server provisioning are not live features.
 
