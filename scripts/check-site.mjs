@@ -43,11 +43,11 @@ for (const marker of ["alter table public.ah_orders", "request_fingerprint", "se
   assert.ok(orderSql.toLowerCase().includes(marker.toLowerCase()), `Missing secure order SQL behavior: ${marker}`);
 }
 assert.ok(!/drop table|truncate table/i.test(orderSql), "Order migration must not drop or truncate data");
-for (const marker of ["auth.getUser", "SUPABASE_SERVICE_ROLE_KEY", "ALLOWED_ORIGINS", "idempotency-key", "ah_create_order", "userData.user.id", "plan_id", "quantity", "order_creation_failed"]) {
+for (const marker of ["auth.getUser", "SUPABASE_SERVICE_ROLE_KEY", "ALLOWED_ORIGINS", "idempotency-key", "ah_create_order", "userData.user.id", "plan_id", "quantity", "order_creation_failed", "unexpected_request_field", "request_too_large", "replayed ? 200 : 201"]) {
   assert.ok(orderFn.includes(marker), `Missing Edge Function behavior: ${marker}`);
 }
-assert.ok(!/payload\\.(user_id|price|total_minor|currency|status)/i.test(orderFn), "Client must not choose user, price, currency, total, or status");
-assert.ok(!/console\\.(log|error).*?(token|service.role|authorization)/i.test(orderFn), "Do not log credentials");
+assert.ok(!/payload\.(user_id|price|total_minor|currency|status)/i.test(orderFn), "Client must not choose user, price, currency, total, or status");
+assert.ok(!/console\.(log|error).*?(token|service.role|authorization)/i.test(orderFn), "Do not log credentials");
 assert.ok(supabaseConfig.includes("verify_jwt = true"), "Order function must retain gateway JWT verification");
 for (const marker of ["create-order", "SUPABASE_SERVICE_ROLE_KEY", "ALLOWED_ORIGINS", "idempotency", "not deployed"]) assert.ok(backendDocs.toLowerCase().includes(marker.toLowerCase()), `Missing backend deployment documentation: ${marker}`);
 console.log("Checks passed: storefront, six locales, RTL, account/auth portal, order isolation, public-key safety, additive RLS schema, and trusted idempotent order API.");
