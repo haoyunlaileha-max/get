@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#071c1b"><meta name="description" content="Sign in to your Anonymous Hosting customer account.">
@@ -8,40 +8,49 @@
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
 <body class="account-page">
-<header><div class="wrap nav"><a class="brand" href="index.html"><span class="logo">A</span> ANONYMOUS HOSTING</a><a class="btn btn-ghost" href="index.html">← Back to storefront</a></div></header>
+<header><div class="wrap nav"><a class="brand" href="index.html"><span class="logo">A</span> ANONYMOUS HOSTING</a><div class="account-nav"><label class="sr-only" for="account-language" data-i="language_label">Language</label><select id="account-language" class="account-language" aria-label="Language"><option value="en">English</option><option value="zh">简体中文</option><option value="ar">العربية</option><option value="fr">Français</option><option value="ru">Русский</option><option value="es">Español</option></select><a class="btn btn-ghost" href="index.html" data-i="back_store">← Back to storefront</a></div></div></header>
 <main class="account-wrap">
   <section class="account-card">
-    <div class="kicker">CUSTOMER PORTAL</div>
-    <h1 class="account-title">Your account</h1>
-    <p class="account-lead">Sign in to manage your hosting services and view your orders.</p>
-    <div id="auth-setup" class="account-notice" role="status">Authentication is not connected yet. Add your Supabase project URL and public anon/publishable key in <code>assets/js/supabase-config.js</code> to enable secure sign-in. Never put a service-role key here.</div>
+    <div class="kicker" data-i="portal">CUSTOMER PORTAL</div>
+    <h1 class="account-title" data-i="your_account">Your account</h1>
+    <p class="account-lead" data-i="intro">Sign in to manage your hosting services and view your orders.</p>
+    <div id="auth-setup" class="account-notice" role="status"><span data-i="setup_text">Authentication is not connected yet. Add your Supabase project URL and public anon/publishable key in</span> <code>assets/js/supabase-config.js</code> <span data-i="setup_suffix">to enable secure sign-in. Never put a service-role key here.</span></div>
     <div id="auth-error" class="account-error" role="alert" hidden></div>
     <div id="auth-success" class="account-success" role="status" hidden></div>
     <section id="auth-panel" hidden>
       <div class="account-tabs" role="tablist" aria-label="Account action">
-        <button type="button" class="account-tab active" id="login-tab" role="tab" aria-selected="true">Sign in</button>
-        <button type="button" class="account-tab" id="signup-tab" role="tab" aria-selected="false">Create account</button>
+        <button type="button" class="account-tab active" id="login-tab" role="tab" aria-selected="true" data-i="sign_in">Sign in</button>
+        <button type="button" class="account-tab" id="signup-tab" role="tab" aria-selected="false" data-i="create_account">Create account</button>
       </div>
       <form id="auth-form">
-        <label for="auth-email">Email address</label>
+        <label for="auth-email" data-i="email">Email address</label>
         <input id="auth-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com">
-        <label for="auth-password">Password</label>
+        <label for="auth-password" data-i="password">Password</label>
         <div class="account-password-field">
           <input id="auth-password" name="password" type="password" autocomplete="current-password" required minlength="8" maxlength="128" placeholder="At least 8 characters">
-          <button class="account-password-toggle" id="toggle-password" type="button" aria-label="Show password" aria-pressed="false">Show</button>
+          <button class="account-password-toggle" id="toggle-password" type="button" aria-label="Show password" aria-pressed="false" data-i="show">Show</button>
         </div>
-        <button class="btn btn-primary account-submit" id="auth-submit" type="submit">Sign in securely</button>
+        <button class="btn btn-primary account-submit" id="auth-submit" type="submit" data-i="sign_in_secure">Sign in securely</button>
       </form>
-      <button class="account-link-button" id="reset-password" type="button">Send password reset email</button>
+      <button class="account-link-button" id="reset-password" type="button" data-i="reset_password">Send password reset email</button>
     </section>
     <section id="account-dashboard" hidden>
-      <div class="account-user"><span class="account-avatar" aria-hidden="true">A</span><div><strong id="account-email"></strong><small>Authenticated customer</small></div></div>
-      <h2 class="account-section-title">Your orders</h2>
-      <div id="orders-state" class="account-notice">Loading your orders…</div>
+      <div class="account-user"><span class="account-avatar" aria-hidden="true">A</span><div><strong id="account-email"></strong><small data-i="authenticated">Authenticated customer</small></div></div>
+      <section class="account-profile">
+        <h2 class="account-section-title" data-i="profile_title">Profile</h2>
+        <form id="profile-form">
+          <label for="profile-name" data-i="display_name">Display name</label>
+          <input id="profile-name" name="display_name" type="text" maxlength="80" autocomplete="name" placeholder="Your name">
+          <button class="btn btn-primary account-profile-submit" id="profile-save" type="submit" data-i="save_profile">Save profile</button>
+        </form>
+        <p id="profile-state" class="account-inline-state" role="status"></p>
+      </section>
+      <h2 class="account-section-title" data-i="your_orders">Your orders</h2>
+      <div id="orders-state" class="account-notice" data-i="loading_orders">Loading your orders…</div>
       <div id="orders-list" class="orders-list"></div>
-      <button class="btn btn-ghost account-submit" id="sign-out" type="button">Sign out</button>
+      <button class="btn btn-ghost account-submit" id="sign-out" type="button" data-i="sign_out">Sign out</button>
     </section>
-    <p class="account-footnote">Your credentials are sent directly to your configured Supabase project over HTTPS. This portal does not store passwords in this website.</p>
+    <p class="account-footnote" data-i="privacy_note">Your credentials are sent directly to your configured Supabase project over HTTPS. This portal does not store passwords in this website.</p>
   </section>
 </main>
 <script src="assets/js/supabase-config.js"></script>
