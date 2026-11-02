@@ -12,6 +12,8 @@ A responsive, multilingual hosting storefront prototype for the **Anonymous Host
 - Category filtering across all five product groups
 - Local-only plan configurator with region and operating-system selections; it does not submit orders or transmit customer data
 - Accessible mobile navigation dropdown
+- Customer account portal UI with Supabase email/password sign-in, registration, password reset, session handling, and user-scoped order history
+- Supabase browser configuration template starts empty and accepts only the public anon/publishable key
 - Sample global data-center locations
 - Modular static frontend: semantic HTML, external CSS, and external JavaScript
 - No build step or framework required
@@ -28,7 +30,9 @@ Every push to `main` runs the dependency-free modular storefront and migration c
 
 - Prices, server specifications, and locations are illustrative demo content, not live inventory or binding offers.
 - The plan configurator is a local demonstration only. It does not create orders, collect personal data, contact a provider, or accept payments.
-- Authentication, customer dashboard, database integration, provisioning APIs, billing, and support workflows are not implemented yet.
+- The account portal is implemented but remains disconnected until a Supabase project URL and public anon/publishable key are configured in `assets/js/supabase-config.js`.
+- Apply the additive database migration before expecting order history to load. The service-role key must never be placed in browser code.
+- Provider provisioning APIs, billing, and support workflows are not implemented yet.
 - Replace placeholder contact links and demo content before public launch.
 
 ## Suggested next milestones
