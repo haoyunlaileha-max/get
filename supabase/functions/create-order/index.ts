@@ -43,6 +43,12 @@ Deno.serve(async (request: Request) => {
     return response(503, { error: "server_not_configured" }, origin);
   }
 
+  if (!(request.headers.get("content-type") ?? "").toLowerCase().includes("application/json")) {
+    return response(415, { error: "application_json_required" }, origin);
+  }
+  const declaredLength = Number(request.headers.get("content-length") ?? "0");
+  if (declaredLength > 16_384) return response(413, { error: "request_too_large" }, origin);
+
   const authorization = request.headers.get("authorization") ?? "";
   const tokenMatch = authorization.match(/^Bearer\s+(.+)$/i);
   if (!tokenMatch) return response(401, { error: "authentication_required" }, origin);
@@ -59,6 +65,10 @@ Deno.serve(async (request: Request) => {
       return response(400, { error: "invalid_request_body" }, origin);
     }
     payload = parsed as Record<string, unknown>;
+    const allowedFields = new Set(["plan_id", "region_id", "quantity", "customer_note"]);
+    if (Object.keys(payload).some((key) => !allowedFields.has(key))) {
+      return response(400, { error: "unexpected_request_field" }, origin);
+    }
   } catch {
     return response(400, { error: "invalid_json" }, origin);
   }
@@ -119,7 +129,8 @@ Deno.serve(async (request: Request) => {
       return response(500, { error: "order_creation_failed" }, origin);
     }
 
-    return response(201, { order: data }, origin);
+    const replayed = Boolean(data && typeof data === "object" && data.replayed === true);
+    return response(replayed ? 200 : 201, { order: data }, origin);
   } catch {
     return response(500, { error: "internal_server_error" }, origin);
   }
