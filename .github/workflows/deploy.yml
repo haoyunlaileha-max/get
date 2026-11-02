@@ -35,6 +35,7 @@ jobs:
           cp .nojekyll dist/.nojekyll
           cp favicon.svg dist/favicon.svg
           cp robots.txt dist/robots.txt
+          cp -R assets dist/assets
       - name: Check whether GitHub Pages is enabled
         id: pages
         env:
