@@ -40,3 +40,12 @@ Every push to `main` runs the dependency-free storefront smoke checks in `script
 ## Brand direction
 
 Dark teal surfaces, mint-green accents, restrained typography, clear product hierarchy, and a privacy-first positioning. The design is an original implementation and does not reuse another provider's branding or source code.
+
+
+## Database foundation
+
+An additive Supabase migration is maintained at `supabase/migrations/20261102000100_anonymous_hosting_core.sql`. It defines namespaced profiles, regions, products, plans, orders, and order items with row-level security. Read `docs/backend-foundation.md` before applying it. The migration is committed to source control only; it is not automatically run against a Supabase project.
+
+## Continuous integration
+
+The independent workflow at `.github/workflows/ci.yml` validates the storefront and migration on pushes and pull requests. This keeps code checks independent from the separate GitHub Pages deployment setup.
