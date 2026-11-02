@@ -1,12 +1,12 @@
 # Anonymous Hosting
 
-A responsive, multilingual hosting storefront prototype for the **Anonymous Hosting** brand.
+A responsive, Chinese-language hosting storefront prototype for the **Anonymous Hosting** brand.
 
 ## Current prototype
 
 - Responsive landing page for desktop and mobile
-- Six-language interface: English (default), Simplified Chinese, Arabic (RTL), French, Russian, and Spanish
-- Language preference saved in browser local storage
+- Simplified Chinese and Traditional Chinese interface, with language preference saved in browser local storage
+- Reference-inspired hosting storefront information architecture with an original Anonymous Hosting logo
 - Linux VPS, Dedicated Server, Windows RDP, GPU Compute, and Domains product categories with demo plans and filtering
 - Local-only plan configurator; it does not submit orders or transmit customer data
 - Customer account portal with Supabase email/password sign-in, registration, password reset, profile editing, and user-scoped order history
@@ -41,4 +41,4 @@ Prices, server specifications, and data-center locations are illustrative. The l
 
 ## Brand direction
 
-Dark teal surfaces, mint-green accents, restrained typography, and a privacy-first positioning. This is an original implementation.
+Dark teal surfaces, mint-green accents, a custom AH-inspired geometric mark, and a privacy-first positioning. The storefront structure is informed by common hosting-provider patterns and the AnonPort reference, while all branding, copy, and visual assets remain original.
