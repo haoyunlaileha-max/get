@@ -144,7 +144,7 @@ async function saveInventory(form) {
   finally{busy=false;}
 }
 
-function tr(key) { return locale.text(messages.zh[key] || messages.en[key] || key, language); }
+function tr(key) { return locale.text(t.zh[key] || t.en[key] || key, language); }
 function setText(id, value) { const node = $(id); if (node) node.textContent = value; }
 function show(node, message) { node.hidden = !message; if (message) node.textContent = message; }
 function escapeHtml(value) {
