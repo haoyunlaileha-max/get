@@ -24,7 +24,7 @@ assert.ok(!html.includes("anonymoushosting.example"), "Placeholder contact email
 assert.equal((html.match(/<section\b/g) || []).length, (html.match(/<\/section>/g) || []).length, "Every section must have a closing tag");
 
 for (const marker of ['<title>Customer account', 'id="auth-form"', 'id="auth-setup"', 'id="account-dashboard"', 'id="orders-list"', 'id="toggle-password"', 'id="account-language"', 'id="profile-form"', 'id="profile-name"', 'assets/js/supabase-config.js', 'assets/js/account.js']) assert.ok(account.includes(marker), `Missing account page feature: ${marker}`);
-for (const marker of ['signInWithPassword', 'signUp', 'resetPasswordForEmail', 'signOut', '.from("ah_orders")', '.eq("user_id", userId)', 'ah_order_items(description_snapshot,quantity,unit_price_minor)', 'toggle-password', 'aria-busy', '.from("ah_profiles").update', 'applyLanguage', 'ah-language', 'messages =', 'never']) {
+for (const marker of ['signInWithPassword', 'signUp', 'resetPasswordForEmail', 'signOut', '.from("ah_orders")', '.eq("user_id",userId)', 'ah_order_items(description_snapshot,quantity,unit_price_minor)', 'toggle-password', 'aria-busy', '.from("ah_profiles").update', 'applyLanguage', 'ah-language', 'messages =', 'never']) {
   if (marker !== "never") assert.ok(accountJs.includes(marker), `Missing account behavior: ${marker}`);
 }
 assert.ok(config.includes('url: ""') && config.includes('anonKey: ""'), "Supabase browser config must start empty");
