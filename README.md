@@ -13,6 +13,7 @@ A responsive, multilingual hosting storefront prototype for the **Anonymous Host
 - Local-only plan configurator with region and operating-system selections; it does not submit orders or transmit customer data
 - Accessible mobile navigation dropdown
 - Sample global data-center locations
+- Modular static frontend: semantic HTML, external CSS, and external JavaScript
 - No build step or framework required
 
 ## Run locally
@@ -21,7 +22,7 @@ Open `index.html` in a modern browser, or serve this directory with any static w
 
 ## Automated checks and deployment
 
-Every push to `main` runs the dependency-free storefront and migration checks in `scripts/check-site.mjs`. The deploy workflow checks whether GitHub Pages is enabled: if it is not, validation still succeeds and deployment is safely skipped; once Pages is enabled with **Settings → Pages → Build and deployment → Source: GitHub Actions**, subsequent pushes deploy automatically. You can also start the workflow manually from the Actions tab. The published URL is shown in the workflow run's deployment environment.
+Every push to `main` runs the dependency-free modular storefront and migration checks in `scripts/check-site.mjs`. The deploy workflow checks whether GitHub Pages is enabled: if it is not, validation still succeeds and deployment is safely skipped; once Pages is enabled with **Settings → Pages → Build and deployment → Source: GitHub Actions**, subsequent pushes deploy automatically. You can also start the workflow manually from the Actions tab. The published URL is shown in the workflow run's deployment environment.
 
 ## Important prototype notes
 
@@ -32,7 +33,7 @@ Every push to `main` runs the dependency-free storefront and migration checks in
 
 ## Suggested next milestones
 
-1. Refactor the single-page prototype into a maintainable production frontend structure.
+1. Add browser-level interaction and accessibility tests to the modular frontend.
 2. Connect Supabase Auth and the reviewed database tables with tested Row Level Security policies.
 3. Replace demo catalog data with live product, region, pricing, and availability records.
 4. Build a secure order and payment workflow with server-side validation.
