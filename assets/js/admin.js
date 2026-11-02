@@ -129,7 +129,9 @@ async function updateRow(table, id, values) {
   try {
     const { error } = await supabase.from(table).update(values).eq("id", id);
     if (error) throw error;
-    show(nodes.success, tr("updated")); await loadDashboard();
+    show(nodes.success, tr("updated"));
+    busy = false;
+    await loadDashboard();
   } catch {
     show(nodes.error, tr("update_error"));
   } finally { busy = false; }
@@ -139,22 +141,26 @@ async function loadDashboard() {
   busy = true; nodes.refresh.disabled = true; nodes.refresh.textContent = tr("refreshing");
   show(nodes.error, ""); show(nodes.success, "");
   try {
-    const [orders, jobs, payments, products, plans, regions] = await Promise.all([
+    const [orders, jobs, payments, products, plans, regions, ordersCount, paidCount, queuedCount, activePlansCount] = await Promise.all([
       supabase.from("ah_orders").select("id,user_id,status,currency,total_minor,created_at").order("created_at", { ascending: false }).limit(50),
       supabase.from("ah_provisioning_jobs").select("id,order_id,status,attempts,max_attempts,provider_reference,last_error_code,created_at").order("created_at", { ascending: false }).limit(30),
       supabase.from("ah_payment_events").select("id,provider,event_id,order_id,event_type,amount_minor,currency,received_at").order("received_at", { ascending: false }).limit(30),
       supabase.from("ah_products").select("id,slug,name,category,is_active,sort_order").order("sort_order"),
       supabase.from("ah_plans").select("id,product_id,code,name,price_minor,currency,billing_period,is_active,sort_order").order("sort_order"),
       supabase.from("ah_regions").select("id,code,name,city,country_code,status").order("name"),
+      supabase.from("ah_orders").select("*", { count: "exact", head: true }),
+      supabase.from("ah_orders").select("*", { count: "exact", head: true }).eq("status", "paid"),
+      supabase.from("ah_provisioning_jobs").select("*", { count: "exact", head: true }).in("status", ["queued", "retry_wait", "processing"]),
+      supabase.from("ah_plans").select("*", { count: "exact", head: true }).eq("is_active", true),
     ]);
-    const result = [orders, jobs, payments, products, plans, regions];
+    const result = [orders, jobs, payments, products, plans, regions, ordersCount, paidCount, queuedCount, activePlansCount];
     if (result.some((entry) => entry.error)) throw new Error("query_failed");
     renderOrders(orders.data || []); renderJobs(jobs.data || []); renderPayments(payments.data || []);
     renderCatalog(products.data || [], plans.data || []); renderRegions(regions.data || []);
-    setText("metric-orders", String((orders.data || []).length));
-    setText("metric-paid", String((orders.data || []).filter((row) => row.status === "paid").length));
-    setText("metric-queued", String((jobs.data || []).filter((row) => ["queued", "retry_wait", "processing"].includes(row.status)).length));
-    setText("metric-plans", String((plans.data || []).filter((row) => row.is_active).length));
+    setText("metric-orders", String(ordersCount.count ?? 0));
+    setText("metric-paid", String(paidCount.count ?? 0));
+    setText("metric-queued", String(queuedCount.count ?? 0));
+    setText("metric-plans", String(activePlansCount.count ?? 0));
   } catch {
     show(nodes.error, tr("load_error"));
   } finally {
