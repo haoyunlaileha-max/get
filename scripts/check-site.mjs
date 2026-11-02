@@ -10,6 +10,10 @@ const account = read("account.html");
 const accountJs = read("assets/js/account.js");
 const config = read("assets/js/supabase-config.js");
 const sql = read("supabase/migrations/20261102000100_anonymous_hosting_core.sql");
+const orderSql = read("supabase/migrations/20261102000200_secure_order_creation.sql");
+const orderFn = read("supabase/functions/create-order/index.ts");
+const supabaseConfig = read("supabase/config.toml");
+const backendDocs = read("docs/backend-foundation.md");
 
 for (const marker of ['<html lang="en">', 'id="language"', 'id="services"', 'id="plans"', 'id="locations"', 'id="why"', 'id="plan-list"', 'assets/css/site.css', 'assets/js/site.js', 'id="mobile-menu"', 'id="configure-dialog"', 'id="configure-form"', 'data-order=', 'data-filter="domains"', 'data-type="rdp"', 'data-type="gpu"', 'data-type="domains"', 'href="account.html"']) {
   assert.ok(html.includes(marker), `Missing storefront feature: ${marker}`);
@@ -34,4 +38,16 @@ for (const asset of ["favicon.svg", ".nojekyll", "robots.txt"]) assert.ok(exists
 const requiredSql = ["create table if not exists public.ah_profiles", "create table if not exists public.ah_regions", "create table if not exists public.ah_products", "create table if not exists public.ah_plans", "create table if not exists public.ah_orders", "create table if not exists public.ah_order_items", "enable row level security", "auth.jwt()", "app_metadata", "auth.uid()"];
 for (const marker of requiredSql) assert.ok(sql.toLowerCase().includes(marker.toLowerCase()), `Missing database security feature: ${marker}`);
 assert.ok(!/drop table|truncate table/i.test(sql), "Migration must not drop or truncate application data");
-console.log("Checks passed: storefront, six locales, RTL, account/auth portal, order isolation, public-key safety, and additive RLS schema.");
+
+for (const marker of ["alter table public.ah_orders", "request_fingerprint", "security definer", "auth.role()", "service_role", "on conflict (user_id, idempotency_key)", "plan_unavailable", "region_unavailable", "v_price_minor * p_quantity", "replayed"]) {
+  assert.ok(orderSql.toLowerCase().includes(marker.toLowerCase()), `Missing secure order SQL behavior: ${marker}`);
+}
+assert.ok(!/drop table|truncate table/i.test(orderSql), "Order migration must not drop or truncate data");
+for (const marker of ["auth.getUser", "SUPABASE_SERVICE_ROLE_KEY", "ALLOWED_ORIGINS", "idempotency-key", "ah_create_order", "userData.user.id", "plan_id", "quantity", "order_creation_failed"]) {
+  assert.ok(orderFn.includes(marker), `Missing Edge Function behavior: ${marker}`);
+}
+assert.ok(!/payload\\.(user_id|price|total_minor|currency|status)/i.test(orderFn), "Client must not choose user, price, currency, total, or status");
+assert.ok(!/console\\.(log|error).*?(token|service.role|authorization)/i.test(orderFn), "Do not log credentials");
+assert.ok(supabaseConfig.includes("verify_jwt = true"), "Order function must retain gateway JWT verification");
+for (const marker of ["create-order", "SUPABASE_SERVICE_ROLE_KEY", "ALLOWED_ORIGINS", "idempotency", "not deployed"]) assert.ok(backendDocs.toLowerCase().includes(marker.toLowerCase()), `Missing backend deployment documentation: ${marker}`);
+console.log("Checks passed: storefront, six locales, RTL, account/auth portal, order isolation, public-key safety, additive RLS schema, and trusted idempotent order API.");
