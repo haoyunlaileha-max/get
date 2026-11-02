@@ -13,6 +13,9 @@ const coreSql = read("supabase/migrations/20261102000100_anonymous_hosting_core.
 const orderSql = read("supabase/migrations/20261102000200_secure_order_creation.sql");
 const paymentSql = read("supabase/migrations/20261102000300_payment_event_processing.sql");
 const provisioningSql = read("supabase/migrations/20261102000400_provisioning_queue.sql");
+const adminSql = read("supabase/migrations/20261102000500_admin_console_read_access.sql");
+const adminHtml = read("admin.html");
+const adminJs = read("assets/js/admin.js");
 const orderFn = read("supabase/functions/create-order/index.ts");
 const paymentFn = read("supabase/functions/payment-webhook/index.ts");
 const provisioningFn = read("supabase/functions/provision-worker/index.ts");
@@ -56,4 +59,11 @@ for (const marker of ["PROVISIONING_WORKER_SECRET", "PROVISIONER_API_URL", "PROV
 assert.ok(!/Access-Control-Allow-Origin|Access-Control-Allow-Headers/.test(provisioningFn), "Internal provisioning worker must not enable browser CORS");
 assert.ok(supabaseConfig.includes("[functions.provision-worker]") && supabaseConfig.includes("verify_jwt = false"), "Worker must use its dedicated shared-secret authentication");
 for (const marker of ["20261102000400_provisioning_queue.sql", "provision-worker", "PROVISIONING_WORKER_SECRET", "PROVISIONER_API_URL", "PROVISIONER_API_TOKEN", "not deployed", "Idempotency-Key"]) assert.ok(backendDocs.toLowerCase().includes(marker.toLowerCase()), `Missing provisioning documentation: ${marker}`);
-console.log("Checks passed: storefront, six locales, RTL, account portal, RLS schema, secure idempotent order API, signed payment events, and leased provisioning queue.");
+
+for (const marker of ["ah_payment_events_admin_read", "ah_provisioning_jobs_admin_read", "ah_is_admin()", "grant select"]) assert.ok(adminSql.toLowerCase().includes(marker.toLowerCase()), `Missing admin data-access policy: ${marker}`);
+assert.ok(!/drop table|truncate table/i.test(adminSql), "Admin access migration must not drop or truncate data");
+for (const marker of ['<title>Admin console', 'id="admin-login"', 'id="admin-app"', 'id="admin-metrics"', 'id="orders-body"', 'id="jobs-list"', 'id="payments-list"', 'id="catalog-list"', 'id="regions-list"', 'assets/js/admin.js']) assert.ok(adminHtml.includes(marker), `Missing admin console feature: ${marker}`);
+for (const marker of ['createClient', 'auth.getUser()', 'user.app_metadata?.role !== "admin"', '.from("ah_orders")', '.from("ah_payment_events")', '.from("ah_provisioning_jobs")', '.from("ah_products")', '.from("ah_plans")', '.from("ah_regions")', 'count: "exact"', 'updateRow', 'escapeHtml', 'localStorage.setItem("ah-language"']) assert.ok(adminJs.includes(marker), `Missing admin dashboard behavior: ${marker}`);
+assert.ok(!/service_role|SUPABASE_SERVICE_ROLE_KEY/i.test(adminJs + adminHtml), "Admin browser code must not contain service-role credentials");
+for (const marker of ["admin.html", "20261102000500_admin_console_read_access.sql", "app_metadata", "admin RLS", "admin console"]) assert.ok(backendDocs.toLowerCase().includes(marker.toLowerCase()), `Missing admin deployment documentation: ${marker}`);
+console.log("Checks passed: storefront, six locales, RTL, account portal, admin console, RLS schema, secure order/payment processing, and provisioning queue.");
