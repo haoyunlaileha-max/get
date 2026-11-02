@@ -35,6 +35,7 @@ function applyLanguage(code){
   document.documentElement.dir="ltr";
   document.querySelectorAll("[data-i]").forEach(el=>{const value=tr(el.dataset.i);if(value)el.textContent=value;});
   languageSelect.value=language;
+  locale.apply(document.body,language);
   localStorage.setItem("ah-language",language);
   document.getElementById("auth-submit").textContent=mode==="login"?tr("sign_in_secure"):tr("create_account_btn");
   document.getElementById("toggle-password").textContent=document.getElementById("auth-password").type==="password"?tr("show"):tr("hide");
