@@ -36,12 +36,11 @@ async function sha256(value: string) {
 }
 
 async function verifySignature(rawBody: string, header: string) {
-  const parts = Object.fromEntries(
-    header.split(",").map((part) => {
-      const separator = part.indexOf("=");
-      return separator < 0 ? ["", ""] : [part.slice(0, separator).trim(), part.slice(separator + 1).trim()];
-    }),
-  );
+  const parts: Record<string, string> = {};
+  for (const part of header.split(",")) {
+    const separator = part.indexOf("=");
+    if (separator > 0) parts[part.slice(0, separator).trim()] = part.slice(separator + 1).trim();
+  }
   const timestamp = Number(parts.t);
   const signature = parts.v1 ?? "";
   const now = Math.floor(Date.now() / 1000);
@@ -107,7 +106,7 @@ Deno.serve(async (request: Request) => {
       || typeof eventId !== "string" || eventId.length < 1 || eventId.length > 200
       || eventType !== "payment.succeeded"
       || typeof orderId !== "string" || !UUID_PATTERN.test(orderId)
-      || !Number.isSafeInteger(amountMinor) || (amountMinor as number) < 0
+      || typeof amountMinor !== "number" || !Number.isSafeInteger(amountMinor) || amountMinor < 0
       || typeof currency !== "string" || !/^[A-Z]{3}$/.test(currency)) {
       return json(400, { error: "unsupported_or_invalid_payment_event" });
     }
