@@ -26,9 +26,11 @@ The additive Supabase schema is namespaced under `ah_*` and does not modify unre
 
 - `supabase/functions/create-order` verifies customer identity and creates pending orders using database-authoritative prices and idempotency.
 - `supabase/functions/payment-webhook` verifies a timestamped HMAC-signed normalized success event and advances a payable order to `paid` only after database checks.
+- `supabase/functions/provision-worker` claims paid-order jobs from a durable queue, calls a configured HTTPS provisioning gateway with an order-stable idempotency key, and marks orders active only after a valid provider confirmation.
+- Provisioning failures use leased retries with exponential backoff and a bounded attempt count; no provider means no job is claimed.
 - Payment event records are idempotent and protected from browser roles.
 - The webhook is a normalized receiver, **not** a ready-made Stripe/PayPal integration. A provider-specific adapter with native signature verification is required before connecting a real provider.
-- No Supabase migration or Edge Function is deployed automatically. No payment secrets or service-role credentials are stored in this repository.
+- No Supabase migration or Edge Function is deployed automatically. No payment, worker, provider, or service-role secrets are stored in this repository.
 - Payments, refunds, disputes, and server provisioning are not live features.
 
 ## Prototype notes
