@@ -110,7 +110,7 @@ function statusPill(value) {
 function applyLanguage() {
   document.documentElement.lang = language;
   document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
-  document.querySelectorAll("[data-i]").forEach((node) => { node.textContent = tr(node.dataset.i); });
+  document.querySelectorAll("[data-i]").forEach((node) => { const value = tr(node.dataset.i); node.textContent = value === node.dataset.i ? editorTr(node.dataset.i) : value; });
   nodes.language.value = language;
 }
 function renderOrders(rows) {
