@@ -85,4 +85,4 @@ This repository change does not link to, migrate, or deploy to a Supabase projec
 - The order function creates pending orders. The webhook advances an order to paid only after a correctly signed normalized success event and database checks.
 - The normalized HMAC receiver is not a substitute for a provider-specific native signature adapter.
 - Refunds, disputes, chargebacks, provider API integration, provisioning queues, retry policy, audit monitoring, and per-user/IP rate limiting remain future work.
-- Neither migrations nor Edge Functions are deployed to Supabase. No secrets or project credentials are stored in this repository.
+- Migrations and Edge Functions are not deployed to Supabase by this repository workflow. No secrets or project credentials are stored in this repository.
