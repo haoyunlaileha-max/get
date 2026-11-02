@@ -5,3 +5,7 @@ verify_jwt = true
 # The function authenticates every request using its timestamped HMAC signature.
 [functions.payment-webhook]
 verify_jwt = false
+
+# Internal worker authenticates with a dedicated secret header.
+[functions.provision-worker]
+verify_jwt = false
