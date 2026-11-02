@@ -57,3 +57,7 @@ An additive Supabase migration is maintained at `supabase/migrations/20261102000
 ## Continuous integration
 
 The independent workflow at `.github/workflows/ci.yml` validates the storefront and migration on pushes and pull requests. This keeps code checks independent from the separate GitHub Pages deployment setup.
+
+## Secure order API foundation
+
+A Supabase Edge Function skeleton is available at `supabase/functions/create-order/index.ts`. It verifies the customer's access token, uses the server-side service-role client only inside the function, and delegates atomic price calculation and idempotent order insertion to `ah_create_order`. The required SQL is a separate additive migration at `supabase/migrations/20261102000200_secure_order_creation.sql`. See `docs/backend-foundation.md` for the request contract, secrets, and deployment prerequisites. Neither the migration nor the function has been deployed to Supabase; real payments and server provisioning are not enabled.
