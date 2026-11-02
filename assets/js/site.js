@@ -1,26 +1,54 @@
-const translations={
-en:{nav_services:"Services",nav_plans:"Pricing",nav_locations:"Locations",nav_why:"Why us",nav_order:"Deploy now ↗",eyebrow:"Infrastructure for a freer internet",hero_title:'Your infrastructure.<br><span>Your rules.</span>',hero_desc:"Powerful, reliable hosting built around privacy, performance, and control. Deploy globally with infrastructure that works as hard as you do.",hero_cta:"Explore hosting plans ↗",hero_secondary:"Explore services",trust1:"Privacy-focused by design",trust2:"Global locations",trust3:"Human support",services_title:"Everything you need to build",services_desc:"From a lightweight VPS to dedicated compute, find the right foundation for your workload.",linux_desc:"Flexible virtual servers for every project.",dedicated_desc:"Bare-metal performance and control.",rdp_desc:"Remote desktop, ready when you are.",gpu_desc:"Accelerated compute for demanding tasks.",domain_desc:"Find a memorable home for your brand.",plans_title:"Choose your compute",plans_desc:"Demo plans and indicative pricing. Final availability and pricing will be confirmed at checkout.",locations_title:"Deploy closer to your users",locations_desc:"A sample of the regions planned for our infrastructure portfolio.",why_title:"Hosting without the hassle",step1_title:"Pick your infrastructure",step1_desc:"Select a product, configuration, and region that fits your workload.",step2_title:"Configure your deployment",step2_desc:"Choose your operating system and options with a clear overview.",step3_title:"Get ready to build",step3_desc:"Manage services from one place as the platform evolves.",cta_title:"Ready to build something?",cta_desc:"Find the infrastructure that moves your project forward.",cta_button:"Find your server ↗",footer:"All rights reserved. Demo storefront — services are not yet available for purchase."},
-zh:{nav_services:"产品服务",nav_plans:"套餐价格",nav_locations:"机房位置",nav_why:"关于我们",nav_order:"立即部署 ↗",eyebrow:"为更自由的互联网提供基础设施",hero_title:'你的基础设施。<br><span>由你做主。</span>',hero_desc:"以隐私、性能与自主控制为核心，提供强大可靠的托管服务。通过全球化基础设施，让你的项目稳定运行。",hero_cta:"查看托管套餐 ↗",hero_secondary:"浏览产品服务",trust1:"隐私优先设计",trust2:"全球机房节点",trust3:"人工客户支持",services_title:"构建项目所需的一切",services_desc:"从轻量 VPS 到独立服务器，为不同工作负载找到合适的基础设施。",linux_desc:"适用于各种项目的灵活虚拟服务器。",dedicated_desc:"独享裸金属性能与控制权。",rdp_desc:"随时可用的 Windows 远程桌面。",gpu_desc:"满足高性能任务的 GPU 加速计算。",domain_desc:"为你的品牌找到理想域名。",plans_title:"选择适合你的算力",plans_desc:"以下为演示套餐及参考价格，实际库存与价格将在正式结账时确认。",locations_title:"让服务更靠近你的用户",locations_desc:"以下为规划中的部分全球基础设施区域。",why_title:"让服务器托管变简单",step1_title:"选择基础设施",step1_desc:"根据工作负载选择产品、配置与机房区域。",step2_title:"配置部署方案",step2_desc:"选择操作系统与所需选项，费用清晰透明。",step3_title:"开始构建项目",step3_desc:"随着平台完善，通过统一入口管理你的服务。",cta_title:"准备好启动你的项目了吗？",cta_desc:"选择能够推动项目发展的基础设施。",cta_button:"查找服务器 ↗",footer:"版权所有。演示网站——服务暂未开放购买。"},
-ar:{nav_services:"الخدمات",nav_plans:"الأسعار",nav_locations:"مواقع الخوادم",nav_why:"لماذا نحن",nav_order:"ابدأ الآن ↗",eyebrow:"بنية تحتية لإنترنت أكثر حرية",hero_title:'بنيتك التحتية.<br><span>قواعدك أنت.</span>',hero_desc:"استضافة قوية وموثوقة تركز على الخصوصية والأداء والتحكم. انطلق عالمياً ببنية تحتية تعمل من أجلك.",hero_cta:"استعرض الخطط ↗",hero_secondary:"استكشف الخدمات",trust1:"الخصوصية أولاً",trust2:"مواقع عالمية",trust3:"دعم بشري",services_title:"كل ما تحتاجه للبناء",services_desc:"من VPS بسيط إلى خوادم مخصصة، اختر الأساس المناسب لأعمالك.",linux_desc:"خوادم افتراضية مرنة لكل مشروع.",dedicated_desc:"أداء وتحكم كاملان على خادم فعلي.",rdp_desc:"سطح مكتب بعيد جاهز للاستخدام.",gpu_desc:"حوسبة GPU للمهام المتقدمة.",domain_desc:"اختر نطاقاً مميزاً لعلامتك.",plans_title:"اختر موارد الحوسبة",plans_desc:"خطط وأسعار تجريبية. سيتم تأكيد التوفر والسعر عند الإطلاق.",locations_title:"اقترب من مستخدميك",locations_desc:"عينة من المناطق المخطط لها ضمن شبكتنا.",why_title:"استضافة بلا تعقيد",step1_title:"اختر بنيتك التحتية",step1_desc:"حدد المنتج والتكوين والمنطقة المناسبة.",step2_title:"اضبط عملية النشر",step2_desc:"اختر نظام التشغيل والخيارات بوضوح.",step3_title:"ابدأ البناء",step3_desc:"أدر خدماتك من مكان واحد مع تطور المنصة.",cta_title:"هل أنت مستعد للبدء؟",cta_desc:"اعثر على البنية التحتية التي تدفع مشروعك للأمام.",cta_button:"اعثر على خادم ↗",footer:"جميع الحقوق محفوظة. متجر تجريبي — الشراء غير متاح حالياً."},
-fr:{nav_services:"Services",nav_plans:"Tarifs",nav_locations:"Emplacements",nav_why:"Pourquoi nous",nav_order:"Déployer ↗",eyebrow:"Une infrastructure pour un Internet plus libre",hero_title:'Votre infrastructure.<br><span>Vos règles.</span>',hero_desc:"Un hébergement puissant et fiable, conçu autour de la confidentialité, des performances et du contrôle. Déployez à l'échelle mondiale.",hero_cta:"Voir les offres ↗",hero_secondary:"Découvrir les services",trust1:"Confidentialité intégrée",trust2:"Présence mondiale",trust3:"Assistance humaine",services_title:"Tout pour construire",services_desc:"Du VPS léger au serveur dédié, trouvez la base adaptée à vos besoins.",linux_desc:"Des serveurs virtuels flexibles pour chaque projet.",dedicated_desc:"Performances et contrôle du matériel dédié.",rdp_desc:"Bureau à distance prêt à l'emploi.",gpu_desc:"Calcul GPU accéléré pour les tâches exigeantes.",domain_desc:"Trouvez un nom de domaine mémorable.",plans_title:"Choisissez vos ressources",plans_desc:"Offres de démonstration et prix indicatifs. Disponibilité à confirmer au lancement.",locations_title:"Au plus près de vos utilisateurs",locations_desc:"Exemples de régions prévues pour notre infrastructure.",why_title:"L'hébergement en toute simplicité",step1_title:"Choisissez votre infrastructure",step1_desc:"Sélectionnez le produit, la configuration et la région adaptés.",step2_title:"Configurez votre déploiement",step2_desc:"Choisissez votre système et vos options en toute clarté.",step3_title:"Prêt à construire",step3_desc:"Gérez vos services depuis un espace centralisé.",cta_title:"Prêt à concrétiser votre projet ?",cta_desc:"Trouvez l'infrastructure qui fera avancer votre projet.",cta_button:"Trouver un serveur ↗",footer:"Tous droits réservés. Site de démonstration — achat non disponible."},
-ru:{nav_services:"Услуги",nav_plans:"Цены",nav_locations:"Локации",nav_why:"Преимущества",nav_order:"Запустить ↗",eyebrow:"Инфраструктура для более свободного интернета",hero_title:'Ваша инфраструктура.<br><span>Ваши правила.</span>',hero_desc:"Мощный и надёжный хостинг с акцентом на конфиденциальность, производительность и контроль. Размещайте проекты по всему миру.",hero_cta:"Выбрать тариф ↗",hero_secondary:"Все услуги",trust1:"Конфиденциальность прежде всего",trust2:"Глобальные локации",trust3:"Поддержка специалистов",services_title:"Всё необходимое для проектов",services_desc:"От лёгкого VPS до выделенного сервера — выберите подходящую основу.",linux_desc:"Гибкие виртуальные серверы для любых задач.",dedicated_desc:"Производительность и контроль физического сервера.",rdp_desc:"Удалённый рабочий стол, готовый к работе.",gpu_desc:"Ускоренные GPU-вычисления для сложных задач.",domain_desc:"Выберите запоминающееся доменное имя.",plans_title:"Выберите вычислительные ресурсы",plans_desc:"Демонстрационные тарифы и ориентировочные цены. Наличие подтвердим при запуске.",locations_title:"Ближе к вашим пользователям",locations_desc:"Примеры регионов, запланированных для нашей инфраструктуры.",why_title:"Хостинг без лишних сложностей",step1_title:"Выберите инфраструктуру",step1_desc:"Подберите продукт, конфигурацию и регион.",step2_title:"Настройте развёртывание",step2_desc:"Выберите ОС и дополнительные параметры.",step3_title:"Начните работу",step3_desc:"Управляйте услугами из единого кабинета.",cta_title:"Готовы начать свой проект?",cta_desc:"Найдите инфраструктуру для развития вашего проекта.",cta_button:"Найти сервер ↗",footer:"Все права защищены. Демоверсия — покупка пока недоступна."},
-es:{nav_services:"Servicios",nav_plans:"Precios",nav_locations:"Ubicaciones",nav_why:"Ventajas",nav_order:"Desplegar ↗",eyebrow:"Infraestructura para una internet más libre",hero_title:'Tu infraestructura.<br><span>Tus reglas.</span>',hero_desc:"Alojamiento potente y fiable centrado en la privacidad, el rendimiento y el control. Despliega globalmente con confianza.",hero_cta:"Ver planes ↗",hero_secondary:"Explorar servicios",trust1:"Privacidad desde el diseño",trust2:"Ubicaciones globales",trust3:"Soporte humano",services_title:"Todo lo que necesitas para crear",services_desc:"Desde un VPS ligero hasta servidores dedicados, encuentra la base ideal.",linux_desc:"Servidores virtuales flexibles para cada proyecto.",dedicated_desc:"Rendimiento y control de hardware dedicado.",rdp_desc:"Escritorio remoto listo para usar.",gpu_desc:"Cómputo GPU acelerado para tareas exigentes.",domain_desc:"Encuentra un dominio memorable para tu marca.",plans_title:"Elige tu capacidad de cómputo",plans_desc:"Planes de demostración y precios orientativos. La disponibilidad se confirmará al lanzamiento.",locations_title:"Más cerca de tus usuarios",locations_desc:"Una muestra de las regiones previstas para nuestra infraestructura.",why_title:"Alojamiento sin complicaciones",step1_title:"Elige tu infraestructura",step1_desc:"Selecciona el producto, la configuración y la región adecuados.",step2_title:"Configura tu despliegue",step2_desc:"Elige el sistema operativo y las opciones con claridad.",step3_title:"Empieza a construir",step3_desc:"Gestiona tus servicios desde un solo lugar.",cta_title:"¿Listo para crear algo?",cta_desc:"Encuentra la infraestructura que impulse tu proyecto.",cta_button:"Buscar servidor ↗",footer:"Todos los derechos reservados. Demo — compra aún no disponible."}
-};
-const lang=document.getElementById('language');
-function setLanguage(code){const t=translations[code]||translations.en;document.documentElement.lang=code;document.documentElement.dir=code==='ar'?'rtl':'ltr';document.querySelectorAll('[data-i]').forEach(el=>{const k=el.dataset.i;if(t[k])el.textContent=t[k]});document.querySelectorAll('[data-html]').forEach(el=>{const k=el.dataset.html;if(t[k])el.innerHTML=t[k]});localStorage.setItem('ah-language',code);lang.value=code}
-lang.addEventListener('change',e=>setLanguage(e.target.value));setLanguage(localStorage.getItem('ah-language')||'en');document.getElementById('year').textContent=new Date().getFullYear();
+const locale = window.AH_LOCALE;
+const lang = document.getElementById("language");
+function applyLanguage(code) {
+  const selected = locale.normalize(code);
+  document.documentElement.lang = selected;
+  document.documentElement.dir = "ltr";
+  lang.value = selected;
+  localStorage.setItem("ah-language", selected);
+}
+lang.addEventListener("change", () => applyLanguage(lang.value));
+applyLanguage(localStorage.getItem("ah-language") || "zh-CN");
+document.getElementById("year").textContent = new Date().getFullYear();
 
-const mobileMenu=document.getElementById('mobile-menu');
-const navLinks=document.querySelector('.links');
-mobileMenu.addEventListener('click',()=>{const open=mobileMenu.getAttribute('aria-expanded')!=='true';mobileMenu.setAttribute('aria-expanded',String(open));mobileMenu.setAttribute('aria-label',open?'Close menu':'Open menu');navLinks.style.display=open?'flex':''});
-navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{mobileMenu.setAttribute('aria-expanded','false');mobileMenu.setAttribute('aria-label','Open menu');navLinks.style.display=''}));
-const configureDialog=document.getElementById('configure-dialog');
-const configTitle=document.getElementById('config-title');
-const configPrice=document.getElementById('config-price');
-const configSummary=document.getElementById('config-summary');
-document.querySelectorAll('[data-order]').forEach(button=>button.addEventListener('click',()=>{configTitle.textContent=button.dataset.order;configPrice.textContent=button.dataset.price;configSummary.hidden=true;configureDialog.showModal()}));
-document.getElementById('config-close').addEventListener('click',()=>configureDialog.close());
-configureDialog.addEventListener('click',event=>{if(event.target===configureDialog)configureDialog.close()});
-document.getElementById('configure-form').addEventListener('submit',event=>{event.preventDefault();configSummary.hidden=false;configSummary.textContent='Configuration preview: '+configTitle.textContent+' · '+configPrice.textContent+' · '+document.getElementById('config-region').value+' · '+document.getElementById('config-os').value+'. Demo only — no order was submitted.'});
-document.querySelectorAll('.filter').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const f=btn.dataset.filter;document.querySelectorAll('.plan').forEach(p=>p.style.display=f==='all'||p.dataset.type===f?'block':'none')}));
-document.querySelectorAll('.product').forEach(card=>card.addEventListener('click',()=>{const f=card.dataset.category;document.querySelectorAll('.filter').forEach(b=>{b.classList.toggle('active',b.dataset.filter===f)});document.querySelectorAll('.plan').forEach(p=>p.style.display=p.dataset.type===f?'block':'none')}));
+const mobileMenu = document.getElementById("mobile-menu");
+const navLinks = document.querySelector(".links");
+mobileMenu.addEventListener("click", () => {
+  const open = mobileMenu.getAttribute("aria-expanded") !== "true";
+  mobileMenu.setAttribute("aria-expanded", String(open));
+  mobileMenu.setAttribute("aria-label", open ? "关闭菜单" : "打开菜单");
+  navLinks.style.display = open ? "flex" : "";
+});
+navLinks.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => {
+  mobileMenu.setAttribute("aria-expanded", "false");
+  mobileMenu.setAttribute("aria-label", "打开菜单");
+  navLinks.style.display = "";
+}));
+
+const configureDialog = document.getElementById("configure-dialog");
+const configTitle = document.getElementById("config-title");
+const configPrice = document.getElementById("config-price");
+const configSummary = document.getElementById("config-summary");
+document.querySelectorAll("[data-order]").forEach((button) => button.addEventListener("click", () => {
+  configTitle.textContent = button.dataset.order;
+  configPrice.textContent = button.dataset.price;
+  configSummary.hidden = true;
+  configureDialog.showModal();
+}));
+document.getElementById("config-close").addEventListener("click", () => configureDialog.close());
+configureDialog.addEventListener("click", (event) => { if (event.target === configureDialog) configureDialog.close(); });
+document.getElementById("configure-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  configSummary.hidden = false;
+  configSummary.textContent = "配置预览：" + configTitle.textContent + " · " + configPrice.textContent + " · " + document.getElementById("config-region").value + " · " + document.getElementById("config-os").value + "。演示环境，不会提交订单。";
+});
+function filterPlans(filter) {
+  document.querySelectorAll(".filter").forEach((button) => button.classList.toggle("active", button.dataset.filter === filter));
+  document.querySelectorAll(".plan").forEach((plan) => { plan.hidden = !(filter === "all" || plan.dataset.type === filter); });
+}
+document.querySelectorAll(".filter").forEach((button) => button.addEventListener("click", () => filterPlans(button.dataset.filter)));
+document.querySelectorAll(".product").forEach((card) => card.addEventListener("click", () => {
+  const filter = card.dataset.category;
+  if (filter) filterPlans(filter);
+}));
+document.querySelectorAll("[data-jump-filter]").forEach((link) => link.addEventListener("click", () => filterPlans(link.dataset.jumpFilter)));
