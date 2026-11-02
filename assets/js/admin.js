@@ -172,6 +172,7 @@ function applyLanguage() {
   document.documentElement.dir = "ltr";
   document.querySelectorAll("[data-i]").forEach((node) => { const value = tr(node.dataset.i); node.textContent = value === node.dataset.i ? editorTr(node.dataset.i) : value; });
   nodes.language.value = language;
+  locale.apply(document.body, language);
 }
 function renderOrders(rows) {
   $("orders-count").textContent = String(rows.length);
