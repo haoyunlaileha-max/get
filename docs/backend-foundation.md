@@ -12,6 +12,7 @@ The `ah_*` schema and functions are isolated from unrelated application tables. 
 - `ah_orders` and `ah_order_items`: customer orders and immutable checkout snapshots.
 - `ah_payment_events`: minimal audit records for accepted payment-success notifications; unique provider/event IDs prevent duplicate processing.
 - `ah_provisioning_jobs`: durable, one-per-order provisioning work queue with leases, retry scheduling, attempt limits, and provider references.
+- `ah_plan_regions`: explicit plan-to-data-center availability and capacity, with transactionally reserved allocated units.
 
 Prices use minor currency units (for example, 1299 = USD 12.99). Browser-submitted prices, totals, user IDs, and order status are never trusted.
 
@@ -80,6 +81,7 @@ Apply migrations in order to the intended Anonymous Hosting Supabase project onl
 - `supabase/migrations/20261102000300_payment_event_processing.sql`
 - `supabase/migrations/20261102000400_provisioning_queue.sql`
 - `supabase/migrations/20261102000500_admin_console_read_access.sql`
+- `supabase/migrations/20261102000600_plan_region_inventory.sql`
 
 Configure secrets in the Supabase project, never in GitHub source:
 
@@ -105,15 +107,19 @@ Invoke `provision-worker` from a trusted scheduler/queue runner using `Authoriza
 
 This repository change does not link to, migrate, or deploy to a Supabase project.
 
+## Plan-to-region inventory
+
+Migration `20261102000600_plan_region_inventory.sql` adds `ah_plan_regions`, an admin-managed mapping between plans and data-center regions. Each mapping has an availability switch, optional unit capacity (blank means unlimited), and a database-maintained allocated-unit count. New mappings seed allocated units from existing non-terminal orders. Order creation locks the mapping row, requires a region once a plan has any explicit region mappings, checks region and mapping availability, verifies capacity, then reserves quantity in the same transaction. Idempotent replays do not reserve twice. Moving an order to cancelled, failed, or refunded releases its reservation once; active and suspended services remain allocated. Plans with no mappings retain the legacy region behavior until an administrator configures their first mapping.
+
 ## Admin operations console
 
 The static `admin.html` page is a browser-only operations interface. It verifies the current user with Supabase Auth and requires the verified JWT `app_metadata.role = admin`. The UI check is only a convenience gate: the database remains authoritative through admin RLS policies. Migration `20261102000500_admin_console_read_access.sql` grants authenticated users SELECT privileges on payment and provisioning records but adds RLS policies that return rows only when `ah_is_admin()` is true. Existing RLS policies already restrict product, plan, and region mutations to the same verified admin role.
 
-The console provides exact count metrics, recent order history, recent payment-event records, provisioning job state, product/plan activation toggles, region availability controls, and admin-only product/plan create/edit forms. Product fields include slug, category, description and sort order. Plan fields include product association, unique code, price in major currency units (converted to integer minor units), currency, billing period, JSON specifications (CPU, RAM, storage, bandwidth, OS options), sort order and publication state. New records default to inactive; existing prices change only when an administrator explicitly edits and saves that plan. The browser validates inputs and database RLS remains authoritative. The console still does not expose direct order status changes, manual payment marking, provider credentials, or destructive operations. Configure only the public Supabase URL and anon/publishable key in `assets/js/supabase-config.js`; never place a service-role key in the browser. Admin users must be assigned `app_metadata.role = admin` by a trusted project administrator through the Supabase Auth Admin API or Dashboard; ordinary users must not be able to set this field themselves.
+The console provides exact count metrics, recent order history, recent payment-event records, provisioning job state, product/plan activation toggles, region availability controls, admin-only product/plan create/edit forms, and plan-to-region inventory assignments. Product fields include slug, category, description and sort order. Plan fields include product association, unique code, price in major currency units (converted to integer minor units), currency, billing period, JSON specifications (CPU, RAM, storage, bandwidth, OS options), sort order and publication state. New records default to inactive; existing prices change only when an administrator explicitly edits and saves that plan. The browser validates inputs and database RLS remains authoritative. The console still does not expose direct order status changes, manual payment marking, provider credentials, or destructive operations. Configure only the public Supabase URL and anon/publishable key in `assets/js/supabase-config.js`; never place a service-role key in the browser. Admin users must be assigned `app_metadata.role = admin` by a trusted project administrator through the Supabase Auth Admin API or Dashboard; ordinary users must not be able to set this field themselves.
 
 ### Admin rollout
 
-Apply migration `20261102000500_admin_console_read_access.sql` after migrations 0001–0004. Once the intended Supabase project is configured and the trusted administrator role is assigned, open `/admin.html`. The console will remain unavailable until the migrations, public browser configuration, and admin role are correctly set up.
+Apply migration `20261102000500_admin_console_read_access.sql` after migrations 0001–0004, then apply `20261102000600_plan_region_inventory.sql` to enable plan-region capacity management. Once the intended Supabase project is configured and the trusted administrator role is assigned, open `/admin.html`. The console will remain unavailable until the migrations, public browser configuration, and admin role are correctly set up.
 
 ## Row-level security
 
