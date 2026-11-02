@@ -7,8 +7,9 @@ const nodes = {
   app: $("admin-app"), error: $("admin-error"), success: $("admin-success"),
   refresh: $("refresh-admin"), signout: $("admin-signout"), language: $("admin-language"),
 };
-const languages = ["en", "zh", "ar", "fr", "ru", "es"];
-let language = localStorage.getItem("ah-language") || "en";
+const locale = window.AH_LOCALE;
+const languages = ["zh-CN", "zh-TW"];
+let language = locale.normalize(localStorage.getItem("ah-language") || "zh-CN");
 let supabase;
 let busy = false;
 
@@ -31,7 +32,7 @@ const editorText = {
   ru:{catalog_manage:"Управление товарами и тарифами",catalog_manage_desc:"Создание и редактирование каталога. Новые записи по умолчанию выключены.",product_editor_title:"Данные продукта",product_name:"Название продукта",product_slug:"Идентификатор",product_category:"Категория",description:"Описание",sort_order:"Порядок",publish_product:"Опубликовать сразу",save_product:"Сохранить продукт",clear_form:"Очистить",plan_editor_title:"Данные тарифа",plan_product:"Продукт",plan_name:"Название тарифа",plan_code:"Уникальный код",price:"Цена",currency:"Валюта",billing_period:"Период оплаты",specs_json:"Характеристики (JSON)",publish_plan:"Опубликовать сразу",save_plan:"Сохранить тариф",edit:"Изменить",catalog_safety:"Новые записи по умолчанию скрыты. Цена меняется только после редактирования и сохранения тарифа.",invalid_specs:"Характеристики должны быть корректным JSON-объектом.",saved:"Каталог сохранён.",save_failed:"Ошибка сохранения. Проверьте уникальность кода и RLS."},
   es:{catalog_manage:"Gestionar productos y planes",catalog_manage_desc:"Crear o editar el catálogo. Los elementos nuevos están desactivados por defecto.",product_editor_title:"Datos del producto",product_name:"Nombre del producto",product_slug:"Identificador",product_category:"Categoría",description:"Descripción",sort_order:"Orden",publish_product:"Publicar inmediatamente",save_product:"Guardar producto",clear_form:"Limpiar",plan_editor_title:"Datos del plan",plan_product:"Producto",plan_name:"Nombre del plan",plan_code:"Código único",price:"Precio",currency:"Moneda",billing_period:"Periodo de facturación",specs_json:"Especificaciones (JSON)",publish_plan:"Publicar inmediatamente",save_plan:"Guardar plan",edit:"Editar",catalog_safety:"Los elementos nuevos empiezan desactivados. El precio solo cambia al editar y guardar el plan.",invalid_specs:"Las especificaciones deben ser un objeto JSON válido.",saved:"Catálogo guardado.",save_failed:"No se pudo guardar. Comprueba el código único y RLS."}
 };
-function editorTr(key) { return (inventoryText[language] || inventoryText.en)[key] || (editorText[language] || editorText.en)[key] || inventoryText.en[key] || editorText.en[key] || key; }
+function editorTr(key) { const value = inventoryText.zh[key] || editorText.zh[key] || inventoryText.en[key] || editorText.en[key] || key; return locale.text(value, language); }
 function formValues(form) { return Object.fromEntries(new FormData(form).entries()); }
 function fillProductEditor(product) {
   const form = $("product-editor"); form.reset();
@@ -143,7 +144,7 @@ async function saveInventory(form) {
   finally{busy=false;}
 }
 
-function tr(key) { return (messages[language] || messages.en)[key] || messages.en[key] || key; }
+function tr(key) { return locale.text(messages.zh[key] || messages.en[key] || key, language); }
 function setText(id, value) { const node = $(id); if (node) node.textContent = value; }
 function show(node, message) { node.hidden = !message; if (message) node.textContent = message; }
 function escapeHtml(value) {
@@ -168,7 +169,7 @@ function statusPill(value) {
 }
 function applyLanguage() {
   document.documentElement.lang = language;
-  document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+  document.documentElement.dir = "ltr";
   document.querySelectorAll("[data-i]").forEach((node) => { const value = tr(node.dataset.i); node.textContent = value === node.dataset.i ? editorTr(node.dataset.i) : value; });
   nodes.language.value = language;
 }
@@ -321,5 +322,5 @@ $("product-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("product-ed
 $("plan-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("plan-editor").elements.currency.value="USD"; $("plan-editor").elements.price.value="0"; $("plan-editor").elements.sort_order.value="0"; },0);});
 nodes.refresh.addEventListener("click", loadDashboard);
 nodes.signout.addEventListener("click", async () => { if (!supabase) return; nodes.signout.disabled = true; await supabase.auth.signOut(); window.location.replace("account.html"); });
-nodes.language.addEventListener("change", () => { language = languages.includes(nodes.language.value) ? nodes.language.value : "en"; localStorage.setItem("ah-language", language); applyLanguage(); if (!nodes.app.hidden) loadDashboard(); });
+nodes.language.addEventListener("change", () => { language = languages.includes(nodes.language.value) ? nodes.language.value : "zh-CN"; localStorage.setItem("ah-language", language); applyLanguage(); if (!nodes.app.hidden) loadDashboard(); });
 initialize();
