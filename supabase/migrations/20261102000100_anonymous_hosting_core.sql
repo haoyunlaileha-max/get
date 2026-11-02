@@ -234,9 +234,10 @@ for all to authenticated
 using (public.ah_is_admin())
 with check (public.ah_is_admin());
 
-grant select on public.ah_regions, public.ah_products, public.ah_plans to anon, authenticated;
+grant select on public.ah_regions, public.ah_products, public.ah_plans to anon;
+grant select, insert, update, delete on public.ah_regions, public.ah_products, public.ah_plans to authenticated;
 grant select, update on public.ah_profiles to authenticated;
-grant select on public.ah_orders, public.ah_order_items to authenticated;
+grant select, insert, update, delete on public.ah_orders, public.ah_order_items to authenticated;
 grant execute on function public.ah_is_admin() to anon, authenticated;
 
 commit;
