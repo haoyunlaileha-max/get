@@ -79,6 +79,7 @@ Apply migrations in order to the intended Anonymous Hosting Supabase project onl
 - `supabase/migrations/20261102000200_secure_order_creation.sql`
 - `supabase/migrations/20261102000300_payment_event_processing.sql`
 - `supabase/migrations/20261102000400_provisioning_queue.sql`
+- `supabase/migrations/20261102000500_admin_console_read_access.sql`
 
 Configure secrets in the Supabase project, never in GitHub source:
 
@@ -104,18 +105,30 @@ Invoke `provision-worker` from a trusted scheduler/queue runner using `Authoriza
 
 This repository change does not link to, migrate, or deploy to a Supabase project.
 
+## Admin operations console
+
+The static `admin.html` page is a browser-only operations interface. It verifies the current user with Supabase Auth and requires the verified JWT `app_metadata.role = admin`. The UI check is only a convenience gate: the database remains authoritative. Migration `20261102000500_admin_console_read_access.sql` grants authenticated users SELECT privileges on payment and provisioning records but adds RLS policies that return rows only when `ah_is_admin()` is true. Existing RLS policies already restrict product, plan, and region mutations to the same verified admin role.
+
+The console provides exact count metrics, recent order history, recent payment-event records, provisioning job state, product/plan activation toggles, and region availability controls. It intentionally does not expose price editing, direct order status changes, manual payment marking, provider credentials, or destructive operations. Configure only the public Supabase URL and anon/publishable key in `assets/js/supabase-config.js`; never place a service-role key in the browser. Admin users must be assigned `app_metadata.role = admin` by a trusted project administrator through the Supabase Auth Admin API or Dashboard; ordinary users must not be able to set this field themselves.
+
+### Admin rollout
+
+Apply migration `20261102000500_admin_console_read_access.sql` after migrations 0001–0004. Once the intended Supabase project is configured and the trusted administrator role is assigned, open `/admin.html`. The console will remain unavailable until the migrations, public browser configuration, and admin role are correctly set up.
+
 ## Row-level security
 
 - Visitors can read active catalog entries and regions.
 - Customers can read/update their own profile and read only their own orders/items.
 - Catalog writes and order mutations are reserved for administrators or trusted server-side code.
 - Admin access uses only verified JWT `app_metadata.role=admin`, never user-editable `user_metadata`.
-- Payment event records have RLS enabled and no grants for browser roles.
+- Payment event records have RLS enabled; only verified admins can read them through the admin console.
+- Provisioning job records have RLS enabled; only verified admins can read them through the admin console.
 - Service-role credentials must remain server-side.
 
 ## Current limitations
 
 - The order function creates pending orders. The webhook advances an order to paid only after a correctly signed normalized success event and database checks.
 - The normalized HMAC receiver is not a substitute for a provider-specific native signature adapter.
-- Refunds, disputes, chargebacks, provider API integration, provisioning queues, retry policy, audit monitoring, and per-user/IP rate limiting remain future work.
+- Refunds, disputes, chargebacks, provider API integration, audit monitoring, and per-user/IP rate limiting remain future work.
 - Migrations and Edge Functions are not deployed to Supabase by this repository workflow. No secrets or project credentials are stored in this repository.
+- The admin console is committed and Pages-deployable, but it requires migrations 0001–0005, a configured public Supabase client, and a trusted admin role before operational data is visible.
