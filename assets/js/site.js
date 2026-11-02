@@ -5,6 +5,7 @@ function applyLanguage(code) {
   document.documentElement.lang = selected;
   document.documentElement.dir = "ltr";
   lang.value = selected;
+  locale.apply(document.body, selected);
   localStorage.setItem("ah-language", selected);
 }
 lang.addEventListener("change", () => applyLanguage(lang.value));
