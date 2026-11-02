@@ -50,6 +50,7 @@ security definer
 set search_path = pg_catalog, public, pg_temp
 as $$
 begin
+  perform 1 from public.ah_plans where id = new.plan_id for update;
   select coalesce(sum(oi.quantity), 0)::integer
     into new.allocated_units
   from public.ah_order_items oi
@@ -193,7 +194,8 @@ begin
     into v_plan_name, v_price_minor, v_currency
   from public.ah_plans pl
   join public.ah_products pr on pr.id = pl.product_id
-  where pl.id = p_plan_id and pl.is_active = true and pr.is_active = true;
+  where pl.id = p_plan_id and pl.is_active = true and pr.is_active = true
+  for key share of pl;
 
   if not found then
     raise exception 'plan_unavailable' using errcode = 'P0002';
