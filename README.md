@@ -16,6 +16,10 @@ A responsive, multilingual hosting storefront prototype for the **Anonymous Host
 
 Open `index.html` in a modern browser, or serve this directory with any static web server.
 
+## Automated checks and deployment
+
+Every push to `main` runs the dependency-free storefront smoke checks in `scripts/check-site.mjs`, prepares the static site, and deploys it with GitHub Actions to GitHub Pages. You can also start the workflow manually from the Actions tab. The first deployment may require GitHub Pages to be enabled for the repository with **Build and deployment → Source: GitHub Actions**. The published URL is shown in the workflow run's deployment environment.
+
 ## Important prototype notes
 
 - Prices, server specifications, and locations are illustrative demo content, not live inventory or binding offers.
