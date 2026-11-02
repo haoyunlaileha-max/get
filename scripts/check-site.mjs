@@ -12,8 +12,10 @@ const publicConfig = read("assets/js/supabase-config.js");
 const coreSql = read("supabase/migrations/20261102000100_anonymous_hosting_core.sql");
 const orderSql = read("supabase/migrations/20261102000200_secure_order_creation.sql");
 const paymentSql = read("supabase/migrations/20261102000300_payment_event_processing.sql");
+const provisioningSql = read("supabase/migrations/20261102000400_provisioning_queue.sql");
 const orderFn = read("supabase/functions/create-order/index.ts");
 const paymentFn = read("supabase/functions/payment-webhook/index.ts");
+const provisioningFn = read("supabase/functions/provision-worker/index.ts");
 const supabaseConfig = read("supabase/config.toml");
 const backendDocs = read("docs/backend-foundation.md");
 
@@ -47,4 +49,11 @@ for (const marker of ["PAYMENT_WEBHOOK_SECRET", "crypto.subtle", "HMAC", "x-ah-s
 assert.ok(!/Access-Control-Allow-Origin|Access-Control-Allow-Headers/.test(paymentFn), "Server-to-server webhook must not enable browser CORS");
 assert.ok(supabaseConfig.includes("[functions.payment-webhook]") && supabaseConfig.includes("verify_jwt = false"), "Webhook must use signature authentication instead of user JWT");
 for (const marker of ["payment-webhook", "PAYMENT_WEBHOOK_SECRET", "provider-specific", "ah_payment_events", "not deployed"]) assert.ok(backendDocs.toLowerCase().includes(marker.toLowerCase()), `Missing payment deployment documentation: ${marker}`);
-console.log("Checks passed: storefront, six locales, RTL, account portal, additive RLS schema, trusted idempotent order API, and signed idempotent payment-event processing.");
+
+for (const marker of ["ah_provisioning_jobs", "unique", "for update skip locked", "lease_expires_at", "max_attempts", "retry_wait", "ah_enqueue_paid_order", "new.status = 'paid'", "ah_claim_provisioning_job", "ah_finish_provisioning_job", "status = 'active'", "status = 'failed'"]) assert.ok(provisioningSql.toLowerCase().includes(marker.toLowerCase()), `Missing provisioning queue safeguard: ${marker}`);
+assert.ok(!/drop table|truncate table/i.test(provisioningSql), "Provisioning migration must not drop or truncate application data");
+for (const marker of ["PROVISIONING_WORKER_SECRET", "PROVISIONER_API_URL", "PROVISIONER_API_TOKEN", "ah_claim_provisioning_job", "ah_finish_provisioning_job", "Idempotency-Key", "https:", "AbortController", "external_id", "retry_scheduled"]) assert.ok(provisioningFn.includes(marker), `Missing provisioning worker behavior: ${marker}`);
+assert.ok(!/Access-Control-Allow-Origin|Access-Control-Allow-Headers/.test(provisioningFn), "Internal provisioning worker must not enable browser CORS");
+assert.ok(supabaseConfig.includes("[functions.provision-worker]") && supabaseConfig.includes("verify_jwt = false"), "Worker must use its dedicated shared-secret authentication");
+for (const marker of ["20261102000400_provisioning_queue.sql", "provision-worker", "PROVISIONING_WORKER_SECRET", "PROVISIONER_API_URL", "PROVISIONER_API_TOKEN", "not deployed", "Idempotency-Key"]) assert.ok(backendDocs.toLowerCase().includes(marker.toLowerCase()), `Missing provisioning documentation: ${marker}`);
+console.log("Checks passed: storefront, six locales, RTL, account portal, RLS schema, secure idempotent order API, signed payment events, and leased provisioning queue.");
