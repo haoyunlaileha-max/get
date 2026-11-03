@@ -28,7 +28,7 @@ The `create-order` Supabase Edge Function accepts only a plan ID, optional regio
 
 ## Verified payment notification foundation
 
-The `payment-webhook` function is a provider-neutral **normalized event receiver**, not a ready-made Stripe/PayPal integration. It expects an upstream provider-specific adapter to verify the provider's native signature and map a genuine success notification into this envelope:
+The `payment-webhook` function is a provider-neutral **normalized event receiver**, not a ready-made Stripe/PayPal integration. It rejects a declared body larger than 32 KiB and enforces the same limit while streaming the actual request bytes before buffering; `Content-Length` is only an early-rejection hint. It expects an upstream provider-specific adapter to verify the provider's native signature and map a genuine success notification into this envelope:
 
 ```json
 {
