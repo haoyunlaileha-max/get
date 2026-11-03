@@ -33,7 +33,6 @@ const cryptoSql = read("supabase/migrations/20261103080000_crypto_usdt_pricing_a
 const telegramFn = read("supabase/functions/telegram-dispatch/index.ts");
 const telegramSql = read("supabase/migrations/20261103081000_crypto_telegram_notification_outbox.sql");
 const telegramSchedulerSql = read("supabase/migrations/20261103090000_crypto_telegram_outbox_scheduler.sql");
-const telegramSchedulerSql = read("supabase/migrations/20261103090000_crypto_telegram_outbox_scheduler.sql");
 const supabaseConfig = read("supabase/config.toml");
 const backendDocs = read("docs/backend-foundation.md");
 
