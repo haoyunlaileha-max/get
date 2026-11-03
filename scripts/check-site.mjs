@@ -87,6 +87,12 @@ for (const marker of ["loadMoreOrders", "ordersPageSize = 20", ".range(orderOffs
 for (const marker of ['id="balance"', 'ACCOUNT BALANCE', 'topup-amount', '充值通道尚未开放']) assert.ok(account.includes(marker), "Missing safe account balance preview: " + marker);
 for (const route of ['zh/vps/', 'zh/dedicated/', 'zh/rdp/', 'zh/gpu/', 'zh/domains/']) assert.ok(html.includes(route), "Missing product route: " + route);
 for (const route of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html","zh/domains/index.html","zh/account/index.html"]) assert.ok(existsSync(new URL("../" + route, import.meta.url)), "Missing localized page: " + route);
+for (const route of ["zh/index.html"]) assert.ok(existsSync(new URL("../" + route, import.meta.url)), "Missing localized storefront: " + route);
+for (const marker of ["七个数据中心地区", "$7.50", "$48.50", "$11.00", "$122.00"]) assert.ok(html.includes(marker), "Missing public product starting price: " + marker);
+for (const path of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html"]) { const page=read(path); assert.ok(page.includes("region-price-table"), "Missing regional price matrix: " + path); assert.ok(page.includes("登录下单"), "Missing account order entry: " + path); }
+const domainPage=read("zh/domains/index.html"); assert.ok(domainPage.includes("常见 26 种域名后缀"), "Missing domain TLD catalogue");
+for (const marker of ["account-payment-chips", "最近充值记录", "充值通道尚未开放"]) assert.ok(account.includes(marker), "Missing account top-up interface: " + marker);
+assert.ok(accountJs.includes("authPanel.hidden=false"), "Auth form should remain visible before Supabase is configured");
 for (const route of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html"]) { const page = read(route); assert.ok(page.includes('id="plan-list"') && page.includes('id="configure-dialog"') && page.includes('assets/js/checkout.js'), "Product page is missing live catalog checkout: " + route); }
 assert.ok(accountJs.includes('requestedMode === "signup"'), "Signup deep link must open registration mode");
 assert.ok(accountJs.includes('location.hash==="#balance"'), "Account balance deep link must scroll after login");
