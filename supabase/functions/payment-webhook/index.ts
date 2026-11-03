@@ -78,7 +78,7 @@ Deno.serve(async (request: Request) => {
   const declaredLength = request.headers.get("content-length");
   if (declaredLength !== null) {
     const parsedLength = Number(declaredLength);
-    if (!Number.isSafeInteger(parsedLength) || parsedLength < 0) {
+    if (!/^\d+$/.test(declaredLength) || !Number.isSafeInteger(parsedLength)) {
       return json(400, { error: "invalid_content_length" });
     }
     if (parsedLength > MAX_BODY_BYTES) return json(413, { error: "request_too_large" });
