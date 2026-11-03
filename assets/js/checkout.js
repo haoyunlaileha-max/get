@@ -207,12 +207,6 @@
     if (button) openPlan(button);
   });
 
-  form.addEventListener("submit", (event) => {
-    if (!window.AH_CHECKOUT?.ready) return;
-    event.preventDefault();
-    submit();
-  });
-
   window.AH_CHECKOUT = {
     get ready() { return Boolean(client); },
     submit
@@ -223,16 +217,16 @@
   (async () => {
     try {
       const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
-      client = createClient(config.url, config.anonKey, {
+      const supabaseClient = createClient(config.url, config.anonKey, {
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
       });
 
       const [productsResult, regionsResult] = await Promise.all([
-        client.from("ah_products")
+        supabaseClient.from("ah_products")
           .select("id,name,category,description,sort_order,ah_plans(id,code,name,description,price_minor,currency,billing_period,specs,is_active,sort_order)")
           .eq("is_active", true)
           .order("sort_order", { ascending: true }),
-        client.from("ah_regions")
+        supabaseClient.from("ah_regions")
           .select("id,name,city,country_code")
           .eq("status", "active")
           .order("name", { ascending: true })
@@ -242,6 +236,7 @@
       if (regionsResult.error) throw regionsResult.error;
       renderRegions(regionsResult.data || []);
       renderPlans(productsResult.data || []);
+      client = supabaseClient;
       document.querySelector(".plan-disclaimer").textContent =
         "套餐、价格与可选机房来自后台实时目录。提交后仅创建待处理订单，不会立即扣款或自动开通服务器。";
       document.querySelector(".config-disclaimer").textContent =
