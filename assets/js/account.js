@@ -7,6 +7,7 @@ const authSuccess = document.getElementById("auth-success");
 const dashboard = document.getElementById("account-dashboard");
 const ordersState = document.getElementById("orders-state");
 const ordersList = document.getElementById("orders-list");
+const loadMoreOrdersButton = document.getElementById("load-more-orders");
 const submitButton = document.getElementById("auth-submit");
 const resetButton = document.getElementById("reset-password");
 const signOutButton = document.getElementById("sign-out");
@@ -17,12 +18,15 @@ const languageSelect = document.getElementById("account-language");
 let supabase;
 let mode = "login";
 let activeUserId = null;
+let orderOffset = 0;
+let ordersLoading = false;
+const ordersPageSize = 20;
 const locale = window.AH_LOCALE;
 let language = locale.normalize(localStorage.getItem("ah-language") || "zh-CN");
 
 const messages = {
-en:{portal:"CUSTOMER PORTAL",your_account:"Your account",intro:"Sign in to manage your hosting services and view your orders.",language_label:"Language",back_store:"← Back to storefront",setup_text:"Authentication is not connected yet. Add your Supabase project URL and public anon/publishable key in",setup_suffix:"to enable secure sign-in. Never put a service-role key here.",sign_in:"Sign in",create_account:"Create account",email:"Email address",password:"Password",show:"Show",hide:"Hide",sign_in_secure:"Sign in securely",create_account_btn:"Create account",reset_password:"Send password reset email",authenticated:"Authenticated customer",profile_title:"Profile",display_name:"Display name",save_profile:"Save profile",your_orders:"Your orders",loading_orders:"Loading your orders…",sign_out:"Sign out",privacy_note:"Your credentials are sent directly to your configured Supabase project over HTTPS. This portal does not store passwords in this website.",enter_email:"Enter your email address first.",reset_sending:"Sending…",reset_sent:"If the address is registered, a password reset email will be sent.",signed_out:"You have been signed out.",signup_check:"Account created. Check your email to confirm your address before signing in.",no_orders:"No orders yet. Orders will appear here after checkout is connected.",orders_error:"Your account is signed in, but orders could not be loaded. Check that the database migration has been applied and its RLS policies are active.",profile_loading:"Loading profile…",profile_saved:"Profile saved.",profile_error:"Could not load or save your profile. Check that the database migration is applied and profile RLS is enabled.",profile_saving:"Saving…",signed_user:"Signed-in user",generic_error:"Something went wrong. Please try again.",init_error:"Supabase could not be initialized. Verify the project URL and public anon/publishable key, then reload."},
-zh:{portal:"客户中心",your_account:"账户中心",intro:"登录以管理托管服务并查看订单。",language_label:"语言",back_store:"← 返回产品首页",setup_text:"尚未连接身份验证。请在",setup_suffix:"中填写 Supabase 项目 URL 和公开 anon/publishable key，以启用安全登录。切勿填写 service-role 密钥。",sign_in:"登录",create_account:"创建账户",email:"电子邮箱",password:"密码",show:"显示",hide:"隐藏",sign_in_secure:"安全登录",create_account_btn:"创建账户",reset_password:"发送密码重置邮件",authenticated:"已验证客户",profile_title:"个人资料",display_name:"显示名称",save_profile:"保存资料",your_orders:"我的订单",loading_orders:"正在加载订单…",sign_out:"退出登录",privacy_note:"账户凭据通过 HTTPS 直接发送到你配置的 Supabase 项目。本网站不会存储你的密码。",enter_email:"请先输入电子邮箱。",reset_sending:"发送中…",reset_sent:"如果该邮箱已注册，系统将发送密码重置邮件。",signed_out:"你已成功退出登录。",signup_check:"账户已创建，请检查邮箱并完成验证后再登录。",no_orders:"暂无订单。接入结账功能后，订单会显示在这里。",orders_error:"已登录，但无法加载订单。请检查数据库迁移是否执行以及 RLS 策略是否启用。",profile_loading:"正在加载资料…",profile_saved:"资料已保存。",profile_error:"无法加载或保存资料。请检查数据库迁移和个人资料 RLS 权限。",profile_saving:"保存中…",signed_user:"已登录客户",generic_error:"发生错误，请重试。",init_error:"无法初始化 Supabase。请检查项目 URL 和公开 anon/publishable key 后刷新页面。"},
+en:{portal:"CUSTOMER PORTAL",your_account:"Your account",intro:"Sign in to manage your hosting services and view your orders.",language_label:"Language",back_store:"← Back to storefront",setup_text:"Authentication is not connected yet. Add your Supabase project URL and public anon/publishable key in",setup_suffix:"to enable secure sign-in. Never put a service-role key here.",sign_in:"Sign in",create_account:"Create account",email:"Email address",password:"Password",show:"Show",hide:"Hide",sign_in_secure:"Sign in securely",create_account_btn:"Create account",reset_password:"Send password reset email",authenticated:"Authenticated customer",profile_title:"Profile",display_name:"Display name",save_profile:"Save profile",your_orders:"Your orders",loading_orders:"Loading your orders…",load_more_orders:"Load more orders",loading_more_orders:"Loading…",orders_more_error:"Could not load more orders. Please try again.",sign_out:"Sign out",privacy_note:"Your credentials are sent directly to your configured Supabase project over HTTPS. This portal does not store passwords in this website.",enter_email:"Enter your email address first.",reset_sending:"Sending…",reset_sent:"If the address is registered, a password reset email will be sent.",signed_out:"You have been signed out.",signup_check:"Account created. Check your email to confirm your address before signing in.",no_orders:"No orders yet. Orders will appear here after checkout is connected.",orders_error:"Your account is signed in, but orders could not be loaded. Check that the database migration has been applied and its RLS policies are active.",profile_loading:"Loading profile…",profile_saved:"Profile saved.",profile_error:"Could not load or save your profile. Check that the database migration is applied and profile RLS is enabled.",profile_saving:"Saving…",signed_user:"Signed-in user",generic_error:"Something went wrong. Please try again.",init_error:"Supabase could not be initialized. Verify the project URL and public anon/publishable key, then reload."},
+zh:{portal:"客户中心",your_account:"账户中心",intro:"登录以管理托管服务并查看订单。",language_label:"语言",back_store:"← 返回产品首页",setup_text:"尚未连接身份验证。请在",setup_suffix:"中填写 Supabase 项目 URL 和公开 anon/publishable key，以启用安全登录。切勿填写 service-role 密钥。",sign_in:"登录",create_account:"创建账户",email:"电子邮箱",password:"密码",show:"显示",hide:"隐藏",sign_in_secure:"安全登录",create_account_btn:"创建账户",reset_password:"发送密码重置邮件",authenticated:"已验证客户",profile_title:"个人资料",display_name:"显示名称",save_profile:"保存资料",your_orders:"我的订单",loading_orders:"正在加载订单…",load_more_orders:"加载更多订单",loading_more_orders:"正在加载…",orders_more_error:"加载更多订单失败，请重试。",sign_out:"退出登录",privacy_note:"账户凭据通过 HTTPS 直接发送到你配置的 Supabase 项目。本网站不会存储你的密码。",enter_email:"请先输入电子邮箱。",reset_sending:"发送中…",reset_sent:"如果该邮箱已注册，系统将发送密码重置邮件。",signed_out:"你已成功退出登录。",signup_check:"账户已创建，请检查邮箱并完成验证后再登录。",no_orders:"暂无订单。接入结账功能后，订单会显示在这里。",orders_error:"已登录，但无法加载订单。请检查数据库迁移是否执行以及 RLS 策略是否启用。",profile_loading:"正在加载资料…",profile_saved:"资料已保存。",profile_error:"无法加载或保存资料。请检查数据库迁移和个人资料 RLS 权限。",profile_saving:"保存中…",signed_user:"已登录客户",generic_error:"发生错误，请重试。",init_error:"无法初始化 Supabase。请检查项目 URL 和公开 anon/publishable key 后刷新页面。"},
 ar:{portal:"بوابة العملاء",your_account:"حسابك",intro:"سجّل الدخول لإدارة خدمات الاستضافة وعرض طلباتك.",language_label:"اللغة",back_store:"العودة إلى المتجر ←",setup_text:"لم يتم ربط المصادقة بعد. أضف رابط مشروع Supabase والمفتاح العام في",setup_suffix:"لتفعيل تسجيل الدخول الآمن. لا تضع مفتاح service-role هنا.",sign_in:"تسجيل الدخول",create_account:"إنشاء حساب",email:"البريد الإلكتروني",password:"كلمة المرور",show:"إظهار",hide:"إخفاء",sign_in_secure:"تسجيل دخول آمن",create_account_btn:"إنشاء حساب",reset_password:"إرسال رابط إعادة تعيين كلمة المرور",authenticated:"عميل موثّق",profile_title:"الملف الشخصي",display_name:"الاسم المعروض",save_profile:"حفظ الملف الشخصي",your_orders:"طلباتك",loading_orders:"جارٍ تحميل الطلبات…",sign_out:"تسجيل الخروج",privacy_note:"تُرسل بيانات اعتمادك مباشرةً إلى مشروع Supabase عبر HTTPS. لا يخزّن هذا الموقع كلمات المرور.",enter_email:"أدخل بريدك الإلكتروني أولاً.",reset_sending:"جارٍ الإرسال…",reset_sent:"إذا كان العنوان مسجلاً فستُرسل رسالة لإعادة تعيين كلمة المرور.",signed_out:"تم تسجيل خروجك.",signup_check:"تم إنشاء الحساب. تحقق من بريدك لتأكيد العنوان قبل تسجيل الدخول.",no_orders:"لا توجد طلبات بعد. ستظهر الطلبات هنا بعد تفعيل الدفع.",orders_error:"تم تسجيل الدخول، لكن تعذر تحميل الطلبات. تحقق من تطبيق ترحيل قاعدة البيانات وسياسات RLS.",profile_loading:"جارٍ تحميل الملف الشخصي…",profile_saved:"تم حفظ الملف الشخصي.",profile_error:"تعذر تحميل الملف الشخصي أو حفظه. تحقق من الترحيل وسياسات RLS.",profile_saving:"جارٍ الحفظ…",signed_user:"مستخدم مسجل الدخول",generic_error:"حدث خطأ. حاول مرة أخرى.",init_error:"تعذر تهيئة Supabase. تحقق من الرابط والمفتاح العام ثم أعد التحميل."},
 fr:{portal:"ESPACE CLIENT",your_account:"Votre compte",intro:"Connectez-vous pour gérer vos services et consulter vos commandes.",language_label:"Langue",back_store:"← Retour à la boutique",setup_text:"L’authentification n’est pas encore connectée. Ajoutez l’URL du projet Supabase et la clé publique dans",setup_suffix:"pour activer la connexion. Ne placez jamais de clé service-role ici.",sign_in:"Connexion",create_account:"Créer un compte",email:"Adresse e-mail",password:"Mot de passe",show:"Afficher",hide:"Masquer",sign_in_secure:"Connexion sécurisée",create_account_btn:"Créer un compte",reset_password:"Envoyer un e-mail de réinitialisation",authenticated:"Client authentifié",profile_title:"Profil",display_name:"Nom affiché",save_profile:"Enregistrer le profil",your_orders:"Vos commandes",loading_orders:"Chargement des commandes…",sign_out:"Déconnexion",privacy_note:"Vos identifiants sont envoyés directement à votre projet Supabase via HTTPS. Ce site ne stocke pas vos mots de passe.",enter_email:"Saisissez d’abord votre adresse e-mail.",reset_sending:"Envoi…",reset_sent:"Si cette adresse est enregistrée, un e-mail de réinitialisation sera envoyé.",signed_out:"Vous êtes déconnecté.",signup_check:"Compte créé. Vérifiez votre e-mail avant de vous connecter.",no_orders:"Aucune commande. Elles apparaîtront ici lorsque le paiement sera activé.",orders_error:"Connecté, mais impossible de charger les commandes. Vérifiez la migration et les règles RLS.",profile_loading:"Chargement du profil…",profile_saved:"Profil enregistré.",profile_error:"Impossible de charger ou d’enregistrer le profil. Vérifiez la migration et les règles RLS.",profile_saving:"Enregistrement…",signed_user:"Client connecté",generic_error:"Une erreur est survenue. Réessayez.",init_error:"Impossible d’initialiser Supabase. Vérifiez l’URL et la clé publique, puis rechargez."},
 ru:{portal:"КАБИНЕТ КЛИЕНТА",your_account:"Ваш аккаунт",intro:"Войдите, чтобы управлять услугами хостинга и просматривать заказы.",language_label:"Язык",back_store:"← На главную",setup_text:"Авторизация ещё не подключена. Добавьте URL проекта Supabase и публичный ключ в",setup_suffix:"для безопасного входа. Не размещайте здесь service-role ключ.",sign_in:"Войти",create_account:"Создать аккаунт",email:"Электронная почта",password:"Пароль",show:"Показать",hide:"Скрыть",sign_in_secure:"Безопасный вход",create_account_btn:"Создать аккаунт",reset_password:"Отправить письмо для сброса пароля",authenticated:"Проверенный клиент",profile_title:"Профиль",display_name:"Отображаемое имя",save_profile:"Сохранить профиль",your_orders:"Ваши заказы",loading_orders:"Загрузка заказов…",sign_out:"Выйти",privacy_note:"Данные для входа отправляются напрямую в ваш проект Supabase по HTTPS. Сайт не хранит пароли.",enter_email:"Сначала введите адрес электронной почты.",reset_sending:"Отправка…",reset_sent:"Если адрес зарегистрирован, будет отправлено письмо для сброса пароля.",signed_out:"Вы вышли из системы.",signup_check:"Аккаунт создан. Подтвердите адрес в письме перед входом.",no_orders:"Заказов пока нет. Они появятся после подключения оплаты.",orders_error:"Вход выполнен, но заказы не загружены. Проверьте миграцию базы и политики RLS.",profile_loading:"Загрузка профиля…",profile_saved:"Профиль сохранён.",profile_error:"Не удалось загрузить или сохранить профиль. Проверьте миграцию и политики RLS.",profile_saving:"Сохранение…",signed_user:"Вошедший пользователь",generic_error:"Произошла ошибка. Попробуйте ещё раз.",init_error:"Не удалось подключить Supabase. Проверьте URL и публичный ключ и обновите страницу."},
@@ -124,21 +128,38 @@ async function loadProfile(userId){
   document.getElementById("profile-name").value=data?.display_name||"";
   profileState.textContent="";
 }
+async function loadMoreOrders(){
+  if(!supabase||!activeUserId||ordersLoading)return;
+  const userId=activeUserId;
+  ordersLoading=true;loadMoreOrdersButton.disabled=true;loadMoreOrdersButton.textContent=tr("loading_more_orders");
+  try{
+    const {data,error}=await supabase.from("ah_orders")
+      .select("id,status,currency,total_minor,created_at,updated_at,paid_at,customer_note,ah_order_items(description_snapshot,quantity,unit_price_minor)")
+      .eq("user_id",userId).order("created_at",{ascending:false}).range(orderOffset,orderOffset+ordersPageSize-1);
+    if(activeUserId!==userId)return;
+    if(error)throw error;
+    for(const order of data||[])ordersList.append(renderOrderCard(order));
+    orderOffset+=(data||[]).length;
+    loadMoreOrdersButton.hidden=(data||[]).length<ordersPageSize;
+  }catch{
+    if(activeUserId===userId){ordersState.hidden=false;ordersState.textContent=tr("orders_more_error");loadMoreOrdersButton.hidden=false;}
+  }finally{
+    ordersLoading=false;
+    if(activeUserId===userId){loadMoreOrdersButton.disabled=false;loadMoreOrdersButton.textContent=tr("load_more_orders");}
+  }
+}
 async function renderSession(session){
-  if(!session){activeUserId=null;dashboard.hidden=true;authPanel.hidden=false;return;}
-  const userId=session.user.id;activeUserId=userId;
+  if(!session){activeUserId=null;orderOffset=0;ordersList.replaceChildren();loadMoreOrdersButton.hidden=true;dashboard.hidden=true;authPanel.hidden=false;return;}
+  const userId=session.user.id;activeUserId=userId;orderOffset=0;
   authPanel.hidden=true;dashboard.hidden=false;
   document.getElementById("account-email").textContent=session.user.email||tr("signed_user");
-  ordersState.hidden=false;ordersState.textContent=tr("loading_orders");ordersList.replaceChildren();
+  ordersState.hidden=false;ordersState.textContent=tr("loading_orders");ordersList.replaceChildren();loadMoreOrdersButton.hidden=true;
   await loadProfile(userId);
-  const {data,error}=await supabase.from("ah_orders")
-    .select("id,status,currency,total_minor,created_at,updated_at,paid_at,customer_note,ah_order_items(description_snapshot,quantity,unit_price_minor)")
-    .eq("user_id",userId).order("created_at",{ascending:false}).limit(20);
   if(activeUserId!==userId)return;
-  if(error){ordersState.textContent=tr("orders_error");return;}
-  if(!data?.length){ordersState.textContent=tr("no_orders");return;}
-  ordersState.hidden=true;
-  for(const order of data)ordersList.append(renderOrderCard(order));
+  await loadMoreOrders();
+  if(activeUserId!==userId)return;
+  if(!ordersList.childElementCount){ordersState.hidden=false;if(ordersState.textContent!==tr("orders_more_error"))ordersState.textContent=tr("no_orders");}
+  else ordersState.hidden=true;
 }
 function showError(error){message(authError,error?.message||tr("generic_error"));message(authSuccess,"");}
 document.getElementById("toggle-password").addEventListener("click",event=>{
@@ -158,6 +179,7 @@ else{
     supabase.auth.onAuthStateChange((_event,nextSession)=>{queueMicrotask(()=>renderSession(nextSession).catch(showError));});
   }catch(error){setup.hidden=false;setup.textContent=tr("init_error")+" "+(error?.message||"");authPanel.hidden=true;}
 }
+loadMoreOrdersButton.addEventListener("click",loadMoreOrders);
 document.getElementById("login-tab").addEventListener("click",()=>setMode("login"));
 document.getElementById("signup-tab").addEventListener("click",()=>setMode("signup"));
 authForm.addEventListener("submit",async event=>{
