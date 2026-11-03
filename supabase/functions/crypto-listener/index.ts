@@ -2,7 +2,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-const INTERNAL_SECRET = Deno.env.get("CRYPTO_LISTENER_INTERNAL_SECRET") ?? "";
 const MAX_BODY_BYTES = 65_536;
 const ASSET_CODES = new Set(["BTC","ETH","USDT_ERC20","USDT_TRC20","LTC","TRX","SOL","BNB_BEP20","TON"]);
 
@@ -66,10 +65,7 @@ async function digest(value: string) {
 
 Deno.serve(async (request: Request) => {
   if (request.method !== "POST") return json(405, { error: "method_not_allowed" });
-  if (!SUPABASE_URL || !SERVICE_ROLE_KEY || !INTERNAL_SECRET) return json(503, { error: "listener_not_configured" });
-  if (!safeEqual(request.headers.get("x-listener-secret") ?? "", INTERNAL_SECRET)) {
-    return json(401, { error: "listener_authentication_failed" });
-  }
+  if (!SUPABASE_URL || !SERVICE_ROLE_KEY) return json(503, { error: "listener_not_configured" });
   if (!(request.headers.get("content-type") ?? "").toLowerCase().includes("application/json")) {
     return json(415, { error: "application_json_required" });
   }
@@ -84,6 +80,9 @@ Deno.serve(async (request: Request) => {
   }
 
   const db = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+  const secret = request.headers.get("x-listener-secret") ?? "";
+  const { data: authorized, error: authorizationError } = await db.rpc("ah_crypto_scan_authorized", { p_secret: secret });
+  if (authorizationError || authorized !== true) return json(401, { error: "listener_authentication_failed" });
   const results: Array<Record<string, unknown>> = [];
   let matched = 0, confirmed = 0, manualReview = 0;
 

@@ -1,48 +1,27 @@
-# Direct-wallet cryptocurrency payment
+# Mainnet chain scanning and automatic settlement
 
-## Supported payment channels
+The production scanner is a Supabase Edge Function invoked every minute by pg_cron/pg_net. It reads the receiving registry and chain cursors, fetches mainnet transaction data, and submits normalized observations to the authenticated `crypto-listener`. The listener verifies its independent Vault-backed cron secret, exact destination, exact invoice amount, confirmation threshold, duplicate key and idempotent payment event before settling an order.
 
-The receiving registry contains BTC, ETH, USDT ERC-20, USDT TRC-20, LTC, TRX, SOL, BNB BEP-20 and a TON-labelled GRAM entry. Catalog plan prices are denominated in USDT. The authenticated `create-crypto-invoice` function obtains live USDT market quotes from Binance public ticker endpoints for BTC, ETH, LTC, TRX, SOL and BNB; USDT network payments use a 1:1 quote. Invoice amounts are calculated with integer arithmetic and each asset's atomic precision.
+## Active public-provider adapters
 
-## Invoice and settlement safeguards
+- Bitcoin: mempool.space address transaction API and live tip height.
+- Litecoin: litecoinspace.org address transaction API and live tip height.
+- Ethereum native ETH and ERC-20 USDT: public Ethereum JSON-RPC; native block transactions and receipt success, ERC-20 Transfer logs filtered by the registered token contract and recipient.
+- BNB native: BNB Smart Chain public JSON-RPC.
+- Solana native SOL: public Solana JSON-RPC parsed System Program transfers; finality is required before credit.
 
-- Orders and invoices are created server-side and are scoped to the authenticated customer.
-- The database allocates a unique active invoice amount per asset and stores the quote and expiry.
-- The invoice endpoint refuses to issue a payment address unless the selected chain listener is explicitly enabled and marked `ready`.
-- A transfer is credited only when the trusted listener reports the exact invoice amount to the registered receiving address. Unmatched transfers are retained for manual review.
-- A deposit becomes paid only after the configured confirmation threshold is met. The payment-event RPC is idempotent; the existing order/provisioning workflow receives the same paid transition as other payment methods.
-- Overpayments and settlement conflicts are not automatically credited.
-- No private keys or seed phrases are stored.
+The EVM scanner stores per-asset block cursors, overlaps recent blocks to refresh confirmation counts, and advances in bounded batches. UTXO and Solana observations are deduplicated by transaction/output or instruction index in the settlement ledger. Provider failures mark the adapter degraded so invoice creation fails closed until scanning recovers.
 
-## Chain listener ingress
+## Providers requiring credentials / additional adapter work
 
-The `crypto-listener` Supabase Edge Function is the authenticated ingestion boundary for chain-specific scanners/indexers. It accepts batches of up to 50 normalized transfers:
+TRON native TRX and USDT TRC-20 require a production TronGrid API key for reliable indexed account history; the worker supports `TRONGRID_API_KEY`, but these assets remain disabled until that key is configured and the provider returns healthy data. TON is not enabled: the existing registry entry is Toncoin, not GRAM, and a TON account-history adapter plus verified token master contract is not present.
 
-```json
-{
-  "action": "ingest",
-  "transfers": [{
-    "asset_code": "USDT_TRC20",
-    "transaction_hash": "provider transaction hash",
-    "event_index": 0,
-    "destination_address": "exact registered receiving address",
-    "amount_atomic": "25000000",
-    "block_height": 123456,
-    "confirmations": 20
-  }]
-}
-```
+## Safety and operations
 
-Call `POST https://izuxtqmjdtzxvnfwppls.supabase.co/functions/v1/crypto-listener` with `Content-Type: application/json` and `x-listener-secret: <CRYPTO_LISTENER_INTERNAL_SECRET>`. The shared secret must be stored only in the scanner's secret manager and Supabase Edge Function secrets; never commit it or send it from the browser. The endpoint checks the registered destination, enabled/ready state, exact invoice amount, confirmation threshold and duplicate transfer key before settlement.
-
-The ingress function is not itself a blockchain scanner. A chain-specific provider/worker must independently verify chain data, canonical block status, transaction finality and reorgs, then submit normalized observations. It must resubmit updated confirmation counts and must never fabricate transfer data. The function intentionally does not enable any listener or issue addresses on its own.
-
-## Current production boundary
-
-All nine chain listeners remain disabled with `listener_status = awaiting_provider` until each chain's provider, scanner, confirmation/reorg handling and receiving-address verification are configured. The schema, USDT pricing path, authenticated invoice endpoint, checkout UI, Telegram notification dispatcher and crypto listener ingress are deployed. The Telegram dispatcher is separate from chain scanning; its successful delivery does not mean blockchain monitoring is active. The ingress deployment does not imply automatic on-chain scanning or live payment acceptance.
-
-GRAM remains blocked: GRAM invoice generation the current address is a TON receiving address, not a verified GRAM Jetton master contract; the actual GRAM Jetton master contract has not yet been populated, and a separate GRAM market-rate source is required.
-
-## Telegram payment notifications
-
-A database trigger writes deposit lifecycle changes to a private transactional outbox. The `telegram-dispatch` Edge Function claims records with row-level locking, sends Telegram Bot API messages, records delivery and retries transient failures with backoff. A Supabase Cron job invokes the dispatcher every minute using a publishable key plus a separate random cron proof stored in Vault. Telegram credentials and internal secrets must never be committed to GitHub.
+- The scanner uses public receiving addresses only; no signing keys or seed phrases are stored.
+- A separate random scanner secret is generated inside Supabase Vault. It is never committed to GitHub.
+- Only the database cron job can invoke the scanner; the listener independently checks the same secret through a service-role-only RPC.
+- Chain observations are not accepted from the browser.
+- Repeated provider failures block new invoices for the affected asset.
+- The scanner is a deposit monitor, not a withdrawal service. It does not sweep or spend funds.
+- Public RPC/explorer endpoints have rate limits and are best-effort infrastructure. For high-volume production, replace them with dedicated provider endpoints and monitor cursor lag.

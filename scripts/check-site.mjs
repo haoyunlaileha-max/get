@@ -33,6 +33,8 @@ const paymentFn = read("supabase/functions/payment-webhook/index.ts");
 const provisioningFn = read("supabase/functions/provision-worker/index.ts");
 const cryptoInvoiceFn = read("supabase/functions/create-crypto-invoice/index.ts");
 const cryptoListenerFn = read("supabase/functions/crypto-listener/index.ts");
+const cryptoScannerFn = read("supabase/functions/crypto-scanner/index.ts");
+const cryptoScannerSql = read("supabase/migrations/20261103100000_crypto_mainnet_scanner.sql");
 
 const cryptoSql = read("supabase/migrations/20261103080000_crypto_usdt_pricing_and_invoice_rpc.sql");
 const telegramFn = read("supabase/functions/telegram-dispatch/index.ts");
@@ -192,6 +194,8 @@ assert.ok(!/drop table|truncate table/i.test(rateLimitCleanupSql), "Rate-limit c
 for (const marker of ["create-crypto-invoice", "telegram-dispatch", "awaiting_provider", "catalog tables", "GRAM"]) assert.ok(readme.includes(marker), `Missing accurate live deployment note: ${marker}`);
 for (const marker of ["all nine chain listeners remain disabled", "separate from chain scanning", "GRAM invoice", "not yet been populated"]) assert.ok(cryptoDocs.toLowerCase().includes(marker.toLowerCase()), `Missing crypto production safety note: ${marker}`);
 
-for (const marker of ["CRYPTO_LISTENER_INTERNAL_SECRET", "validTransfer", "destination_mismatch", "manual_review", "ah_apply_payment_event", "confirmations_required", "MAX_BODY_BYTES"]) assert.ok(cryptoListenerFn.includes(marker), `Missing secure crypto transfer ingestion behavior: ${marker}`);
-for (const marker of ["crypto-listener", "exact invoice amount", "chain-specific provider/worker", "GRAM remains blocked"]) assert.ok(cryptoDocs.toLowerCase().includes(marker.toLowerCase()), `Missing crypto listener safety documentation: ${marker}`);
-console.log("Checks passed: storefront, Chinese locales, account/admin portals, database/RLS safeguards, crypto invoice and Telegram outbox security, deployment documentation, and explicit chain-listener fail-closed status.");
+for (const marker of ["ah_crypto_scan_authorized", "validTransfer", "destination_mismatch", "manual_review", "ah_apply_payment_event", "confirmations_required", "MAX_BODY_BYTES"]) assert.ok(cryptoListenerFn.includes(marker), `Missing secure crypto transfer ingestion behavior: ${marker}`);
+for (const marker of ["crypto-listener", "exact invoice amount", "mainnet chain scanning", "TON is not enabled"]) assert.ok(cryptoDocs.toLowerCase().includes(marker.toLowerCase()), `Missing crypto listener safety documentation: ${marker}`);
+for (const marker of ["mempool.space", "litecoinspace.org", "eth_getLogs", "getSignaturesForAddress", "ah_crypto_scan_authorized", "TRONGRID_API_KEY", "crypto-listener"]) assert.ok(cryptoScannerFn.includes(marker), `Missing chain scanner adapter/security behavior: ${marker}`);
+for (const marker of ["crypto_scan_cron_secret", "vault.create_secret", "ah_crypto_scan_authorized", "ah-crypto-chain-scanner", "cron.schedule", "listener_enabled = true"]) assert.ok(cryptoScannerSql.includes(marker), `Missing scanner migration behavior: ${marker}`);
+console.log("Checks passed: storefront, account/admin portals, database/RLS safeguards, crypto invoices, mainnet scanner adapters, Vault-authenticated cron and settlement, Telegram outbox security, and provider fail-closed behavior.");
