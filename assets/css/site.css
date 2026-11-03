@@ -114,3 +114,6 @@ body{background:#fff;color:#17231f}
 .admin-orders-toolbar .admin-order-date input{width:100%;min-height:40px;padding:9px 10px;border:1px solid #dce6df;border-radius:8px;background:#fff;color:#26372e;font:inherit}
 
 .account-submit[hidden]{display:none}
+
+/* Account balance and top-up preview */
+.account-balance{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(240px,.8fr);gap:24px;align-items:start;padding:22px;margin:22px 0;border:1px solid var(--line,#e5e7eb);border-radius:18px;background:#fafbfa}.account-balance-value{font-size:30px;font-weight:750;margin:8px 0}.account-balance-value small{display:block;font-size:12px;font-weight:500;color:var(--muted,#6b7280)}.account-topup{display:grid;gap:9px}.account-topup select{width:100%;min-height:42px;border:1px solid var(--line,#e5e7eb);border-radius:9px;padding:8px 10px;background:#f3f4f6;color:#777}.account-topup button:disabled{opacity:.55;cursor:not-allowed}@media(max-width:680px){.account-balance{grid-template-columns:1fr}}
