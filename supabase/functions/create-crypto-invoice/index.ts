@@ -6,7 +6,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "
 const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") || "https://haoyunlaileha-max.github.io").split(",").map((v) => v.trim()).filter(Boolean);
 const ASSET_SYMBOLS: Record<string, string> = {
   BTC:"BTCUSDT", ETH:"ETHUSDT", LTC:"LTCUSDT", TRX:"TRXUSDT", SOL:"SOLUSDT",
-  BNB_BEP20:"BNBUSDT", TON:"GRAMUSDT", USDT_ERC20:"", USDT_TRC20:"",
+  BNB_BEP20:"BNBUSDT", TON:"TONUSDT", USDT_ERC20:"", USDT_TRC20:"",
 };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function reply(status:number, body:Record<string,unknown>, origin:string|null) {
