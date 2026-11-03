@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 
 const root = new URL("../", import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), "utf8");
+const readme = read("README.md");
+const cryptoDocs = read("docs/crypto-payment-foundation.md");
 const html = read("index.html");
 const css = read("assets/css/site.css");
 const js = read("assets/js/site.js");
@@ -183,4 +185,6 @@ assert.ok(tokenAuth.includes("auth.setSession"), "Token login must establish the
 for (const marker of ["ah_token_auth_rate_limits_updated_idx", "updated_at < now() - interval '24 hours'", "ah_consume_token_auth_attempt", "grant execute", "service_role"]) assert.ok(rateLimitCleanupSql.toLowerCase().includes(marker.toLowerCase()), `Missing bounded token-auth rate-limit cleanup behavior: ${marker}`);
 assert.ok(!/drop table|truncate table/i.test(rateLimitCleanupSql), "Rate-limit cleanup migration must not drop or truncate data");
 
-console.log("Checks passed: refreshed storefront, Simplified/Traditional Chinese locales, account portal, admin console, RLS schema, least-privilege order ACLs, secure order/payment processing, and provisioning queue.");
+for (const marker of ["create-crypto-invoice", "telegram-dispatch", "awaiting_provider", "catalog tables", "GRAM"]) assert.ok(readme.includes(marker), `Missing accurate live deployment note: ${marker}`);
+for (const marker of ["all nine chain listeners remain disabled", "does not scan blockchains", "GRAM invoice", "not been verified"]) assert.ok(cryptoDocs.toLowerCase().includes(marker.toLowerCase()), `Missing crypto production safety note: ${marker}`);
+console.log("Checks passed: storefront, Chinese locales, account/admin portals, database/RLS safeguards, crypto invoice and Telegram outbox security, deployment documentation, and explicit chain-listener fail-closed status.");
