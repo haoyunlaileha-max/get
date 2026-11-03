@@ -181,8 +181,8 @@ if(requestedMode === "signup") setMode("signup");
 if(!config.url||!config.anonKey){setup.hidden=false;authPanel.hidden=false;submitButton.disabled=true;resetButton.disabled=true;setup.textContent="登录与注册界面已就绪。配置 Supabase 项目 URL 和公开 anon/publishable key 后即可启用；当前不会提交或保存账户凭据。";}
 else{
   try{
-    const {createClient}=await import("https://esm.sh/@supabase/supabase-js@2");
-    supabase=createClient(config.url,config.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+    supabase=await window.AH_SUPABASE_READY;
+    if(!supabase)throw new Error("Supabase 初始化未返回客户端。");
     // Share the exact auth client with token login so both flows use one session store.
     window.AH_SUPABASE_AUTH_CLIENT=supabase;
     window.AH_RENDER_ACCOUNT_SESSION=renderSession;
