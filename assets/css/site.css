@@ -280,3 +280,6 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
     grid-column: 1;
   }
 }
+
+/* Live account top-up and on-chain invoice panel */
+.account-balance{grid-template-columns:minmax(0,1fr) minmax(260px,.85fr)}.account-topup select{background:#fff;color:#17212b;border:1px solid #d0d5dd}.account-topup button:disabled{opacity:.55;cursor:not-allowed}.topup-invoice{margin-top:10px;padding:14px;border:1px solid #b8d8cb;border-radius:12px;background:#f1faf5;color:#17212b;font-size:13px;overflow-wrap:anywhere}.topup-invoice strong{display:block;margin:0 0 8px}.topup-invoice .topup-address{display:block;padding:10px;background:#fff;border:1px solid #d0d5dd;border-radius:8px;font-family:ui-monospace,monospace;word-break:break-all}.topup-invoice button{margin-top:10px}.topup-history{display:grid;gap:9px}.topup-history-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 14px;border:1px solid #e5e7eb;border-radius:10px;background:#fff}.topup-history-row small{display:block;color:#667085;font-size:12px}.topup-history-row strong{color:#17212b}.topup-status{font-size:12px;font-weight:700;color:#8a5a00}.topup-status.credited{color:#16865f}@media(max-width:680px){.account-balance{grid-template-columns:1fr}.topup-history-row{align-items:flex-start;flex-direction:column}}
