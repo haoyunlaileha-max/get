@@ -93,7 +93,7 @@ for (const path of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.
 const domainPage=read("zh/domains/index.html"); assert.ok(domainPage.includes("常见 26 种域名后缀"), "Missing domain TLD catalogue");
 for (const marker of ["account-payment-chips", "最近充值记录", "充值通道尚未开放"]) assert.ok(account.includes(marker), "Missing account top-up interface: " + marker);
 assert.ok(accountJs.includes("authPanel.hidden=false"), "Auth form should remain visible before Supabase is configured");
-for (const route of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html"]) { const page = read(route); assert.ok(page.includes('id="plan-list"') && page.includes('id="configure-dialog"') && page.includes('assets/js/checkout.js'), "Product page is missing live catalog checkout: " + route); }
+for (const route of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html"]) { const page = read(route); assert.ok(page.includes('id="plan-list"') && page.includes('id="configure-dialog"') && page.includes('assets/js/checkout.js') && page.includes('data-account-url="../../account.html?mode=login#auth-panel"'), "Product page is missing live catalog checkout: " + route); }
 assert.ok(accountJs.includes('requestedMode === "signup"'), "Signup deep link must open registration mode");
 assert.ok(accountJs.includes('location.hash==="#balance"'), "Account balance deep link must scroll after login");
 const domainsPage = read("zh/domains/index.html");
