@@ -159,7 +159,7 @@ async function renderSession(session){
   const userId=session.user.id;activeUserId=userId;orderOffset=0;
   authPanel.hidden=true;if(tokenAuthPanel)tokenAuthPanel.hidden=true;dashboard.hidden=false;
   if(location.hash==="#balance")document.getElementById("balance").scrollIntoView({behavior:"smooth",block:"start"});
-  document.getElementById("account-email").textContent=session.user.email||tr("signed_user");
+  document.getElementById("account-email").textContent=session.user.user_metadata?.display_name||session.user.email||tr("signed_user");
   ordersState.hidden=false;ordersState.textContent=tr("loading_orders");ordersList.replaceChildren();loadMoreOrdersButton.hidden=true;
   await loadProfile(userId);
   if(activeUserId!==userId)return;
