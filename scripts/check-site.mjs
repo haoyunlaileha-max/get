@@ -28,6 +28,8 @@ const orderFn = read("supabase/functions/create-order/index.ts");
 const tokenAuthFn = read("supabase/functions/token-auth/index.ts");
 const paymentFn = read("supabase/functions/payment-webhook/index.ts");
 const provisioningFn = read("supabase/functions/provision-worker/index.ts");
+const cryptoInvoiceFn = read("supabase/functions/create-crypto-invoice/index.ts");
+const cryptoSql = read("supabase/migrations/20261103080000_crypto_usdt_pricing_and_invoice_rpc.sql");
 const supabaseConfig = read("supabase/config.toml");
 const backendDocs = read("docs/backend-foundation.md");
 
@@ -39,8 +41,13 @@ assert.ok(!/<script>/.test(html), "Application JavaScript must live in the exter
 for (const marker of ["--bg:", ".config-dialog", ".mobile-menu", ".account-card", ".account-password-field", ".order-items", ".account-profile", ".account-language", "@media(max-width:640px)"]) assert.ok(css.includes(marker), `Missing stylesheet feature: ${marker}`);
 for (const marker of ["function applyLanguage", "localStorage.setItem", "configureDialog.showModal()", "配置预览", "function filterPlans"]) assert.ok(js.includes(marker), `Missing application behavior: ${marker}`);
 for (const marker of ["window.AH_CHECKOUT?.ready", "window.AH_CHECKOUT.submit"]) assert.ok(js.includes(marker), `Missing checkout handoff: ${marker}`);
-for (const marker of ["functions/v1/create-order", "Idempotency-Key", "ah_products", "ah_regions", "ah_plans", "plan_id", "region_id", "auth.getSession", "支付与服务器开通尚未启用"]) assert.ok(checkoutJs.includes(marker), `Missing checkout integration: ${marker}`);
+for (const marker of ["functions/v1/create-order", "Idempotency-Key", "ah_products", "ah_regions", "ah_plans", "plan_id", "region_id", "auth.getSession", "选择收款网络后，系统会按 USDT 报价换算币种金额。"]) assert.ok(checkoutJs.includes(marker), `Missing checkout integration: ${marker}`);
 for (const marker of ["productCategory", "categoryMap[product.category] === pageCategory", "data-plan-id"]) assert.ok(checkoutJs.includes(marker), `Missing product page catalog filtering: ${marker}`);
+for (const marker of ["create-crypto-invoice", "USDT", "asset_monitoring_unavailable", "wallet_address", "expected_amount"]) assert.ok(checkoutJs.includes(marker), `Missing direct crypto checkout behavior: ${marker}`);
+for (const marker of ["SUPABASE_SERVICE_ROLE_KEY", "ah_create_crypto_invoice", "market_rate_unavailable", "asset_monitoring_unavailable", "auth.getUser", "formatAtomic", "BTCUSDT", "TONUSDT"]) assert.ok(cryptoInvoiceFn.includes(marker), `Missing secure crypto invoice behavior: ${marker}`);
+for (const marker of ["alter column currency type varchar(4)", "currency<>'USDT'", "ah_create_crypto_invoice", "unique_violation", "quote_price_usdt", "ticker='GRAM'", "service_role"]) assert.ok(cryptoSql.includes(marker), `Missing USDT invoice database safeguard: ${marker}`);
+assert.ok(adminHtml.includes('value="USDT" readonly'), "Admin catalog must price plans in USDT only");
+assert.ok(adminJs.includes('const currency="USDT"'), "Admin catalog writes must enforce USDT pricing");
 for (const marker of ["product-language", "configure-dialog", "AH_LOCALE"]) assert.ok(productPageJs.includes(marker), `Missing product page interaction: ${marker}`);
 for (const marker of ["zh-TW", "zh-CN", "const normalize", "const text", "function apply", "traditional", "simplified"]) assert.ok(localeJs.includes(marker), `Missing Chinese locale behavior: ${marker}`);
 for (const category of ["vps", "dedicated", "rdp", "gpu", "domains"]) assert.ok(html.includes(`data-type="${category}"`), `Missing plan category: ${category}`);
