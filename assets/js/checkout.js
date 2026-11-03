@@ -211,7 +211,7 @@
       invoiceButton.addEventListener("click", async () => {
         invoiceButton.disabled = true; invoiceResult.textContent = "正在获取实时 USDT 汇率并检查链上监听状态…";
         try {
-          const response = await fetch(config.url.replace(/\\/$/, "") + "/functions/v1/create-crypto-invoice", {
+          const response = await fetch(config.url.replace(/\/$/, "") + "/functions/v1/create-crypto-invoice", {
             method:"POST",
             headers:{"Content-Type":"application/json",apikey:config.anonKey,Authorization:"Bearer "+session.access_token},
             body:JSON.stringify({order_id:order.order_id,asset_code:assetSelect.value})
@@ -227,7 +227,7 @@
             throw new Error(messages[result.error] || "暂时无法生成收款信息，请稍后重试。");
           }
           const invoice=result.invoice;
-          invoiceResult.textContent = "应付：" + invoice.expected_amount + " " + invoice.ticker + "\\n网络：" + invoice.network + "\\n收款地址：" + invoice.wallet_address + "\\n报价：" + invoice.quoted_usdt + " USDT\\n有效期：" + invoice.expires_at;
+          invoiceResult.textContent = "应付：" + invoice.expected_amount + " " + invoice.ticker + "\n网络：" + invoice.network + "\n收款地址：" + invoice.wallet_address + "\n报价：" + invoice.quoted_usdt + " USDT\n有效期：" + invoice.expires_at;
           const copy=document.createElement("button"); copy.type="button"; copy.className="admin-toggle"; copy.textContent="复制收款地址";
           copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(invoice.wallet_address);copy.textContent="已复制";}catch{copy.textContent="复制失败";}});
           invoiceResult.append(document.createElement("br"),copy);
