@@ -32,6 +32,7 @@ const cryptoInvoiceFn = read("supabase/functions/create-crypto-invoice/index.ts"
 const cryptoSql = read("supabase/migrations/20261103080000_crypto_usdt_pricing_and_invoice_rpc.sql");
 const telegramFn = read("supabase/functions/telegram-dispatch/index.ts");
 const telegramSql = read("supabase/migrations/20261103081000_crypto_telegram_notification_outbox.sql");
+const telegramSchedulerSql = read("supabase/migrations/20261103090000_crypto_telegram_outbox_scheduler.sql");
 const supabaseConfig = read("supabase/config.toml");
 const backendDocs = read("docs/backend-foundation.md");
 
@@ -52,6 +53,9 @@ assert.ok(adminHtml.includes('value="USDT" readonly'), "Admin catalog must price
 assert.ok(adminJs.includes('const currency="USDT"'), "Admin catalog writes must enforce USDT pricing");
 for (const marker of ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "CRYPTO_LISTENER_INTERNAL_SECRET", "sendMessage", "ah_claim_crypto_telegram_notifications", "ah_finish_crypto_telegram_notification"]) assert.ok(telegramFn.includes(marker), "Missing Telegram delivery behavior: " + marker);
 for (const marker of ["ah_crypto_telegram_outbox", "ah_enqueue_crypto_telegram_event", "ah_claim_crypto_telegram_notifications", "ah_finish_crypto_telegram_notification", "skip locked", "service_role"]) assert.ok(telegramSql.toLowerCase().includes(marker.toLowerCase()), "Missing Telegram outbox safeguard: " + marker);
+for (const marker of ["create extension if not exists pg_cron", "create extension if not exists pg_net", "vault.create_secret", "project_url", "publishable_key", "ah-crypto-telegram-outbox-dispatch", "net.http_post", "cron.schedule"]) assert.ok(telegramSchedulerSql.toLowerCase().includes(marker.toLowerCase()), "Missing scheduled Telegram dispatcher: " + marker);
+for (const marker of ["createSupabaseContext", 'auth:"publishable"', "hasInternalSecret", 'body.action!=="dispatch"', 'body.action==="test"']) assert.ok(telegramFn.includes(marker), "Missing restricted cron authentication behavior: " + marker);
+assert.ok(!/service_role|secret key/i.test(telegramSchedulerSql), "Cron migration must never store a privileged service-role credential");
 for (const marker of ["product-language", "configure-dialog", "AH_LOCALE"]) assert.ok(productPageJs.includes(marker), `Missing product page interaction: ${marker}`);
 for (const marker of ["zh-TW", "zh-CN", "const normalize", "const text", "function apply", "traditional", "simplified"]) assert.ok(localeJs.includes(marker), `Missing Chinese locale behavior: ${marker}`);
 for (const category of ["vps", "dedicated", "rdp", "gpu", "domains"]) assert.ok(html.includes(`data-type="${category}"`), `Missing plan category: ${category}`);
