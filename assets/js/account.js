@@ -99,6 +99,9 @@ function renderOrderCard(order){
     wrap.append(term,desc);detailGrid.append(wrap);
   };
   addDetail("订单编号",order.id);
+  const region=order.ah_regions;
+  const regionLabel=[region?.name,region?.city,region?.country_code].filter(Boolean).join(" · ");
+  addDetail("数据中心",regionLabel);
   addDetail("订单状态",orderStatusLabels[order.status]||"状态未知");
   addDetail("创建时间",formatDate(order.created_at));
   addDetail("更新时间",formatDate(order.updated_at));
@@ -134,7 +137,7 @@ async function loadMoreOrders(){
   ordersLoading=true;loadMoreOrdersButton.disabled=true;loadMoreOrdersButton.textContent=tr("loading_more_orders");
   try{
     const {data,error}=await supabase.from("ah_orders")
-      .select("id,status,currency,total_minor,created_at,updated_at,paid_at,customer_note,ah_order_items(description_snapshot,quantity,unit_price_minor)")
+      .select("id,status,currency,total_minor,created_at,updated_at,paid_at,customer_note,ah_regions(name,city,country_code),ah_order_items(description_snapshot,quantity,unit_price_minor)")
       .eq("user_id",userId).order("created_at",{ascending:false}).range(orderOffset,orderOffset+ordersPageSize-1);
     if(activeUserId!==userId)return;
     if(error)throw error;
