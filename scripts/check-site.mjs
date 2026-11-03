@@ -46,14 +46,14 @@ assert.equal(html.split("<section").length - 1, html.split("</section>").length 
 for (const marker of ['<title>账户中心', 'id="auth-form"', 'id="auth-setup"', 'id="account-dashboard"', 'id="orders-list"', 'id="toggle-password"', 'id="account-language"', 'id="profile-form"', 'id="profile-name"', 'assets/js/language.js', 'assets/js/supabase-config.js', 'assets/js/account.js']) assert.ok(account.includes(marker), `Missing account page feature: ${marker}`);
 assert.ok(account.includes('value="zh-CN"') && account.includes('value="zh-TW"') && !/value="(?:en|ar|fr|ru|es)"/.test(account), "Account page must expose only Chinese locales");
 for (const marker of ['signInWithPassword', 'signUp', 'resetPasswordForEmail', 'signOut', '.from("ah_orders")', '.eq("user_id",userId)', 'ah_order_items(description_snapshot,quantity,unit_price_minor)', 'toggle-password', 'aria-busy', '.from("ah_profiles").update', 'applyLanguage', 'ah-language', 'messages =']) assert.ok(accountJs.includes(marker), `Missing account behavior: ${marker}`);
-assert.ok(publicConfig.includes('url: ""') && publicConfig.includes('anonKey: ""'), "Supabase browser config must start empty");
+assert.ok(/url: "https:\/\/[^"]+\.supabase\.co"/.test(publicConfig) && /anonKey: "sb_publishable_[^"]+"/.test(publicConfig), "Supabase browser config must use the project URL and a public publishable key");
 assert.ok(/service_role|secret key/i.test(publicConfig), "Public config must warn against exposing privileged keys");
 assert.ok(!accountJs.includes("service_role:") && !publicConfig.includes("service_role:"), "No service role credential may be embedded");
 for (const asset of ["favicon.svg", ".nojekyll", "robots.txt"]) assert.ok(existsSync(new URL(asset, root)), `Missing static asset: ${asset}`);
 
 for (const marker of ["create table if not exists public.ah_profiles", "create table if not exists public.ah_regions", "create table if not exists public.ah_products", "create table if not exists public.ah_plans", "create table if not exists public.ah_orders", "create table if not exists public.ah_order_items", "enable row level security", "auth.jwt()", "app_metadata", "auth.uid()"]) assert.ok(coreSql.toLowerCase().includes(marker.toLowerCase()), `Missing core database safeguard: ${marker}`);
 assert.ok(!/drop table|truncate table/i.test(coreSql), "Core migration must not drop or truncate application data");
-for (const marker of ["request_fingerprint", "security definer", "auth.role()", "service_role", "on conflict (user_id, idempotency_key)", "plan_unavailable", "region_unavailable", "v_price_minor * p_quantity", "replayed"]) assert.ok(orderSql.toLowerCase().includes(marker.toLowerCase()), `Missing secure order SQL behavior: ${marker}`);
+for (const marker of ["request_fingerprint", "security definer", "current_setting('request.jwt.claim.role'", "service_role", "on conflict (user_id, idempotency_key)", "plan_unavailable", "region_unavailable", "v_price_minor * p_quantity", "replayed"]) assert.ok(orderSql.toLowerCase().includes(marker.toLowerCase()), `Missing secure order SQL behavior: ${marker}`);
 assert.ok(!/drop table|truncate table/i.test(orderSql), "Order migration must not drop or truncate data");
 for (const marker of ["auth.getUser", "SUPABASE_SERVICE_ROLE_KEY", "ALLOWED_ORIGINS", "idempotency-key", "ah_create_order", "userData.user.id", "unexpected_request_field", "request_too_large"]) assert.ok(orderFn.includes(marker), `Missing order Edge Function behavior: ${marker}`);
 assert.ok(!["payload.user_id", "payload.price", "payload.total_minor", "payload.currency", "payload.status"].some((field) => orderFn.includes(field)), "Client must not choose user, price, currency, total, or status");
@@ -118,9 +118,9 @@ for (const marker of ['.admin-order-details', '.admin-order-detail-body', '.admi
 for (const marker of ['paid_at timestamptz', 'customer_note text']) assert.ok(paymentSql.includes(marker) || coreSql.includes(marker), `Admin order detail field missing from schema: ${marker}`);
 
 const accountHtml = account;
-const tokenPreview = read("assets/js/token-auth-preview.js");
+const tokenAuth = read("assets/js/token-auth.js");
 for (const marker of ['id="token-login-tab"', 'id="token-signup-tab"', 'id="access-token"', 'id="generate-token"', 'id="generated-token"', 'id="copy-token"', 'token-demo-warning']) assert.ok(accountHtml.includes(marker), `Missing token auth UI: ${marker}`);
-for (const marker of ['crypto.getRandomValues', 'clipboard.writeText', '令牌验证服务尚未接入']) assert.ok(tokenPreview.includes(marker), `Missing safe token preview behavior: ${marker}`);
-assert.ok(accountHtml.includes('assets/js/token-auth-preview.js'), "Token auth preview script must be loaded");
+for (const marker of ['crypto.getRandomValues', 'clipboard.writeText', 'functions/v1/token-auth', 'requestAuth("register"', 'requestAuth("login"', 'auth.setSession']) assert.ok(tokenAuth.includes(marker), `Missing server-verified token auth behavior: ${marker}`);
+assert.ok(accountHtml.includes('assets/js/token-auth.js'), "Token auth client script must be loaded");
 assert.ok(accountJs.includes('const tokenAuthPanel = document.getElementById("token-auth")') && accountJs.includes('if(tokenAuthPanel)tokenAuthPanel.hidden=true'), "Authenticated dashboard must replace the token sign-in panel");
 console.log("Checks passed: refreshed storefront, Simplified/Traditional Chinese locales, account portal, admin console, RLS schema, secure order/payment processing, and provisioning queue.");
