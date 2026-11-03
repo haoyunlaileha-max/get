@@ -49,7 +49,7 @@ The receiver verifies a timestamped HMAC-SHA256 signature in `x-ah-signature` ov
 
 ## Safe unpaid-order cancellation
 
-Migration `20261103061000_cancel_unpaid_orders_safely.sql` adds the service-role-only `ah_cancel_unpaid_order(uuid)` RPC. It locks the order, allows only `pending` and `awaiting_payment` orders to transition to `cancelled`, returns an idempotent result for an already-cancelled order, and relies on the existing once-only inventory-release trigger. It deliberately refuses paid, provisioning, active, suspended, failed, and refunded orders: those states must use dedicated payment-refund and provider-lifecycle workflows. It does not forcibly terminate a processing provisioning job; if an already-running provider request later succeeds, the existing completion fence retains the provider reference and flags reconciliation.
+Migration `20261103061000_cancel_unpaid_orders_safely.sql` introduced the service-role-only unpaid-order cancellation RPC. Migration `20261103062000_cancel_order_owner_guard.sql` replaces its one-argument signature with `ah_cancel_unpaid_order(p_order_id, p_user_id)`, locks the order, and verifies the authenticated owner in the same transaction before returning or changing any state. The `cancel-order` Edge Function requires a valid user JWT, validates it with Supabase Auth, and supplies the user ID from the verified session only; the request body accepts only `order_id`. The account portal displays the cancel action only for `pending` and `awaiting_payment` orders and refreshes the list after success. Cancellation remains idempotent and relies on the existing once-only inventory-release trigger. Paid, provisioning, active, suspended, failed, and refunded orders are refused and require dedicated payment-refund and provider-lifecycle workflows. An in-flight provider request is not forcibly terminated; a late success retains its provider reference and flags reconciliation.
 
 ## Server provisioning queue
 
@@ -105,6 +105,7 @@ After confirming the correct project:
 ```sh
 supabase link --project-ref YOUR_PROJECT_REF
 supabase functions deploy create-order
+supabase functions deploy cancel-order
 supabase functions deploy payment-webhook
 supabase functions deploy provision-worker
 ```
@@ -147,5 +148,5 @@ The `token-auth` Edge Function applies database-backed per-IP limits: at most fi
 - The storefront can load active products, plans, and regions from the Supabase catalog. Signed-in customers submit plan and region IDs to the `create-order` Edge Function; the function verifies the session and delegates to the service-role-only `ah_create_order` RPC, which derives prices from the database and reserves configured regional capacity. Successful submission creates a pending order only. The order function does not collect payment details or charge a customer. The webhook advances an order to paid only after a correctly signed normalized success event and database checks.
 - The normalized HMAC receiver is not a substitute for a provider-specific native signature adapter.
 - Refunds, disputes, chargebacks, provider API integration, audit monitoring, and order-creation abuse throttling remain future work. Token registration and login have separate database-backed per-IP limits.
-- Migrations and Edge Functions are not deployed to Supabase by this repository workflow. No secrets or project credentials are stored in this repository.
+- The owner-scoped unpaid-order cancellation migration and `cancel-order` Edge Function are deployed to the configured Supabase project. The payment webhook and provisioning worker remain source-only until provider-specific credentials and adapters are configured. No secrets or project credentials are stored in this repository.
 - The admin console is committed and Pages-deployable, but it requires migrations 0001–0005, a configured public Supabase client, and a trusted admin role before operational data is visible.
