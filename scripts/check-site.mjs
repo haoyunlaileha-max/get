@@ -88,6 +88,11 @@ for (const marker of ['id="balance"', 'ACCOUNT BALANCE', 'topup-amount', '充值
 for (const route of ['zh/vps/', 'zh/dedicated/', 'zh/rdp/', 'zh/gpu/', 'zh/domains/']) assert.ok(html.includes(route), "Missing product route: " + route);
 for (const route of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html","zh/domains/index.html","zh/account/index.html"]) assert.ok(existsSync(new URL("../" + route, import.meta.url)), "Missing localized page: " + route);
 for (const route of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html"]) { const page = read(route); assert.ok(page.includes('id="plan-list"') && page.includes('id="configure-dialog"') && page.includes('assets/js/checkout.js'), "Product page is missing live catalog checkout: " + route); }
+assert.ok(accountJs.includes('requestedMode === "signup"'), "Signup deep link must open registration mode");
+assert.ok(accountJs.includes('location.hash==="#balance"'), "Account balance deep link must scroll after login");
+const domainsPage = read("zh/domains/index.html");
+assert.equal((domainsPage.match(/<tr><td><strong>\./g) || []).length, 26, "Domain pricing table must contain 26 TLDs");
+assert.ok(domainsPage.includes('?mode=signup#auth-panel'), "Domain registration CTA must open signup mode");
 assert.ok(account.includes('id="load-more-orders"'), "Customer order load-more control must exist");
 for (const marker of ['.order-details', '.order-detail-grid', '.order-detail-toggle', '.status-failed', '.account-card{background:#fff']) assert.ok(css.includes(marker), `Missing light account/order detail styling: ${marker}`);
 for (const marker of ['customer_note text', 'description_snapshot text', 'unit_price_minor bigint']) assert.ok(coreSql.includes(marker), `Account order field is not present in the core schema: ${marker}`);
