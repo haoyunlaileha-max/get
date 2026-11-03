@@ -13,3 +13,7 @@ verify_jwt = false
 # Token authentication verifies the publishable API key and access token in the function itself.
 [functions.token-auth]
 verify_jwt = false
+
+# Customer cancellation requires a valid Supabase user JWT.
+[functions.cancel-order]
+verify_jwt = true
