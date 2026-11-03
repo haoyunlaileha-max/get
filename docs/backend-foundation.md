@@ -49,7 +49,7 @@ The receiver verifies a timestamped HMAC-SHA256 signature in `x-ah-signature` ov
 
 ## Server provisioning queue
 
-The `20261102000400_provisioning_queue.sql` migration adds a durable queue. A transition of an order to `paid` automatically inserts one job for that order; the unique order constraint prevents duplicate queue entries. The internal `provision-worker` Edge Function claims one ready job using `FOR UPDATE SKIP LOCKED`, a two-minute lease, and an incrementing attempt counter. Failed provider calls are retried with exponential backoff, capped at one hour, up to eight attempts. Exhausted jobs and their orders are marked failed. A confirmed provider response with a non-empty external ID marks the job succeeded and the order active.
+The `20261103032419_provisioning_queue.sql` migration adds a durable queue. A transition of an order to `paid` automatically inserts one job for that order; the unique order constraint prevents duplicate queue entries. The internal `provision-worker` Edge Function claims one ready job using `FOR UPDATE SKIP LOCKED`, a two-minute lease, and an incrementing attempt counter. Failed provider calls are retried with exponential backoff, capped at one hour, up to eight attempts. Exhausted jobs and their orders are marked failed. A confirmed provider response with a non-empty external ID marks the job succeeded and the order active.
 
 The worker requires a configured HTTPS provider endpoint and sends a single order payload with an order-stable `Idempotency-Key`. The provider adapter must honor that key to prevent duplicate server creation if a network timeout occurs after the provider has already accepted a request. The worker does not claim jobs when the provider is unconfigured. It does not invent success: only a provider response with `status: "provisioned"` or `"active"` and a valid `external_id` completes an order.
 
@@ -76,12 +76,12 @@ The gateway is a separate trusted service; do not set the endpoint to a user-con
 
 Apply migrations in order to the intended Anonymous Hosting Supabase project only:
 
-- `supabase/migrations/20261102000100_anonymous_hosting_core.sql`
-- `supabase/migrations/20261102000200_secure_order_creation.sql`
-- `supabase/migrations/20261102000300_payment_event_processing.sql`
-- `supabase/migrations/20261102000400_provisioning_queue.sql`
-- `supabase/migrations/20261102000500_admin_console_read_access.sql`
-- `supabase/migrations/20261102000600_plan_region_inventory.sql`
+- `supabase/migrations/20261103032042_anonymous_hosting_core.sql`
+- `supabase/migrations/20261103032407_secure_order_creation.sql`
+- `supabase/migrations/20261103032413_payment_event_processing.sql`
+- `supabase/migrations/20261103032419_provisioning_queue.sql`
+- `supabase/migrations/20261103032425_admin_console_read_access.sql`
+- `supabase/migrations/20261103032449_plan_region_inventory.sql`
 
 Configure secrets in the Supabase project, never in GitHub source:
 
@@ -109,17 +109,17 @@ This repository change does not link to, migrate, or deploy to a Supabase projec
 
 ## Plan-to-region inventory
 
-Migration `20261102000600_plan_region_inventory.sql` adds `ah_plan_regions`, an admin-managed mapping between plans and data-center regions. Each mapping has an availability switch, optional unit capacity (blank means unlimited), and a database-maintained allocated-unit count. New mappings seed allocated units from existing non-terminal orders. Order creation locks the mapping row, requires a region once a plan has any explicit region mappings, checks region and mapping availability, verifies capacity, then reserves quantity in the same transaction. Idempotent replays do not reserve twice. Moving an order to cancelled, failed, or refunded releases its reservation once; active and suspended services remain allocated. Plans with no mappings retain the legacy region behavior until an administrator configures their first mapping.
+Migration `20261103032449_plan_region_inventory.sql` adds `ah_plan_regions`, an admin-managed mapping between plans and data-center regions. Each mapping has an availability switch, optional unit capacity (blank means unlimited), and a database-maintained allocated-unit count. New mappings seed allocated units from existing non-terminal orders. Order creation locks the mapping row, requires a region once a plan has any explicit region mappings, checks region and mapping availability, verifies capacity, then reserves quantity in the same transaction. Idempotent replays do not reserve twice. Moving an order to cancelled, failed, or refunded releases its reservation once; active and suspended services remain allocated. Plans with no mappings retain the legacy region behavior until an administrator configures their first mapping.
 
 ## Admin operations console
 
-The static `admin.html` page is a browser-only operations interface. It verifies the current user with Supabase Auth and requires the verified JWT `app_metadata.role = admin`. The UI check is only a convenience gate: the database remains authoritative through admin RLS policies. Migration `20261102000500_admin_console_read_access.sql` grants authenticated users SELECT privileges on payment and provisioning records but adds RLS policies that return rows only when `ah_is_admin()` is true. Existing RLS policies already restrict product, plan, and region mutations to the same verified admin role.
+The static `admin.html` page is a browser-only operations interface. It verifies the current user with Supabase Auth and requires the verified JWT `app_metadata.role = admin`. The UI check is only a convenience gate: the database remains authoritative through admin RLS policies. Migration `20261103032425_admin_console_read_access.sql` grants authenticated users SELECT privileges on payment and provisioning records but adds RLS policies that return rows only when `ah_is_admin()` is true. Existing RLS policies already restrict product, plan, and region mutations to the same verified admin role.
 
 The console provides exact count metrics, recent order history, recent payment-event records, provisioning job state, product/plan activation toggles, region availability controls, admin-only product/plan create/edit forms, and plan-to-region inventory assignments. Product fields include slug, category, description and sort order. Plan fields include product association, unique code, price in major currency units (converted to integer minor units), currency, billing period, JSON specifications (CPU, RAM, storage, bandwidth, OS options), sort order and publication state. New records default to inactive; existing prices change only when an administrator explicitly edits and saves that plan. The browser validates inputs and database RLS remains authoritative. The console still does not expose direct order status changes, manual payment marking, provider credentials, or destructive operations. Configure only the public Supabase URL and anon/publishable key in `assets/js/supabase-config.js`; never place a service-role key in the browser. Admin users must be assigned `app_metadata.role = admin` by a trusted project administrator through the Supabase Auth Admin API or Dashboard; ordinary users must not be able to set this field themselves.
 
 ### Admin rollout
 
-Apply migration `20261102000500_admin_console_read_access.sql` after migrations 0001–0004, then apply `20261102000600_plan_region_inventory.sql` to enable plan-region capacity management. Once the intended Supabase project is configured and the trusted administrator role is assigned, open `/admin.html`. The console will remain unavailable until the migrations, public browser configuration, and admin role are correctly set up.
+Apply migration `20261103032425_admin_console_read_access.sql` after migrations 0001–0004, then apply `20261103032449_plan_region_inventory.sql` to enable plan-region capacity management. Once the intended Supabase project is configured and the trusted administrator role is assigned, open `/admin.html`. The console will remain unavailable until the migrations, public browser configuration, and admin role are correctly set up.
 
 ## Row-level security
 
