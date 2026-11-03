@@ -88,7 +88,7 @@ assert.ok(adminHtml.includes('data-i="order_details"') && adminHtml.includes('<t
 for (const marker of ['id="orders-filter"', 'id="order-search"', 'id="order-status-filter"', 'id="orders-prev"', 'id="orders-next"']) assert.ok(adminHtml.includes(marker), `Missing admin order filter control: ${marker}`);
 assert.ok(adminHtml.includes('id="export-orders"'), "Admin order export control must exist");
 for (const marker of ["async function exportOrders()", "exportLimit = 5000", "URL.createObjectURL", "csvCell", "orders_export_limit"]) assert.ok(adminJs.includes(marker), "Missing safe order CSV export behavior: " + marker);
-assert.ok(adminJs.includes(String.raw`/^[\s]*[=+@\-]/`), "CSV export must neutralize spreadsheet formula prefixes");
+assert.ok(adminJs.includes(String.raw`/^\s*[=+@\-]/`), "CSV export must neutralize spreadsheet formula prefixes");
 for (const marker of ['orderPageSize = 20', 'ordersQuery.range', 'ordersQuery.or', 'ordersQuery.eq("status", orderStatus)', 'renderOrderPagination', 'search_invalid']) assert.ok(adminJs.includes(marker), `Missing admin order search/pagination behavior: ${marker}`);
 for (const marker of ['.admin-orders-toolbar', '.admin-orders-pagination']) assert.ok(css.includes(marker), `Missing admin order filter styling: ${marker}`);
 for (const marker of ['.admin-order-details', '.admin-order-detail-body', '.admin-order-items']) assert.ok(css.includes(marker), `Missing admin order detail styling: ${marker}`);
