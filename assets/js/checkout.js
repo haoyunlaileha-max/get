@@ -220,6 +220,7 @@
           if (!response.ok) {
             const messages = {
               asset_monitoring_unavailable:"该网络的自动到账监听尚未启用，系统暂不开放此网络收款，避免转账后无法自动识别。",
+              asset_contract_unverified:"GRAM 的 TON Jetton 合约地址尚未核验，暂不开放收款。",
               market_rate_unavailable:"暂时无法取得可靠 USDT 实时汇率，请稍后重试。",
               order_not_payable:"此订单当前不可支付。",
               order_must_be_priced_in_usdt:"订单必须使用 USDT 计价。"
