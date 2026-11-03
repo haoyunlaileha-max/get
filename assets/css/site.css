@@ -166,3 +166,6 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 .token-auth-message{margin-top:16px}
 .legacy-auth-panel{display:none!important}
 @media(max-width:520px){.account-wrap{margin:28px auto 55px}.account-card{padding:23px 19px}.token-result-row{align-items:stretch}.token-result-row .btn{padding:0 10px}}
+
+.account-page #auth-setup{display:none!important}
+.account-page .legacy-auth-panel{display:none!important}
