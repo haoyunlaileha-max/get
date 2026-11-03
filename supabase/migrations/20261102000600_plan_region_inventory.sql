@@ -29,7 +29,8 @@ alter table public.ah_orders
 create or replace function public.ah_plan_regions_set_updated_at()
 returns trigger
 language plpgsql
-as $$
+set search_path = pg_catalog
+as $
 begin
   new.updated_at = now();
   return new;
@@ -146,7 +147,7 @@ declare
   v_region_map public.ah_plan_regions%rowtype;
   v_has_region_rules boolean := false;
 begin
-  if coalesce(auth.role(), '') <> 'service_role' then
+  if coalesce(current_setting('request.jwt.claim.role', true), '') <> 'service_role' then
     raise exception 'not_authorized' using errcode = '42501';
   end if;
 
@@ -294,5 +295,10 @@ $$;
 
 revoke all on function public.ah_create_order(uuid, uuid, uuid, integer, text, text) from public, anon, authenticated;
 grant execute on function public.ah_create_order(uuid, uuid, uuid, integer, text, text) to service_role;
+
+
+-- These privileged helpers are invoked only by database triggers.
+revoke all on function public.ah_plan_regions_seed_allocations() from public, anon, authenticated;
+revoke all on function public.ah_release_order_inventory() from public, anon, authenticated;
 
 commit;
