@@ -51,7 +51,7 @@ function fillPlanEditor(plan) {
   const form = $("plan-editor"); form.reset();
   const productSelect = $("plan-product");
   productSelect.value = plan?.product_id || productSelect.options[0]?.value || "";
-  for (const key of ["id","name","code","currency","billing_period","description","sort_order"]) form.elements.namedItem(key).value = plan?.[key] ?? ({currency:"USD",billing_period:"monthly",sort_order:0}[key] ?? "");
+  for (const key of ["id","name","code","currency","billing_period","description","sort_order"]) form.elements.namedItem(key).value = plan?.[key] ?? ({currency:"USDT",billing_period:"monthly",sort_order:0}[key] ?? "");
   form.elements.price.value = plan ? (Number(plan.price_minor)/100).toFixed(2) : "0.00";
   form.elements.specs.value = JSON.stringify(plan?.specs || {cpu:"2 vCPU",ram:"4 GB",storage:"80 GB NVMe",bandwidth:"4 TB",os_options:["Ubuntu 24.04","Debian 12"]},null,2);
   form.elements.is_active.checked = Boolean(plan?.is_active);
@@ -74,8 +74,8 @@ async function saveCatalog(form, table) {
     let specs;
     try { specs=JSON.parse(values.specs); } catch { show(nodes.error,editorTr("invalid_specs")); return; }
     if (!specs || Array.isArray(specs) || typeof specs!=="object") { show(nodes.error,editorTr("invalid_specs")); return; }
-    const price=Number(values.price); const priceMinor=Math.round(price*100); const currency=values.currency.trim().toUpperCase();
-    if (!Number.isFinite(price)||price<0||priceMinor>Number.MAX_SAFE_INTEGER||!/^[A-Z]{3}$/.test(currency)||!Number.isSafeInteger(Number(values.sort_order))||Number(values.sort_order)<0) { show(nodes.error,editorTr("save_failed")); return; }
+    const price=Number(values.price); const priceMinor=Math.round(price*100); const currency="USDT";
+    if (!Number.isFinite(price)||price<0||priceMinor>Number.MAX_SAFE_INTEGER||currency!=="USDT"||!Number.isSafeInteger(Number(values.sort_order))||Number(values.sort_order)<0) { show(nodes.error,editorTr("save_failed")); return; }
     payload={product_id:values.product_id,name:values.name.trim(),code:values.code.trim(),description:values.description.trim()||null,price_minor:priceMinor,currency,billing_period:values.billing_period,specs,sort_order:Number(values.sort_order||0),is_active:form.elements.is_active.checked};
     if(!/^[A-Za-z0-9_-]+$/.test(payload.code)||!payload.product_id) { show(nodes.error,editorTr("save_failed")); return; }
   }
@@ -86,7 +86,7 @@ async function saveCatalog(form, table) {
     if(error) throw error;
     show(nodes.success,editorTr("saved")); form.reset();
     if(table==="ah_products") form.elements.sort_order.value="0";
-    if(table==="ah_plans") { form.elements.currency.value="USD"; form.elements.price.value="0"; form.elements.sort_order.value="0"; }
+    if(table==="ah_plans") { form.elements.currency.value="USDT"; form.elements.price.value="0"; form.elements.sort_order.value="0"; }
     busy=false; await loadDashboard();
   } catch {
     show(nodes.error,editorTr("save_failed"));
