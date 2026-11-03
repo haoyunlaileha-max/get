@@ -79,8 +79,28 @@ Deno.serve(async (request: Request) => {
 
   let payload: Record<string, unknown>;
   try {
-    const raw = await request.arrayBuffer();
-    if (raw.byteLength > 4096) return json(413, { error: "request_too_large" }, origin);
+    // Read incrementally so a missing or dishonest Content-Length cannot force
+    // an unbounded allocation before the request-size check.
+    const reader = request.body?.getReader();
+    if (!reader) return json(400, { error: "invalid_json" }, origin);
+    const chunks: Uint8Array[] = [];
+    let totalBytes = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      totalBytes += value.byteLength;
+      if (totalBytes > 4096) {
+        await reader.cancel();
+        return json(413, { error: "request_too_large" }, origin);
+      }
+      chunks.push(value);
+    }
+    const raw = new Uint8Array(totalBytes);
+    let offset = 0;
+    for (const chunk of chunks) {
+      raw.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
     const parsed: unknown = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(raw));
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
       return json(400, { error: "invalid_request" }, origin);
