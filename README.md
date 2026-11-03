@@ -1,17 +1,24 @@
 # Anonymous Hosting
 
-A responsive, Chinese-language hosting storefront prototype for the **Anonymous Hosting** brand.
+A responsive, Chinese-language storefront and customer portal prototype for the **Anonymous Hosting** brand.
 
-## Current prototype
+## Current application
 
-- Responsive landing page for desktop and mobile
-- Simplified Chinese and Traditional Chinese interface, with language preference saved in browser local storage
-- Reference-inspired hosting storefront information architecture with an original Anonymous Hosting logo
-- Linux VPS, Dedicated Server, Windows RDP, GPU Compute, and Domains product categories with demo plans and filtering
-- Supabase-backed live catalog and authenticated pending-order submission when the public client configuration and trusted Edge Function are deployed; demo-only fallback when not configured
-- Customer account portal with Supabase email/password sign-in, registration, password reset, profile editing, and user-scoped order history
-- Admin operations console for orders, payment events, provisioning queue, product/plan creation and editing (including pricing/specifications), activation, region availability, and per-plan data-center capacity assignments (verified admin role + RLS required)
-- Modular static frontend with no bundler requirement
+- Responsive storefront with Simplified Chinese and Traditional Chinese interfaces.
+- Product categories for Linux VPS, Dedicated Servers, Windows RDP, GPU Compute, and Domains.
+- Product pages support catalog-driven plans, region selection, and a secure checkout handoff.
+- Customer access uses generated private tokens. Registration creates a Supabase Auth identity; the token is shown once and must be stored safely by the customer.
+- The customer portal uses the resulting Supabase session for profile management and user-scoped order history.
+- The operations console supports orders, payment events, provisioning jobs, catalog editing, regions, and per-plan inventory. Access requires a trusted `app_metadata.role = admin` claim and matching database RLS policies.
+- Static frontend; no bundler is required.
+
+## Live deployment status
+
+The GitHub Pages storefront and account portal are deployed. The connected Supabase project has the `ah_*` schema and currently has the `token-auth` and `create-order` Edge Functions active.
+
+The live catalog tables `ah_products`, `ah_plans`, and `ah_regions` are currently empty. Therefore, the site is not yet ready to accept real customer orders. Only publish genuine products, prices, specifications, and data-center availability after confirming the actual hosting supply and commercial terms.
+
+The payment webhook and provisioning worker exist in source but are not deployed. Real payments and automatic server provisioning are not enabled.
 
 ## Run locally
 
@@ -19,26 +26,26 @@ Open `index.html` in a modern browser, or serve this directory with any static w
 
 ## Automated checks and deployment
 
-Every push to `main` runs `node scripts/check-site.mjs`. GitHub Pages deployment is handled separately by `.github/workflows/deploy.yml`.
+Every push to `main` runs `node scripts/check-site.mjs`. GitHub Pages deployment is handled by `.github/workflows/deploy.yml`.
 
-## Backend foundation and deployment boundary
+## Backend architecture and deployment boundary
 
-The additive Supabase schema is namespaced under `ah_*` and does not modify unrelated application tables. Read `docs/backend-foundation.md` before applying migrations.
+The additive Supabase schema is namespaced under `ah_*` and does not modify unrelated application tables. Review `docs/backend-foundation.md` before changing the database or deploying backend functions.
 
+- `supabase/functions/token-auth` creates and verifies token-based customer credentials with server-side rate limiting.
 - `supabase/functions/create-order` verifies customer identity and creates pending orders using database-authoritative prices and idempotency.
-- `supabase/functions/payment-webhook` verifies a timestamped HMAC-signed normalized success event and advances a payable order to `paid` only after database checks.
+- `supabase/functions/payment-webhook` is a provider-neutral, timestamped HMAC-signed normalized success-event receiver. It is not a ready-made Stripe/PayPal integration; a provider-specific adapter with native signature verification is required.
 - `supabase/functions/provision-worker` claims paid-order jobs from a durable queue, calls a configured HTTPS provisioning gateway with an order-stable idempotency key, and marks orders active only after a valid provider confirmation.
-- Provisioning failures use leased retries with exponential backoff and a bounded attempt count; no provider means no job is claimed.
+- Provisioning failures use leased retries with exponential backoff and a bounded attempt count.
 - Payment event records are idempotent and protected from browser roles.
-- The webhook is a normalized receiver, **not** a ready-made Stripe/PayPal integration. A provider-specific adapter with native signature verification is required before connecting a real provider.
-- `admin.html` is a protected operations UI; database RLS remains the actual access boundary. Migration 0006 adds plan-region availability and transactional capacity reservations during order creation.
-- No Supabase migration or Edge Function is deployed automatically. No payment, worker, provider, or service-role secrets are stored in this repository.
-- Payments, refunds, disputes, and server provisioning are not live features.
+- `admin.html` is a protected operations UI; database RLS is the actual access boundary. Plan-region capacity is reserved transactionally during order creation.
+- No service-role credentials, payment secrets, or provider API tokens belong in browser code or Git history.
+- Before enabling payment or provisioning, configure real provider credentials, deploy the relevant functions, and test the complete lifecycle in the provider's sandbox.
 
-## Prototype notes
+## Prototype and operational notes
 
-Prices, server specifications, and data-center locations are illustrative. The local plan configurator does not create orders, collect personal data, contact a provider, or accept payments. The account portal remains disconnected until the public Supabase URL/key are configured in `assets/js/supabase-config.js`; never put a service-role key in browser code.
+Any remaining demo plans or marketing prices shown in static storefront content are illustrative and must not be treated as an offer until reconciled with the live catalog. The local configurator does not itself contact a provider or accept payment. Never place a Supabase service-role or secret key in `assets/js/supabase-config.js`.
 
 ## Brand direction
 
-Dark teal surfaces, mint-green accents, a custom AH-inspired geometric mark, and a privacy-first positioning. The storefront structure is informed by common hosting-provider patterns and the AnonPort reference, while all branding, copy, and visual assets remain original.
+Dark teal surfaces, mint-green accents, a custom AH-inspired geometric mark, and a privacy-first positioning. The storefront structure follows familiar hosting-provider patterns while all branding, copy, and visual assets remain original.
