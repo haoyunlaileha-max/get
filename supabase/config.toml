@@ -21,3 +21,6 @@ verify_jwt = true
 # Authenticated customer endpoint for USDT-denominated direct-wallet invoices.
 [functions.create-crypto-invoice]
 verify_jwt = true
+
+[functions.telegram-dispatch]
+verify_jwt = false
