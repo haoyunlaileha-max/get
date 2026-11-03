@@ -27,7 +27,7 @@ The GitHub Pages storefront, account portal, localized product pages, and admin 
 | `cancel-order` | 4 | Safe cancellation of eligible unpaid orders |
 | `create-crypto-invoice` | 8 | Authenticated crypto invoice quotes and invoice creation |
 | `crypto-listener` | 2 | Authenticated chain-transfer verification and idempotent settlement |
-| `crypto-scanner` | 3 | Minute-scheduled mainnet scanning for BTC, LTC, ETH, ERC-20 USDT, BNB and SOL |
+| `crypto-scanner` | 4 | Minute-scheduled mainnet scanning for BTC, LTC, ETH, ERC-20 USDT, BNB, SOL, TRX, TRC-20 USDT and native GRAM |
 | `telegram-dispatch` | 6 | Private Telegram notification outbox delivery |
 
 The payment webhook and provisioning worker are present in source but are not deployed as active Edge Functions. No payment-provider adapter or hosting-provisioning gateway is currently live.
@@ -36,9 +36,9 @@ The payment webhook and provisioning worker are present in source but are not de
 
 - The live catalog tables `ah_products`, `ah_plans`, and `ah_regions` are empty. The storefront is deployed, but it is not ready to accept real hosting orders until genuine products, prices, specifications, and data-center availability are entered.
 - Nine crypto assets are configured: BTC, ETH, USDT ERC-20, USDT TRC-20, LTC, TRX, SOL, BNB BEP-20, and GRAM on TON. XMR is excluded.
-- BTC, LTC, ETH, USDT ERC-20, BNB and SOL scanners are enabled; TRON and TON remain disabled pending provider configuration with `listener_status = awaiting_provider`. The invoice endpoint refuses to issue a payment address while the selected chain listener is offline.
+- BTC, LTC, ETH, USDT ERC-20, BNB, SOL, TRX, USDT TRC-20 and native GRAM scanners are enabled; provider failures automatically mark the affected asset degraded and prevent new invoices until recovery.
 - Telegram notification delivery is deployed and its test message was verified. A Vault-authenticated Cron job runs the dispatcher every minute, but it only processes notification events already written to the outbox; it does not scan blockchains.
-- The GRAM Jetton master contract and a matching GRAM market-rate source have not been verified. GRAM invoice creation is intentionally blocked rather than substituting native TON pricing.
+- The native TON coin is now displayed as GRAM. The existing TON asset code and wallet address remain unchanged; the invoice quote uses the GRAM/USDT market symbol. No separate GRAM Jetton is accepted.
 - Mainnet scanning and automatic on-chain settlement are deployed for BTC, LTC, ETH, USDT ERC-20, BNB and SOL. No external payment-provider webhook integration or automatic hosting provisioning should be represented as live. A real customer deposit has not yet been used for end-to-end acceptance testing.
 
 See [the crypto payment deployment notes](docs/crypto-payment-foundation.md) and [the backend foundation](docs/backend-foundation.md) for the implementation boundary and safeguards.
