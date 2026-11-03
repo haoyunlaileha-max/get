@@ -95,3 +95,15 @@ body{background:#fff;color:#17231f}
 .admin-order-items li strong,.admin-order-items li span{display:block}
 .admin-order-items li small{display:block;margin-top:4px;color:#738078;white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:640px){.admin-order-details{max-width:260px}.admin-order-detail-body{min-width:220px}}
+
+/* Admin order search, status filters and server-side pagination. */
+.admin-orders-toolbar{display:flex;align-items:end;gap:10px;flex-wrap:wrap;margin:14px 0}
+.admin-orders-toolbar label{display:grid;gap:5px;color:#66736b;font-size:11px}
+.admin-order-search{flex:1 1 260px;min-width:210px}
+.admin-order-status{flex:0 1 180px;min-width:150px}
+.admin-orders-toolbar input,.admin-orders-toolbar select{width:100%;min-height:40px;padding:9px 11px;border:1px solid #dce6df;border-radius:8px;background:#fff;color:#26372e;font:inherit}
+.admin-orders-toolbar input:focus,.admin-orders-toolbar select:focus{outline:2px solid #16865a33;border-color:#16865a}
+.admin-orders-pagination{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:4px 0 12px;color:#68766f;font-size:12px}
+.admin-orders-pagination>div{display:flex;gap:7px}
+.admin-orders-pagination button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:520px){.admin-orders-toolbar>*{flex:1 1 100%}.admin-orders-pagination{align-items:flex-start;flex-direction:column}}
