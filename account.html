@@ -2,7 +2,7 @@
 <html lang="zh-CN" dir="ltr">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#071c1b"><meta name="description" content="Sign in to your Anonymous Hosting customer account.">
+<meta name="theme-color" content="#ffffff"><meta name="description" content="Sign in to your Anonymous Hosting customer account.">
 <title>账户中心 — Anonymous Hosting</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/css/site.css">
@@ -36,6 +36,10 @@
     </section>
     <section id="account-dashboard" hidden>
       <div class="account-user"><span class="account-avatar" aria-hidden="true">A</span><div><strong id="account-email"></strong><small data-i="authenticated">Authenticated customer</small></div></div>
+      <section class="account-balance" id="balance">
+        <div><div class="kicker">ACCOUNT BALANCE / 账户余额</div><h2 class="account-section-title">账户余额</h2><p class="account-balance-value">— <small>余额数据尚未接入</small></p><p class="account-inline-state">充值与余额扣款服务正在接入中。当前不会创建虚假充值记录或收取款项。</p></div>
+        <div class="account-topup"><label for="topup-amount">充值金额（USD）</label><select id="topup-amount" disabled><option>选择充值金额</option><option>10</option><option>25</option><option>50</option><option>100</option><option>250</option></select><label for="topup-method">支付方式</label><select id="topup-method" disabled><option>支付渠道尚未开放</option><option>Bitcoin (BTC)</option><option>Monero (XMR)</option><option>USDT</option></select><button class="btn btn-primary" type="button" disabled>充值通道尚未开放</button></div>
+      </section>
       <section class="account-profile">
         <h2 class="account-section-title" data-i="profile_title">Profile</h2>
         <form id="profile-form">
