@@ -81,6 +81,14 @@ for (const marker of ["requires_reconciliation", "reconciliation_required"]) ass
 const cancelMigration = readFileSync("supabase/migrations/20261103061000_cancel_unpaid_orders_safely.sql", "utf8");
 for (const marker of ["ah_cancel_unpaid_order", "service_role", "pending", "awaiting_payment", "order_requires_payment_or_provider_workflow", "for update", "inventory_released_at"]) assert.ok(cancelMigration.includes(marker), "Missing safe unpaid-order cancellation guard: " + marker);
 assert.ok(cancelMigration.includes("revoke all on function public.ah_cancel_unpaid_order(uuid) from public, anon, authenticated"), "Cancellation RPC must not be callable by browser roles");
+const cancelOwnerSql = readFileSync("supabase/migrations/20261103062000_cancel_order_owner_guard.sql", "utf8");
+const cancelFn = readFileSync("supabase/functions/cancel-order/index.ts", "utf8");
+for (const marker of ["ah_cancel_unpaid_order", "p_order_id uuid", "p_user_id uuid", "user_id = p_user_id", "for update", "order_not_found", "pending", "awaiting_payment", "service_role", "revoke all on function public.ah_cancel_unpaid_order(uuid, uuid) from public, anon, authenticated"]) assert.ok(cancelOwnerSql.toLowerCase().includes(marker.toLowerCase()), "Missing owner-scoped cancellation database guard: " + marker);
+for (const marker of ["auth.getUser(tokenMatch[1])", "p_order_id: orderId", "p_user_id: userData.user.id", "unexpected_request_field", "MAX_BODY_BYTES", "request.body?.getReader()", "ALLOWED_ORIGINS", "SUPABASE_SERVICE_ROLE_KEY", "order_not_cancellable"]) assert.ok(cancelFn.includes(marker), "Missing authenticated cancellation Edge Function safeguard: " + marker);
+assert.ok(!cancelFn.includes("payload.user_id"), "Cancellation endpoint must never trust a client-supplied user ID");
+assert.ok(supabaseConfig.includes("[functions.cancel-order]") && supabaseConfig.includes("verify_jwt = true"), "Customer cancellation must require a valid JWT");
+for (const marker of ['orderCancellationMessages', 'cancel_order_confirm', 'cancelOrder(order.id,cancelButton)', 'functions.invoke("cancel-order"', 'body:{order_id:orderId}', 'order.status==="pending"', 'order.status==="awaiting_payment"']) assert.ok(accountJs.includes(marker), "Missing customer cancellation UI behavior: " + marker);
+for (const localeCode of ["en:", "zh:", "ar:", "fr:", "ru:", "es:"]) assert.ok(accountJs.includes(localeCode), "Missing cancellation locale: " + localeCode);
 
 for (const marker of ['function renderReconciliation(rows, total)', 'reconciliationJobs.count', '.eq("requires_reconciliation", true)', 'reconciliation-count', 'reconciliation_overflow']) assert.ok(adminJs.includes(marker), "Missing complete provisioning reconciliation view: " + marker);
 assert.ok(adminHtml.includes('id="reconciliation-list"') && adminHtml.includes('data-i="reconciliation_title"'), "Admin console must expose a dedicated reconciliation panel");
