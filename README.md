@@ -38,7 +38,7 @@ The payment webhook and provisioning worker are present in source but are not de
 - Nine crypto assets are configured: BTC, ETH, USDT ERC-20, USDT TRC-20, LTC, TRX, SOL, BNB BEP-20, and GRAM on TON. XMR is excluded.
 - BTC, LTC, ETH, USDT ERC-20, BNB, SOL, TRX, USDT TRC-20 and native GRAM scanners are enabled; provider failures automatically mark the affected asset degraded and prevent new invoices until recovery.
 - Telegram notification delivery is deployed and its test message was verified. A Vault-authenticated Cron job runs the dispatcher every minute, but it only processes notification events already written to the outbox; it does not scan blockchains.
-- The native TON coin is now displayed as GRAM. The existing TON asset code and wallet address remain unchanged; the invoice quote uses the GRAM/USDT market symbol. No separate GRAM Jetton is accepted.
+- The native TON coin is now displayed as GRAM. The existing TON asset code and wallet address remain unchanged; the invoice quote uses the GRAM/USDT market symbol. No separate GRAM Jetton is accepted. Assets without a configured or healthy chain provider remain `awaiting_provider` or `degraded` and cannot issue invoices.
 - Mainnet scanning and automatic on-chain settlement are deployed for BTC, LTC, ETH, USDT ERC-20, BNB and SOL. No external payment-provider webhook integration or automatic hosting provisioning should be represented as live. A real customer deposit has not yet been used for end-to-end acceptance testing.
 
 See [the crypto payment deployment notes](docs/crypto-payment-foundation.md) and [the backend foundation](docs/backend-foundation.md) for the implementation boundary and safeguards.
