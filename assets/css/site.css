@@ -129,3 +129,40 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 /* Responsive product navigation and light checkout dialog */
 .config-dialog{background:#fff!important;color:#17212b!important;border:1px solid #e5e7eb!important}.config-dialog label{color:#475467!important}.config-dialog select{background:#fff!important;border:1px solid #d0d5dd!important;color:#17212b!important}.config-close{background:#fff!important;color:#344054!important;border-color:#d0d5dd!important}.config-disclaimer{color:#667085!important}.config-summary{background:#f8faf9!important;border-color:#d0d5dd!important;color:#344054!important}
 @media(max-width:640px){.product-page .nav{gap:12px;overflow:hidden}.product-page .brand{font-size:13px;white-space:nowrap;gap:6px}.product-page .brand-mark{width:27px;height:27px}.product-page .links{display:flex!important;position:static!important;flex:1;min-width:0;overflow-x:auto;white-space:nowrap;padding:0 0 5px;background:transparent!important;border:0!important;flex-direction:row!important;gap:13px!important;font-size:11px}.product-page .navright{display:none}}
+
+
+/* Token-first sign-in and registration experience */
+.account-wrap{width:min(500px,calc(100% - 32px));margin:54px auto 86px}
+.account-card{padding:clamp(24px,5vw,38px)}
+.token-auth-heading .kicker{font-size:10px;letter-spacing:1.4px;color:#16865f;font-weight:700}
+.token-auth-heading .account-title{font-size:clamp(30px,5vw,38px);letter-spacing:-1.2px;margin:12px 0 5px}
+.token-auth-heading .account-lead{font-size:14px;margin-bottom:22px}
+.token-tabs{margin:0 0 24px;padding:4px;background:#f4f7f5;border:1px solid #e5ebe7;border-radius:11px;gap:4px}
+.token-tabs .account-tab{border:0;background:transparent;border-radius:8px;padding:11px;color:#66756d;font-size:13px;font-weight:650}
+.token-tabs .account-tab.active{background:#fff;color:#176b49;box-shadow:0 1px 4px #172b1e14}
+.token-panel label{display:block;margin:0 0 8px;color:#34433b;font-size:13px;font-weight:650}
+.token-panel input{width:100%;min-width:0;min-height:48px;padding:13px 14px;border:1px solid #d6dfd9;border-radius:9px;background:#fff;color:#17231e;font:14px ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.4px}
+.token-panel input:focus{outline:3px solid #16865f1c;border-color:#16865f}
+.token-panel input::placeholder{color:#a0aaa4;letter-spacing:1px}
+.token-help,.token-switch-copy{font-size:12px;color:#77847d}
+.token-help{margin:9px 0 0}
+.token-panel .account-submit{margin-top:20px;min-height:46px}
+.token-switch-copy{text-align:center;margin:18px 0 0}
+.token-switch-copy .account-link-button{display:inline;margin:0;padding:0;font-size:12px;font-weight:650}
+.token-signup-title{font-size:25px;letter-spacing:-.6px;margin:0 0 4px;color:#17231e}
+.token-signup-lead{margin:0 0 14px;color:#16865f;font-size:13px;font-weight:650}
+.token-description{font-size:13px;line-height:1.85;color:#65736b;margin:0 0 20px}
+.token-steps{list-style:none;padding:0;margin:0;display:grid;gap:15px}
+.token-steps li{display:flex;align-items:flex-start;gap:12px}
+.token-steps li>span{width:27px;height:27px;flex:none;display:grid;place-items:center;border-radius:50%;background:#eaf5ef;color:#14784f;font-size:12px;font-weight:750}
+.token-steps strong,.token-steps small{display:block}
+.token-steps strong{font-size:13px;color:#26352d;margin:1px 0 3px}
+.token-steps small{font-size:11px;color:#7a877f;line-height:1.6}
+.token-result{margin-top:17px;padding:15px;border:1px solid #d7e9de;border-radius:11px;background:#f5faf7}
+.token-result-row{display:flex;gap:8px;align-items:center}
+.token-result-row input{flex:1;min-width:0}
+.token-result-row .btn{flex:none;min-height:44px;padding:0 13px}
+.token-demo-warning{margin:10px 0 0;color:#8a5b22;font-size:11px;line-height:1.65}
+.token-auth-message{margin-top:16px}
+.legacy-auth-panel{display:none!important}
+@media(max-width:520px){.account-wrap{margin:28px auto 55px}.account-card{padding:23px 19px}.token-result-row{align-items:stretch}.token-result-row .btn{padding:0 10px}}
