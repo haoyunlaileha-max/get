@@ -33,7 +33,7 @@ assert.ok(!/<script>/.test(html), "Application JavaScript must live in the exter
 for (const marker of ["--bg:", ".config-dialog", ".mobile-menu", ".account-card", ".account-password-field", ".order-items", ".account-profile", ".account-language", "@media(max-width:640px)"]) assert.ok(css.includes(marker), `Missing stylesheet feature: ${marker}`);
 for (const marker of ["function applyLanguage", "localStorage.setItem", "configureDialog.showModal()", "配置预览", "function filterPlans"]) assert.ok(js.includes(marker), `Missing application behavior: ${marker}`);
 for (const marker of ["window.AH_CHECKOUT?.ready", "window.AH_CHECKOUT.submit"]) assert.ok(js.includes(marker), `Missing checkout handoff: ${marker}`);
-for (const marker of ["functions/v1/create-order", "Idempotency-Key", "ah_products", "ah_regions", "ah_plans", "plan_id", "region_id", "auth.getSession", "payment and server provisioning are not enabled"]) assert.ok(checkoutJs.includes(marker), `Missing checkout integration: ${marker}`);
+for (const marker of ["functions/v1/create-order", "Idempotency-Key", "ah_products", "ah_regions", "ah_plans", "plan_id", "region_id", "auth.getSession", "支付与服务器开通尚未启用"]) assert.ok(checkoutJs.includes(marker), `Missing checkout integration: ${marker}`);
 for (const marker of ["zh-TW", "zh-CN", "const normalize", "const text", "function apply", "traditional", "simplified"]) assert.ok(localeJs.includes(marker), `Missing Chinese locale behavior: ${marker}`);
 for (const category of ["vps", "dedicated", "rdp", "gpu", "domains"]) assert.ok(html.includes(`data-type="${category}"`), `Missing plan category: ${category}`);
 assert.equal((html.match(/data-type="[^"]+"/g) || []).length, 6, "Expected six demo plan cards");
