@@ -79,6 +79,8 @@ for (const marker of ['createClient', 'auth.getUser()', 'user.app_metadata?.role
 assert.ok(!/service_role|SUPABASE_SERVICE_ROLE_KEY/i.test(adminJs + adminHtml), "Admin browser code must not contain service-role credentials");
 for (const marker of ["admin.html", "20261102000500_admin_console_read_access.sql", "20261102000600_plan_region_inventory.sql", "plan-region", "capacity", "app_metadata", "admin RLS", "admin console"]) assert.ok(backendDocs.toLowerCase().includes(marker.toLowerCase()), `Missing admin deployment documentation: ${marker}`);
 for (const marker of ['paid_at', 'customer_note', 'ah_order_items(description_snapshot,quantity,unit_price_minor)', 'orderStatusLabels', 'renderOrderCard', '查看订单详情', 'active:"运行中"', '付款确认时间']) assert.ok(accountJs.includes(marker), `Missing customer order detail behavior: ${marker}`);
+for (const marker of ["loadMoreOrders", "ordersPageSize = 20", ".range(orderOffset,orderOffset+ordersPageSize-1)", "orders_more_error"]) assert.ok(accountJs.includes(marker), "Missing customer order pagination: " + marker);
+assert.ok(accountHtml.includes('id="load-more-orders"'), "Customer order load-more control must exist");
 for (const marker of ['.order-details', '.order-detail-grid', '.order-detail-toggle', '.status-failed', '.account-card{background:#fff']) assert.ok(css.includes(marker), `Missing light account/order detail styling: ${marker}`);
 for (const marker of ['customer_note text', 'description_snapshot text', 'unit_price_minor bigint']) assert.ok(coreSql.includes(marker), `Account order field is not present in the core schema: ${marker}`);
 assert.ok(paymentSql.includes('paid_at timestamptz'), 'Payment confirmation timestamp must come from the payment migration');
