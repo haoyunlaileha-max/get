@@ -21,6 +21,7 @@ const inventorySql = read("supabase/migrations/20261103032449_plan_region_invent
 const rateLimitCleanupSql = read("supabase/migrations/20261103043218_cleanup_token_auth_rate_limits.sql");
 const orderAclSql = read("supabase/migrations/20261103052132_lock_down_order_mutations.sql");
 const leaseFenceSql = read("supabase/migrations/20261103052950_fence_provisioning_job_leases.sql");
+const provisioningStateSql = read("supabase/migrations/20261103054000_fence_order_state_during_provisioning.sql");
 const adminHtml = read("admin.html");
 const adminJs = read("assets/js/admin.js");
 const orderFn = read("supabase/functions/create-order/index.ts");
@@ -75,6 +76,8 @@ for (const marker of ["payment-webhook", "PAYMENT_WEBHOOK_SECRET", "provider-spe
 for (const marker of ["ah_provisioning_jobs", "unique", "for update skip locked", "lease_expires_at", "max_attempts", "retry_wait", "ah_enqueue_paid_order", "new.status = 'paid'", "ah_claim_provisioning_job", "ah_finish_provisioning_job", "status = 'active'", "status = 'failed'"]) assert.ok(provisioningSql.toLowerCase().includes(marker.toLowerCase()), `Missing provisioning queue safeguard: ${marker}`);
 assert.ok(!/drop table|truncate table/i.test(provisioningSql), "Provisioning migration must not drop or truncate application data");
 for (const marker of ["lease_token uuid", "gen_random_uuid()", "p_lease_token uuid", "stale_lease", "lease_expires_at <= now()"]) assert.ok(leaseFenceSql.toLowerCase().includes(marker.toLowerCase()), `Missing provisioning lease fencing: ${marker}`);
+for (const marker of ["requires_reconciliation boolean not null default false", "order_status_changed_after_provider_success", "order_not_provisioning_retry_suppressed", "for update", "retry_suppressed", "grant execute", "service_role"]) assert.ok(provisioningStateSql.toLowerCase().includes(marker.toLowerCase()), `Missing order/provisioning state-race safeguard: ${marker}`);
+for (const marker of ["requires_reconciliation", "reconciliation_required"]) assert.ok(adminJs.includes(marker), `Missing provisioning reconciliation visibility: ${marker}`);
 for (const marker of ["PROVISIONING_WORKER_SECRET", "PROVISIONER_API_URL", "PROVISIONER_API_TOKEN", "ah_claim_provisioning_job", "ah_finish_provisioning_job", "Idempotency-Key", "https:", "AbortController", "external_id", "retry_scheduled", "lease_token", "p_lease_token: job.lease_token"]) assert.ok(provisioningFn.includes(marker), `Missing provisioning worker behavior: ${marker}`);
 assert.ok(!/Access-Control-Allow-Origin|Access-Control-Allow-Headers/.test(provisioningFn), "Internal provisioning worker must not enable browser CORS");
 assert.ok(supabaseConfig.includes("[functions.provision-worker]") && supabaseConfig.includes("verify_jwt = false"), "Worker must use its dedicated shared-secret authentication");
