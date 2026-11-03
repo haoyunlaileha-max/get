@@ -123,4 +123,13 @@ for (const marker of ['id="token-login-tab"', 'id="token-signup-tab"', 'id="acce
 for (const marker of ['crypto.getRandomValues', 'clipboard.writeText', 'functions/v1/token-auth', 'requestAuth("register"', 'requestAuth("login"', 'auth.setSession']) assert.ok(tokenAuth.includes(marker), `Missing server-verified token auth behavior: ${marker}`);
 assert.ok(accountHtml.includes('assets/js/token-auth.js'), "Token auth client script must be loaded");
 assert.ok(accountJs.includes('const tokenAuthPanel = document.getElementById("token-auth")') && accountJs.includes('if(tokenAuthPanel)tokenAuthPanel.hidden=true'), "Authenticated dashboard must replace the token sign-in panel");
+const authBootstrap = read("assets/js/supabase-auth-bootstrap.js");
+for (const marker of ["window.AH_SUPABASE_READY", "await import(", "createClient", "persistSession: true", "autoRefreshToken: true"]) assert.ok(authBootstrap.includes(marker), `Missing shared Supabase auth bootstrap behavior: ${marker}`);
+const bootstrapTag = account.indexOf('assets/js/supabase-auth-bootstrap.js');
+const tokenAuthTag = account.indexOf('assets/js/token-auth.js');
+assert.ok(bootstrapTag >= 0 && tokenAuthTag > bootstrapTag, "Shared Supabase auth bootstrap must load before token auth");
+assert.ok(accountJs.includes("await window.AH_SUPABASE_READY"), "Account module must await the shared Supabase client");
+assert.ok(tokenAuth.includes("await window.AH_SUPABASE_READY"), "Token login must await the same shared Supabase client");
+assert.ok(tokenAuth.includes("auth.setSession"), "Token login must establish the verified Supabase session");
+
 console.log("Checks passed: refreshed storefront, Simplified/Traditional Chinese locales, account portal, admin console, RLS schema, secure order/payment processing, and provisioning queue.");
