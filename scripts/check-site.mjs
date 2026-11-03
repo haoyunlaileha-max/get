@@ -7,6 +7,7 @@ const html = read("index.html");
 const css = read("assets/css/site.css");
 const js = read("assets/js/site.js");
 const checkoutJs = read("assets/js/checkout.js");
+const productPageJs = read("assets/js/product-page.js");
 const localeJs = read("assets/js/language.js");
 const account = read("account.html");
 const accountJs = read("assets/js/account.js");
@@ -34,6 +35,8 @@ for (const marker of ["--bg:", ".config-dialog", ".mobile-menu", ".account-card"
 for (const marker of ["function applyLanguage", "localStorage.setItem", "configureDialog.showModal()", "配置预览", "function filterPlans"]) assert.ok(js.includes(marker), `Missing application behavior: ${marker}`);
 for (const marker of ["window.AH_CHECKOUT?.ready", "window.AH_CHECKOUT.submit"]) assert.ok(js.includes(marker), `Missing checkout handoff: ${marker}`);
 for (const marker of ["functions/v1/create-order", "Idempotency-Key", "ah_products", "ah_regions", "ah_plans", "plan_id", "region_id", "auth.getSession", "支付与服务器开通尚未启用"]) assert.ok(checkoutJs.includes(marker), `Missing checkout integration: ${marker}`);
+for (const marker of ["productCategory", "categoryMap[product.category] === pageCategory", "data-plan-id"]) assert.ok(checkoutJs.includes(marker), `Missing product page catalog filtering: ${marker}`);
+for (const marker of ["product-language", "configure-dialog", "AH_LOCALE"]) assert.ok(productPageJs.includes(marker), `Missing product page interaction: ${marker}`);
 for (const marker of ["zh-TW", "zh-CN", "const normalize", "const text", "function apply", "traditional", "simplified"]) assert.ok(localeJs.includes(marker), `Missing Chinese locale behavior: ${marker}`);
 for (const category of ["vps", "dedicated", "rdp", "gpu", "domains"]) assert.ok(html.includes(`data-type="${category}"`), `Missing plan category: ${category}`);
 assert.equal((html.match(/data-type="[^"]+"/g) || []).length, 6, "Expected six demo plan cards");
@@ -84,6 +87,7 @@ for (const marker of ["loadMoreOrders", "ordersPageSize = 20", ".range(orderOffs
 for (const marker of ['id="balance"', 'ACCOUNT BALANCE', 'topup-amount', '充值通道尚未开放']) assert.ok(account.includes(marker), "Missing safe account balance preview: " + marker);
 for (const route of ['zh/vps/', 'zh/dedicated/', 'zh/rdp/', 'zh/gpu/', 'zh/domains/']) assert.ok(html.includes(route), "Missing product route: " + route);
 for (const route of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html","zh/domains/index.html","zh/account/index.html"]) assert.ok(existsSync(new URL("../" + route, import.meta.url)), "Missing localized page: " + route);
+for (const route of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html"]) { const page = read(route); assert.ok(page.includes('id="plan-list"') && page.includes('id="configure-dialog"') && page.includes('assets/js/checkout.js'), "Product page is missing live catalog checkout: " + route); }
 assert.ok(account.includes('id="load-more-orders"'), "Customer order load-more control must exist");
 for (const marker of ['.order-details', '.order-detail-grid', '.order-detail-toggle', '.status-failed', '.account-card{background:#fff']) assert.ok(css.includes(marker), `Missing light account/order detail styling: ${marker}`);
 for (const marker of ['customer_note text', 'description_snapshot text', 'unit_price_minor bigint']) assert.ok(coreSql.includes(marker), `Account order field is not present in the core schema: ${marker}`);
