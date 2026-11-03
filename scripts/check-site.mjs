@@ -69,7 +69,6 @@ assert.ok(!/drop table|truncate table/i.test(paymentSql), "Payment migration mus
 for (const marker of ["PAYMENT_WEBHOOK_SECRET", "crypto.subtle", "HMAC", "x-ah-signature", "Math.abs(now - timestamp) > 300", "ah_apply_payment_event", "payment.succeeded", "amount_minor", "order_id", 'typeof amountMinor !== "number"', "request.body?.getReader()", "value.byteLength", "totalBytes > MAX_BODY_BYTES", "TextDecoder", "invalid_content_length"]) assert.ok(paymentFn.includes(marker), `Missing webhook verification behavior: ${marker}`);
 assert.ok(!/Access-Control-Allow-Origin|Access-Control-Allow-Headers/.test(paymentFn), "Server-to-server webhook must not enable browser CORS");
 assert.ok(!paymentFn.includes("request.arrayBuffer()"), "Payment webhook must enforce its body limit before buffering the complete request");
-assert.ok(!paymentFn.includes("request.arrayBuffer()"), "Payment webhook must enforce its body limit before buffering the complete request");
 assert.ok(supabaseConfig.includes("[functions.payment-webhook]") && supabaseConfig.includes("verify_jwt = false"), "Webhook must use signature authentication instead of user JWT");
 for (const marker of ["payment-webhook", "PAYMENT_WEBHOOK_SECRET", "provider-specific", "ah_payment_events", "not deployed"]) assert.ok(backendDocs.toLowerCase().includes(marker.toLowerCase()), `Missing payment deployment documentation: ${marker}`);
 
