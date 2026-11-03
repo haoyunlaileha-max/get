@@ -25,9 +25,9 @@ The GitHub Pages storefront, account portal, localized product pages, and admin 
 | `token-auth` | 5 | Token-based customer registration and login |
 | `create-order` | 5 | Authenticated, idempotent order creation |
 | `cancel-order` | 4 | Safe cancellation of eligible unpaid orders |
-| `create-crypto-invoice` | 8 | Authenticated crypto invoice quotes and invoice creation |
-| `crypto-listener` | 2 | Authenticated chain-transfer verification and idempotent settlement |
-| `crypto-scanner` | 5 | Minute-scheduled mainnet scanning for BTC, LTC, ETH, ERC-20 USDT, BNB, SOL, TRX, TRC-20 USDT and native GRAM |
+| `create-crypto-invoice` | 12 | Authenticated crypto invoice quotes and invoice creation |\n| `create-account-topup` | 1 | Authenticated account top-up order creation and ready network discovery |
+| `crypto-listener` | 3 | Authenticated chain-transfer verification and idempotent settlement |
+| `crypto-scanner` | 6 | Minute-scheduled mainnet scanning for BTC, LTC, ETH, ERC-20 USDT, BNB, SOL, TRX, TRC-20 USDT and native TON |
 | `telegram-dispatch` | 6 | Private Telegram notification outbox delivery |
 
 Crypto wallet payments are monitored on-chain and settled automatically after exact amount and confirmation checks. Confirmed orders are sent to the configured Telegram administrator chat for manual fulfilment; no automatic VPS provisioning or fund withdrawal is performed. The generic external payment webhook and hosting-provisioning gateway are not part of this live manual-fulfilment payment flow.
@@ -36,13 +36,13 @@ Crypto wallet payments are monitored on-chain and settled automatically after ex
 
 - The live catalog tables `ah_products`, `ah_plans`, and `ah_regions` are empty. The storefront is deployed, but it is not ready to accept real hosting orders until genuine products, prices, specifications, and data-center availability are entered.
 - Nine crypto assets are configured: BTC, ETH, USDT ERC-20, USDT TRC-20, LTC, TRX, SOL, BNB BEP-20, and GRAM on TON. XMR is excluded.
-- BTC, LTC, ETH, USDT ERC-20, BNB, SOL, TRX, USDT TRC-20 and native GRAM scanners are implemented. TRON production payments require the `TRONGRID_API_KEY` Supabase Edge Function secret; until configured, TRX and USDT-TRC20 remain fail-closed and cannot issue new invoices. Provider failures automatically mark affected assets degraded.
+- BTC, LTC, ETH, USDT ERC-20, BNB, SOL, TRX, USDT TRC-20 and native TON scanners are implemented. The production `TRONGRID_API_KEY` is configured; TRX, USDT-TRC20 and TON are currently `ready`. Provider failures automatically mark affected assets degraded and block new invoices.
 - Telegram notification delivery is deployed and its test message was verified. A Vault-authenticated Cron job runs the dispatcher every minute, but it only processes notification events already written to the outbox; it does not scan blockchains.
-- The native TON coin is displayed as GRAM. The existing TON asset code and wallet address remain unchanged; the invoice quote uses the GRAM/USDT market symbol. No separate GRAM Jetton is accepted. TRON invoice creation requires the `TRONGRID_API_KEY` Supabase Edge Function secret; without it or when TronGrid is unhealthy, TRX and USDT-TRC20 are marked degraded and invoice creation is blocked. Assets without a healthy provider cannot issue invoices.
-- Confirmed payments automatically mark orders paid and create a deduplicated Telegram administrator notification. Administrators manually fulfil orders; no automatic provisioning or withdrawals are performed. If a chain provider is unavailable, the asset is held in `awaiting_provider` or `degraded` and invoice creation remains blocked.
+- The native TON coin is displayed as Toncoin (TON), and its invoice quote uses TON/USDT. No separate GRAM Jetton is accepted. TRON invoices use the configured production TronGrid API key; if TronGrid becomes unhealthy, TRX and USDT-TRC20 are marked degraded and invoice creation is blocked.
+- Account recharge is live: customers can create 10–500 USDT top-ups, receive a unique on-chain invoice on a ready network, and see their balance/history. A confirmed payment adds one immutable ledger credit through a database trigger; pending or unconfirmed payments never change the balance. Confirmed service orders automatically mark paid and create a deduplicated Telegram administrator notification. Administrators manually fulfil orders; no automatic provisioning or withdrawals are performed. If a chain provider is unavailable, the asset is held in `awaiting_provider` or `degraded` and invoice creation remains blocked.
 - Mainnet scanning and automatic on-chain settlement are deployed for BTC, LTC, ETH, USDT ERC-20, BNB and SOL. No external payment-provider webhook integration or automatic hosting provisioning should be represented as live. A real customer deposit has not yet been used for end-to-end acceptance testing.
 
-See [the crypto payment deployment notes](docs/crypto-payment-foundation.md) and [the backend foundation](docs/backend-foundation.md) for the implementation boundary and safeguards.
+The account balance is credited from the immutable `ah_account_ledger`; top-up creation is idempotent and the ledger tables are protected by owner-scoped RLS.\n\nSee [the crypto payment deployment notes](docs/crypto-payment-foundation.md) and [the backend foundation](docs/backend-foundation.md) for the implementation boundary and safeguards.
 
 ## Run locally
 
