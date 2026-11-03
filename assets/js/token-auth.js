@@ -73,8 +73,8 @@
 
   async function applySession(session) {
     // Reuse the account page's initialized client and its auth storage.
-    const client = window.AH_SUPABASE_AUTH_CLIENT;
-    if (!client) throw new Error("账户中心仍在初始化，请稍后再试。");
+    const client = await window.AH_SUPABASE_READY;
+    if (!client) throw new Error("登录服务初始化失败，请刷新页面后重试。");
     const { data, error } = await client.auth.setSession({
       access_token: session.access_token,
       refresh_token: session.refresh_token
