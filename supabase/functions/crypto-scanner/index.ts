@@ -89,15 +89,14 @@ function tronAddressHex(address: string): string | null {
   if (bytes.length !== 25) return null;
   return bytes.slice(0, 21).join("").toLowerCase();
 }
-function tronDestinationMatches(actual: string, expected: string) {
+async function tronDestinationMatches(actual: string, expected: string) {
   if (actual === expected) return true;
-  const left = tronAddressHex(actual.replace(/^0x/i, ""));
-  const right = tronAddressHex(expected);
+  const [left, right] = await Promise.all([tronAddressHex(actual), tronAddressHex(expected)]);
   return !!left && !!right && left === right;
 }
 function tonRawAddress(address: string): string | null {
   const raw = address.trim().toLowerCase();
-  if (/^-?\\d+:[0-9a-f]{64}$/.test(raw)) return raw;
+  if (/^-?\d+:[0-9a-f]{64}$/.test(raw)) return raw;
   try {
     const normalized = address.replace(/-/g, "+").replace(/_/g, "/");
     const binary = atob(normalized + "=".repeat((4 - normalized.length % 4) % 4));
@@ -263,7 +262,7 @@ async function scanTon(db: ReturnType<typeof createClient>, asset: Asset, secret
   let latestLt: string | null = null;
   for (const tx of rows) {
     const lt = String(tx.lt ?? "");
-    if (!latestLt && /^\\d+$/.test(lt)) latestLt = lt;
+    if (!latestLt && /^\d+$/.test(lt)) latestLt = lt;
     const message = tx.in_msg;
     if (!message || message.bounced === true || message.bounce === true) continue;
     if (tonRawAddress(String(message.destination ?? "")) !== expected) continue;
@@ -274,7 +273,7 @@ async function scanTon(db: ReturnType<typeof createClient>, asset: Asset, secret
     const mcSeqno = Number(tx.mc_block_seqno ?? 0);
     if (!Number.isSafeInteger(mcSeqno) || mcSeqno <= 0) continue;
     const amount = String(message.value ?? "0");
-    if (!/^\\d+$/.test(amount) || BigInt(amount) <= 0n) continue;
+    if (!/^\d+$/.test(amount) || BigInt(amount) <= 0n) continue;
     const hash = String(tx.hash ?? "");
     if (hash.length < 8) continue;
     transfers.push({
@@ -288,11 +287,36 @@ async function scanTon(db: ReturnType<typeof createClient>, asset: Asset, secret
   return transfers.length;
 }
 
+async function fetchTronJson(url: string, init: RequestInit = {}, timeout = 12_000): Promise<any> {
+  let lastError = "trongrid_request_failed";
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    try {
+      const result = await fetch(url, { ...init, signal: controller.signal, headers: { accept: "application/json", ...(init.headers ?? {}) } });
+      if (result.ok) return await result.json();
+      lastError = "trongrid_http_" + result.status;
+      if (![429, 500, 502, 503, 504].includes(result.status) || attempt === 3) throw new Error(lastError);
+      const retryAfter = Number(result.headers.get("retry-after") ?? "");
+      const wait = Number.isFinite(retryAfter) && retryAfter > 0
+        ? Math.min(5000, retryAfter * 1000)
+        : Math.min(4000, 500 * (2 ** attempt)) + Math.floor(Math.random() * 250);
+      await new Promise(resolve => setTimeout(resolve, wait));
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") lastError = "trongrid_timeout";
+      else lastError = error instanceof Error ? error.message : "trongrid_request_failed";
+      if (attempt === 3 || lastError.includes("_http_403") || lastError.includes("_http_400")) throw new Error(lastError);
+      await new Promise(resolve => setTimeout(resolve, Math.min(4000, 500 * (2 ** attempt)) + Math.floor(Math.random() * 250)));
+    } finally { clearTimeout(timer); }
+  }
+  throw new Error(lastError);
+}
+
 async function scanTron(db: ReturnType<typeof createClient>, asset: Asset, secret: string) {
   if (!TRON_KEY) throw new Error("trongrid_api_key_missing");
   const headers: Record<string, string> = { "content-type": "application/json", "TRON-PRO-API-KEY": TRON_KEY };
   const base = "https://api.trongrid.io";
-  const head = await fetchJson(base + "/walletsolidity/getnowblock", { method: "POST", headers, body: "{}" });
+  const head = await fetchTronJson(base + "/walletsolidity/getnowblock", { method: "POST", headers, body: "{}" });
   const tip = Number(head.block_header?.raw_data?.number ?? 0);
   if (!tip) throw new Error("tron_solidified_tip_invalid");
   const saved = await getCursor(db, asset.asset_code);
@@ -303,7 +327,7 @@ async function scanTron(db: ReturnType<typeof createClient>, asset: Asset, secre
     const path = asset.token_contract
       ? "/v1/accounts/" + encodeURIComponent(asset.wallet_address) + "/transactions/trc20?only_confirmed=true&only_to=true&limit=200&contract_address=" + encodeURIComponent(asset.token_contract)
       : "/v1/accounts/" + encodeURIComponent(asset.wallet_address) + "/transactions?only_confirmed=true&only_to=true&limit=200&order_by=block_timestamp,desc";
-    const result = await fetchJson(base + path + (fingerprint ? "&fingerprint=" + encodeURIComponent(fingerprint) : ""), { headers });
+    const result = await fetchTronJson(base + path + (fingerprint ? "&fingerprint=" + encodeURIComponent(fingerprint) : ""), { headers });
     const rows = result.data;
     if (!Array.isArray(rows)) throw new Error("tron_history_invalid");
     let foundSaved = false;
@@ -316,19 +340,19 @@ async function scanTron(db: ReturnType<typeof createClient>, asset: Asset, secre
       let amount = "0", eventIndex = 0;
       if (asset.token_contract) {
         if (String(row.token_info?.address ?? "").toLowerCase() !== asset.token_contract.toLowerCase()) continue;
-        if (!tronDestinationMatches(String(row.to ?? ""), asset.wallet_address)) continue;
+        if (!(await tronDestinationMatches(String(row.to ?? ""), asset.wallet_address))) continue;
         amount = String(row.value ?? "0");
         eventIndex = Number(row.event_index ?? 0);
       } else {
         const contract = row.raw_data?.contract?.find((item: any) => item.type === "TransferContract");
         if (!contract) continue;
         const value = contract.parameter?.value ?? {};
-        if (!tronDestinationMatches(String(value.to_address ?? ""), asset.wallet_address)) continue;
+        if (!(await tronDestinationMatches(String(value.to_address ?? ""), asset.wallet_address))) continue;
         if (Array.isArray(row.ret) && row.ret.length && row.ret.some((entry: any) => entry.contractRet && entry.contractRet !== "SUCCESS")) continue;
         amount = String(value.amount ?? "0");
         eventIndex = Number(contract.parameter?.index ?? 0);
       }
-      if (!/^\\d+$/.test(amount) || BigInt(amount) <= 0n) continue;
+      if (!/^\d+$/.test(amount) || BigInt(amount) <= 0n) continue;
       transfers.push({
         asset_code: asset.asset_code, transaction_hash: txHash, event_index: eventIndex,
         destination_address: asset.wallet_address, amount_atomic: amount,
