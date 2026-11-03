@@ -72,17 +72,19 @@
   }
 
   async function applySession(session) {
-    const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
-    const client = createClient(config.url, config.anonKey, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-    });
-    const { error } = await client.auth.setSession({
+    // Reuse the account page's initialized client and its auth storage.
+    const client = window.AH_SUPABASE_AUTH_CLIENT;
+    if (!client) throw new Error("账户中心仍在初始化，请稍后再试。");
+    const { data, error } = await client.auth.setSession({
       access_token: session.access_token,
       refresh_token: session.refresh_token
     });
     if (error) throw error;
-    showMessage("登录成功，正在打开账户中心…");
-    window.location.reload();
+    if (!data?.session?.user) throw new Error("登录会话未能建立，请重试。");
+    // Render the dashboard directly; do not reload and risk losing the just-written session.
+    if (typeof window.AH_RENDER_ACCOUNT_SESSION === "function") {
+      await window.AH_RENDER_ACCOUNT_SESSION(data.session);
+    }
   }
 
   loginTab.addEventListener("click", () => setMode("login"));
