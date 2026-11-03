@@ -109,3 +109,6 @@ body{background:#fff;color:#17231f}
 @media(max-width:520px){.admin-orders-toolbar>*{flex:1 1 100%}.admin-orders-pagination{align-items:flex-start;flex-direction:column}}
 
 .admin-orders-toolbar #export-orders{white-space:nowrap}
+
+.admin-order-date{flex:0 1 150px;min-width:135px}
+.admin-orders-toolbar .admin-order-date input{width:100%;min-height:40px;padding:9px 10px;border:1px solid #dce6df;border-radius:8px;background:#fff;color:#26372e;font:inherit}
