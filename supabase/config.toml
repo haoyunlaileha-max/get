@@ -24,3 +24,7 @@ verify_jwt = true
 
 [functions.telegram-dispatch]
 verify_jwt = false
+
+# Authenticated customer endpoint for account balance top-up creation and ready asset discovery.
+[functions.create-account-topup]
+verify_jwt = true
