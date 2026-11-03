@@ -19,6 +19,7 @@ const provisioningSql = read("supabase/migrations/20261103032419_provisioning_qu
 const adminSql = read("supabase/migrations/20261103032425_admin_console_read_access.sql");
 const inventorySql = read("supabase/migrations/20261103032449_plan_region_inventory.sql");
 const rateLimitCleanupSql = read("supabase/migrations/20261103043218_cleanup_token_auth_rate_limits.sql");
+const orderAclSql = read("supabase/migrations/20261103051930_lock_down_order_mutations.sql");
 const adminHtml = read("admin.html");
 const adminJs = read("assets/js/admin.js");
 const orderFn = read("supabase/functions/create-order/index.ts");
@@ -57,6 +58,8 @@ for (const marker of ["create table if not exists public.ah_profiles", "create t
 assert.ok(!/drop table|truncate table/i.test(coreSql), "Core migration must not drop or truncate application data");
 for (const marker of ["request_fingerprint", "security definer", "current_setting('request.jwt.claim.role'", "service_role", "on conflict (user_id, idempotency_key)", "plan_unavailable", "region_unavailable", "v_price_minor * p_quantity", "replayed"]) assert.ok(orderSql.toLowerCase().includes(marker.toLowerCase()), `Missing secure order SQL behavior: ${marker}`);
 assert.ok(!/drop table|truncate table/i.test(orderSql), "Order migration must not drop or truncate data");
+for (const marker of ["ah_orders_admin_insert", "ah_orders_admin_update", "ah_orders_admin_delete", "ah_order_items_admin_insert", "ah_order_items_admin_update", "ah_order_items_admin_delete", "revoke all on table public.ah_orders, public.ah_order_items from authenticated", "grant select on table public.ah_orders, public.ah_order_items to authenticated"]) assert.ok(orderAclSql.toLowerCase().includes(marker.toLowerCase()), `Missing least-privilege order ACL safeguard: ${marker}`);
+assert.ok(!/drop table|truncate table/i.test(orderAclSql), "Order ACL migration must not drop or truncate data");
 for (const marker of ["auth.getUser", "SUPABASE_SERVICE_ROLE_KEY", "ALLOWED_ORIGINS", "idempotency-key", "ah_create_order", "userData.user.id", "unexpected_request_field", "request_too_large", "request.body?.getReader()", "TextDecoder", "value.byteLength", "tokenMatch[1].length > 8_192"]) assert.ok(orderFn.includes(marker), `Missing order Edge Function behavior: ${marker}`);
 assert.ok(!["payload.user_id", "payload.price", "payload.total_minor", "payload.currency", "payload.status"].some((field) => orderFn.includes(field)), "Client must not choose user, price, currency, total, or status");
 
@@ -138,4 +141,4 @@ assert.ok(tokenAuth.includes("auth.setSession"), "Token login must establish the
 for (const marker of ["ah_token_auth_rate_limits_updated_idx", "updated_at < now() - interval '24 hours'", "ah_consume_token_auth_attempt", "grant execute", "service_role"]) assert.ok(rateLimitCleanupSql.toLowerCase().includes(marker.toLowerCase()), `Missing bounded token-auth rate-limit cleanup behavior: ${marker}`);
 assert.ok(!/drop table|truncate table/i.test(rateLimitCleanupSql), "Rate-limit cleanup migration must not drop or truncate data");
 
-console.log("Checks passed: refreshed storefront, Simplified/Traditional Chinese locales, account portal, admin console, RLS schema, secure order/payment processing, and provisioning queue.");
+console.log("Checks passed: refreshed storefront, Simplified/Traditional Chinese locales, account portal, admin console, RLS schema, least-privilege order ACLs, secure order/payment processing, and provisioning queue.");
