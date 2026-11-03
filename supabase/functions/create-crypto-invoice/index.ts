@@ -67,6 +67,7 @@ Deno.serve(async(request:Request)=>{
     if(order.currency!=="USDT"||!Number.isSafeInteger(order.total_minor)||order.total_minor<=0) return reply(409,{error:"order_must_be_priced_in_usdt"},origin);
     if(!["pending","awaiting_payment"].includes(order.status)) return reply(409,{error:"order_not_payable"},origin);
     // Never issue an address while its chain listener is offline: funds could otherwise be lost or uncredited.
+    if(assetCode==="TON"&&!asset.token_contract) return reply(503,{error:"asset_contract_unverified"},origin);
     if(!asset.listener_enabled||asset.listener_status!=="ready") return reply(503,{error:"asset_monitoring_unavailable",asset:assetCode,monitoring:asset.listener_status},origin);
     const symbol=ASSET_SYMBOLS[assetCode],priceText=symbol?await marketPrice(symbol):"1";
     const priceScale=12,priceScaled=scaledDecimal(priceText,priceScale),decimals=Number(asset.decimals);
