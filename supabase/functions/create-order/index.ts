@@ -51,7 +51,9 @@ Deno.serve(async (request: Request) => {
 
   const authorization = request.headers.get("authorization") ?? "";
   const tokenMatch = authorization.match(/^Bearer\s+(.+)$/i);
-  if (!tokenMatch) return response(401, { error: "authentication_required" }, origin);
+  if (!tokenMatch || tokenMatch[1].length > 8_192) {
+    return response(401, { error: "authentication_required" }, origin);
+  }
 
   const idempotencyKey = request.headers.get("idempotency-key") ?? "";
   if (!idempotencyPattern.test(idempotencyKey)) {
