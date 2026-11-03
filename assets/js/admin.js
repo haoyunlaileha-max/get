@@ -327,8 +327,9 @@ function getOrderDateBounds() {
   const start = orderStartDate ? new Date(orderStartDate + "T00:00:00") : null;
   const end = orderEndDate ? new Date(orderEndDate + "T00:00:00") : null;
   if ((start && Number.isNaN(start.getTime())) || (end && Number.isNaN(end.getTime()))) throw new Error("invalid_date");
-  if (start && start.toISOString().slice(0,10) !== orderStartDate) throw new Error("invalid_date");
-  if (end && end.toISOString().slice(0,10) !== orderEndDate) throw new Error("invalid_date");
+  const localDateKey = (value) => value ? [value.getFullYear(), String(value.getMonth()+1).padStart(2,"0"), String(value.getDate()).padStart(2,"0")].join("-") : "";
+  if (start && localDateKey(start) !== orderStartDate) throw new Error("invalid_date");
+  if (end && localDateKey(end) !== orderEndDate) throw new Error("invalid_date");
   if (end) end.setDate(end.getDate() + 1);
   return { start: start?.toISOString(), end: end?.toISOString() };
 }
