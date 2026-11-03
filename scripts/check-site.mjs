@@ -12,12 +12,12 @@ const localeJs = read("assets/js/language.js");
 const account = read("account.html");
 const accountJs = read("assets/js/account.js");
 const publicConfig = read("assets/js/supabase-config.js");
-const coreSql = read("supabase/migrations/20261102000100_anonymous_hosting_core.sql");
-const orderSql = read("supabase/migrations/20261102000200_secure_order_creation.sql");
-const paymentSql = read("supabase/migrations/20261102000300_payment_event_processing.sql");
-const provisioningSql = read("supabase/migrations/20261102000400_provisioning_queue.sql");
-const adminSql = read("supabase/migrations/20261102000500_admin_console_read_access.sql");
-const inventorySql = read("supabase/migrations/20261102000600_plan_region_inventory.sql");
+const coreSql = read("supabase/migrations/20261103032042_anonymous_hosting_core.sql");
+const orderSql = read("supabase/migrations/20261103032407_secure_order_creation.sql");
+const paymentSql = read("supabase/migrations/20261103032413_payment_event_processing.sql");
+const provisioningSql = read("supabase/migrations/20261103032419_provisioning_queue.sql");
+const adminSql = read("supabase/migrations/20261103032425_admin_console_read_access.sql");
+const inventorySql = read("supabase/migrations/20261103032449_plan_region_inventory.sql");
 const adminHtml = read("admin.html");
 const adminJs = read("assets/js/admin.js");
 const orderFn = read("supabase/functions/create-order/index.ts");
@@ -70,7 +70,7 @@ assert.ok(!/drop table|truncate table/i.test(provisioningSql), "Provisioning mig
 for (const marker of ["PROVISIONING_WORKER_SECRET", "PROVISIONER_API_URL", "PROVISIONER_API_TOKEN", "ah_claim_provisioning_job", "ah_finish_provisioning_job", "Idempotency-Key", "https:", "AbortController", "external_id", "retry_scheduled"]) assert.ok(provisioningFn.includes(marker), `Missing provisioning worker behavior: ${marker}`);
 assert.ok(!/Access-Control-Allow-Origin|Access-Control-Allow-Headers/.test(provisioningFn), "Internal provisioning worker must not enable browser CORS");
 assert.ok(supabaseConfig.includes("[functions.provision-worker]") && supabaseConfig.includes("verify_jwt = false"), "Worker must use its dedicated shared-secret authentication");
-for (const marker of ["20261102000400_provisioning_queue.sql", "provision-worker", "PROVISIONING_WORKER_SECRET", "PROVISIONER_API_URL", "PROVISIONER_API_TOKEN", "not deployed", "Idempotency-Key"]) assert.ok(backendDocs.toLowerCase().includes(marker.toLowerCase()), `Missing provisioning documentation: ${marker}`);
+for (const marker of ["20261103032419_provisioning_queue.sql", "provision-worker", "PROVISIONING_WORKER_SECRET", "PROVISIONER_API_URL", "PROVISIONER_API_TOKEN", "not deployed", "Idempotency-Key"]) assert.ok(backendDocs.toLowerCase().includes(marker.toLowerCase()), `Missing provisioning documentation: ${marker}`);
 
 for (const marker of ["ah_payment_events_admin_read", "ah_provisioning_jobs_admin_read", "ah_is_admin()", "grant select"]) assert.ok(adminSql.toLowerCase().includes(marker.toLowerCase()), `Missing admin data-access policy: ${marker}`);
 assert.ok(!/drop table|truncate table/i.test(adminSql), "Admin access migration must not drop or truncate data");
@@ -80,7 +80,7 @@ for (const marker of ['<title>运营管理后台', 'id="admin-login"', 'id="admi
 assert.ok(adminHtml.includes('value="zh-CN"') && adminHtml.includes('value="zh-TW"') && !/value="(?:en|ar|fr|ru|es)"/.test(adminHtml), "Admin page must expose only Chinese locales");
 for (const marker of ['createClient', 'auth.getUser()', 'user.app_metadata?.role !== "admin"', '.from("ah_orders")', '.from("ah_payment_events")', '.from("ah_provisioning_jobs")', '.from("ah_products")', '.from("ah_plans")', '.from("ah_regions")', 'count: "exact"', 'updateRow', 'escapeHtml', 'saveCatalog', 'renderProductOptions', 'price_minor:priceMinor', 'JSON.parse(values.specs)', 'ah_plan_regions', 'saveInventory', 'renderPlanRegions', 'capacity_units', 'allocated_units', 'insert(payload)', 'localStorage.setItem("ah-language"']) assert.ok(adminJs.includes(marker), `Missing admin dashboard behavior: ${marker}`);
 assert.ok(!/service_role|SUPABASE_SERVICE_ROLE_KEY/i.test(adminJs + adminHtml), "Admin browser code must not contain service-role credentials");
-for (const marker of ["admin.html", "20261102000500_admin_console_read_access.sql", "20261102000600_plan_region_inventory.sql", "plan-region", "capacity", "app_metadata", "admin RLS", "admin console"]) assert.ok(backendDocs.toLowerCase().includes(marker.toLowerCase()), `Missing admin deployment documentation: ${marker}`);
+for (const marker of ["admin.html", "20261103032425_admin_console_read_access.sql", "20261103032449_plan_region_inventory.sql", "plan-region", "capacity", "app_metadata", "admin RLS", "admin console"]) assert.ok(backendDocs.toLowerCase().includes(marker.toLowerCase()), `Missing admin deployment documentation: ${marker}`);
 for (const marker of ['paid_at', 'customer_note', 'ah_order_items(description_snapshot,quantity,unit_price_minor)', 'orderStatusLabels', 'renderOrderCard', '查看订单详情', 'active:"运行中"', '付款确认时间']) assert.ok(accountJs.includes(marker), `Missing customer order detail behavior: ${marker}`);
 for (const marker of ['ah_regions(name,city,country_code)', 'addDetail("数据中心",regionLabel)', 'region?.country_code']) assert.ok(accountJs.includes(marker), "Missing customer order region detail: " + marker);
 for (const marker of ["loadMoreOrders", "ordersPageSize = 20", ".range(orderOffset,orderOffset+ordersPageSize-1)", "orders_more_error"]) assert.ok(accountJs.includes(marker), "Missing customer order pagination: " + marker);
