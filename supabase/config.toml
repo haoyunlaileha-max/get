@@ -9,3 +9,7 @@ verify_jwt = false
 # Internal worker authenticates with a dedicated secret header.
 [functions.provision-worker]
 verify_jwt = false
+
+# Token authentication verifies the publishable API key and access token in the function itself.
+[functions.token-auth]
+verify_jwt = false
