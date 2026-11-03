@@ -1,6 +1,7 @@
 const config = window.AH_SUPABASE_CONFIG || {};
 const setup = document.getElementById("auth-setup");
 const authPanel = document.getElementById("auth-panel");
+const tokenAuthPanel = document.getElementById("token-auth");
 const authForm = document.getElementById("auth-form");
 const authError = document.getElementById("auth-error");
 const authSuccess = document.getElementById("auth-success");
@@ -154,9 +155,9 @@ async function loadMoreOrders(){
   }
 }
 async function renderSession(session){
-  if(!session){activeUserId=null;orderOffset=0;ordersList.replaceChildren();loadMoreOrdersButton.hidden=true;dashboard.hidden=true;authPanel.hidden=false;return;}
+  if(!session){activeUserId=null;orderOffset=0;ordersList.replaceChildren();loadMoreOrdersButton.hidden=true;dashboard.hidden=true;authPanel.hidden=false;if(tokenAuthPanel)tokenAuthPanel.hidden=false;return;}
   const userId=session.user.id;activeUserId=userId;orderOffset=0;
-  authPanel.hidden=true;dashboard.hidden=false;
+  authPanel.hidden=true;if(tokenAuthPanel)tokenAuthPanel.hidden=true;dashboard.hidden=false;
   if(location.hash==="#balance")document.getElementById("balance").scrollIntoView({behavior:"smooth",block:"start"});
   document.getElementById("account-email").textContent=session.user.email||tr("signed_user");
   ordersState.hidden=false;ordersState.textContent=tr("loading_orders");ordersList.replaceChildren();loadMoreOrdersButton.hidden=true;
