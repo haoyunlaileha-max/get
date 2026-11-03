@@ -48,3 +48,37 @@ body{background:#fff;color:#17231f}
 .account-card{background:#fff;border-color:#e5ece8;box-shadow:0 14px 40px rgba(20,45,32,.07)}.account-lead,.account-card label,.account-footnote{color:#68776f}.account-notice,.account-success{background:#f1f8f4;color:#426251;border-color:#d9ebe0}.account-error{background:#fff5f4;color:#9a403a;border-color:#f0d5d2}.account-tab{background:#f7faf8;color:#66756d;border-color:#e3ebe6}.account-tab.active{background:#eef7f1;color:#147d5d;border-color:#a9d5bc}.account-card input{background:#fff;color:#24352c;border-color:#dce6df}.account-card input:focus{outline:2px solid #16876522;border-color:#168765}.account-link-button,.account-inline-state{color:#147d5d}.account-avatar{background:#e7f4ec;color:#147d5d}.order-row,.account-profile{background:#f9fbfa;border-color:#e5ece8}.order-items{border-color:#e8eeea}.order-status{color:#168765}.account-password-toggle{background:#f5f9f6;color:#147d5d;border-color:#dce6df}
 .admin-editor,.admin-inventory-form{background:#f8faf9;border-color:#e4ebe7}.admin-editor label,.admin-inventory-form label{color:#596a60}.admin-editor input,.admin-editor select,.admin-editor textarea,.admin-inventory-form input,.admin-inventory-form select{background:#fff;color:#26372e;border-color:#dce6df}.admin-editor h3{color:#27372f}.admin-editor-note,.admin-catalog-line small{color:#718078}.admin-page .account-card,.admin-page .account-panel{background:#fff;color:#26372f}
 @media(max-width:640px){.links{background:#fff}}
+
+
+/* Customer portal: keep the account experience aligned with the light storefront. */
+.account-card{background:#fff;border-color:#e5e9e7;box-shadow:0 16px 42px #14241b0d;color:#17231e}
+.account-card .account-lead,.account-card .account-user small,.account-card .order-row small,.account-card .account-footnote{color:#68766f}
+.account-card label{color:#34433b}
+.account-card input,.account-tab,.account-language,.account-profile,.order-row{background:#f8faf9;color:#17231e;border-color:#e1e7e3}
+.account-card input{border-color:#d6dfd9}
+.account-card input:focus{outline:2px solid #16865a33;border-color:#16865a}
+.account-tab{color:#5d6b63}
+.account-tab.active{background:#eaf5ef;border-color:#16865a;color:#116b48}
+.account-link-button{color:#13784f}
+.account-notice,.account-error,.account-success{background:#f5f8f6;border-color:#dce5df;color:#405148}
+.account-error{background:#fff5f4;border-color:#f0d2cf;color:#9b3931}
+.account-success{background:#eff9f3;border-color:#cce9d6;color:#17633d}
+.account-avatar{background:#e5f3eb;color:#17633d}
+.account-profile{border-color:#e1e7e3}
+.account-inline-state{color:#176b45}
+.account-password-toggle{background:#f5f8f6;color:#176b45;border-color:#dce5df}
+.order-row{align-items:flex-start;flex-wrap:wrap}
+.order-heading{min-width:0;flex:1}
+.order-meta{min-width:112px}
+.order-status{color:#176b45}
+.order-status.status-failed,.order-status.status-cancelled,.order-status.status-refunded{color:#a33e36}
+.order-status.status-active{color:#13784f}
+.order-details{flex-basis:100%;border-top:1px solid #e7ece8;margin-top:10px;padding-top:9px}
+.order-detail-toggle{color:#176b45;font-size:12px;cursor:pointer;list-style-position:inside}
+.order-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 2px}
+.order-detail-grid div{min-width:0}
+.order-detail-grid dt{font-size:10px;color:#748178;margin-bottom:3px}
+.order-detail-grid dd{margin:0;font-size:12px;color:#24332b;overflow-wrap:anywhere}
+.order-items{border-color:#e7ece8;color:#66736b}
+.order-items strong{color:#24332b}
+@media(max-width:520px){.order-detail-grid{grid-template-columns:1fr}.order-meta{text-align:left;margin-top:4px}}
