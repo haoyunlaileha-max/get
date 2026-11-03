@@ -5,6 +5,7 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const WORKER_SECRET = Deno.env.get("PROVISIONING_WORKER_SECRET") ?? "";
 const PROVIDER_URL = Deno.env.get("PROVISIONER_API_URL") ?? "";
 const PROVIDER_TOKEN = Deno.env.get("PROVISIONER_API_TOKEN") ?? "";
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function json(status: number, body: Record<string, unknown>) {
   return new Response(JSON.stringify(body), {
@@ -51,6 +52,9 @@ Deno.serve(async (request: Request) => {
     if (claimError) return json(500, { error: "job_claim_failed" });
     if (!job) return new Response(null, { status: 204 });
     if (job.rejected) return json(409, { error: "order_not_provisionable" });
+    if (typeof job.lease_token !== "string" || !UUID_PATTERN.test(job.lease_token)) {
+      return json(500, { error: "job_lease_token_missing" });
+    }
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 20_000);
@@ -76,6 +80,7 @@ Deno.serve(async (request: Request) => {
     } catch {
       await supabase.rpc("ah_finish_provisioning_job", {
         p_job_id: job.job_id,
+        p_lease_token: job.lease_token,
         p_success: false,
         p_provider_reference: null,
         p_error_code: "provider_unreachable",
@@ -88,6 +93,7 @@ Deno.serve(async (request: Request) => {
     if (!providerResponse.ok) {
       await supabase.rpc("ah_finish_provisioning_job", {
         p_job_id: job.job_id,
+        p_lease_token: job.lease_token,
         p_success: false,
         p_provider_reference: null,
         p_error_code: `provider_http_${providerResponse.status}`,
@@ -110,6 +116,7 @@ Deno.serve(async (request: Request) => {
       || result.external_id.length > 200) {
       await supabase.rpc("ah_finish_provisioning_job", {
         p_job_id: job.job_id,
+        p_lease_token: job.lease_token,
         p_success: false,
         p_provider_reference: null,
         p_error_code: "invalid_provider_response",
@@ -119,6 +126,7 @@ Deno.serve(async (request: Request) => {
 
     const { data: finished, error: finishError } = await supabase.rpc("ah_finish_provisioning_job", {
       p_job_id: job.job_id,
+      p_lease_token: job.lease_token,
       p_success: true,
       p_provider_reference: result.external_id,
       p_error_code: null,
