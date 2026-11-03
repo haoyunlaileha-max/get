@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-const ETH_RPC = Deno.env.get("ETHEREUM_RPC_URL") ?? "https://cloudflare-eth.com";
+const ETH_RPC = Deno.env.get("ETHEREUM_RPC_URL") ?? "https://ethereum-rpc.publicnode.com";
 const BSC_RPC = Deno.env.get("BSC_RPC_URL") ?? "https://bsc-dataseed.binance.org";
 const SOL_RPC = Deno.env.get("SOLANA_RPC_URL") ?? "https://api.mainnet-beta.solana.com";
 const TRON_KEY = Deno.env.get("TRONGRID_API_KEY") ?? "";
