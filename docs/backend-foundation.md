@@ -20,7 +20,7 @@ Prices use minor currency units (for example, 1299 = USD 12.99). Browser-submitt
 
 The `create-order` Supabase Edge Function accepts only a plan ID, optional region ID, quantity, optional customer note, the caller's bearer token, and an `Idempotency-Key` header.
 
-1. The Edge Function validates the request shape and checks the origin against `ALLOWED_ORIGINS`.
+1. The Edge Function checks the origin against `ALLOWED_ORIGINS`, then enforces a 16 KiB limit while reading the actual request stream (not trusting the optional `Content-Length` header). The bearer token is also capped at 8 KiB.
 2. It validates the bearer token with Supabase Auth and obtains the user ID from the verified session.
 3. It calls `ah_create_order` using the service-role client, which exists only in the function environment.
 4. The database function independently validates the service role, quantity and idempotency, reads the active plan/product and optional active region, calculates the total from the database price, and atomically inserts the order and price snapshot.
