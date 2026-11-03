@@ -58,6 +58,7 @@ function setMode(next){
   document.getElementById("signup-tab").setAttribute("aria-selected",String(!login));
   document.getElementById("auth-password").autocomplete=login?"current-password":"new-password";
   setBusy(submitButton,false,"",login?tr("sign_in_secure"):tr("create_account_btn"));
+  if(!supabase)submitButton.disabled=true;
   message(authError,"");message(authSuccess,"");
 }
 function formatMoney(minor,currency){
@@ -174,7 +175,7 @@ document.getElementById("toggle-password").addEventListener("click",event=>{
 });
 const requestedMode = new URLSearchParams(location.search).get("mode");
 if(requestedMode === "signup") setMode("signup");
-if(!config.url||!config.anonKey){setup.hidden=false;}
+if(!config.url||!config.anonKey){setup.hidden=false;authPanel.hidden=false;submitButton.disabled=true;resetButton.disabled=true;setup.textContent="登录与注册界面已就绪。配置 Supabase 项目 URL 和公开 anon/publishable key 后即可启用；当前不会提交或保存账户凭据。";}
 else{
   try{
     const {createClient}=await import("https://esm.sh/@supabase/supabase-js@2");
