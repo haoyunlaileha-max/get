@@ -15,6 +15,7 @@
     gpu: "gpu",
     domain: "domains"
   };
+  const pageCategory = document.body.dataset.productCategory || "";
   let client = null;
   let selectedPlan = null;
   let activeRegions = [];
@@ -50,7 +51,7 @@
 
   function renderPlans(products) {
     const plans = products.flatMap((product) => (product.ah_plans || [])
-      .filter((plan) => plan.is_active !== false)
+      .filter((plan) => plan.is_active !== false && (!pageCategory || categoryMap[product.category] === pageCategory))
       .map((plan) => ({ ...plan, product })))
       .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
 
