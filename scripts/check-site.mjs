@@ -32,6 +32,8 @@ const tokenAuthFn = read("supabase/functions/token-auth/index.ts");
 const paymentFn = read("supabase/functions/payment-webhook/index.ts");
 const provisioningFn = read("supabase/functions/provision-worker/index.ts");
 const cryptoInvoiceFn = read("supabase/functions/create-crypto-invoice/index.ts");
+const cryptoListenerFn = read("supabase/functions/crypto-listener/index.ts");
+
 const cryptoSql = read("supabase/migrations/20261103080000_crypto_usdt_pricing_and_invoice_rpc.sql");
 const telegramFn = read("supabase/functions/telegram-dispatch/index.ts");
 const telegramSql = read("supabase/migrations/20261103081000_crypto_telegram_notification_outbox.sql");
@@ -189,4 +191,7 @@ assert.ok(!/drop table|truncate table/i.test(rateLimitCleanupSql), "Rate-limit c
 
 for (const marker of ["create-crypto-invoice", "telegram-dispatch", "awaiting_provider", "catalog tables", "GRAM"]) assert.ok(readme.includes(marker), `Missing accurate live deployment note: ${marker}`);
 for (const marker of ["all nine chain listeners remain disabled", "separate from chain scanning", "GRAM invoice", "not yet been populated"]) assert.ok(cryptoDocs.toLowerCase().includes(marker.toLowerCase()), `Missing crypto production safety note: ${marker}`);
+
+for (const marker of ["CRYPTO_LISTENER_INTERNAL_SECRET", "validTransfer", "destination_mismatch", "manual_review", "ah_apply_payment_event", "confirmations_required", "MAX_BODY_BYTES"]) assert.ok(cryptoListenerFn.includes(marker), `Missing secure crypto transfer ingestion behavior: ${marker}`);
+for (const marker of ["crypto-listener", "exact invoice amount", "chain-specific provider/worker", "GRAM remains blocked"]) assert.ok(cryptoDocs.toLowerCase().includes(marker.toLowerCase()), `Missing crypto listener safety documentation: ${marker}`);
 console.log("Checks passed: storefront, Chinese locales, account/admin portals, database/RLS safeguards, crypto invoice and Telegram outbox security, deployment documentation, and explicit chain-listener fail-closed status.");
