@@ -30,5 +30,5 @@ After the chain listener confirms an exact payment, it calls the idempotent paym
 - Chain observations are not accepted from the browser.
 - Repeated provider failures block new invoices for the affected asset.
 - The existing `TON` asset code is retained for backwards compatibility, while the native coin is displayed and priced as GRAM after the network ticker rebrand. Native GRAM is not a Jetton; the scanner accepts only native inbound messages with masterchain inclusion and rejects Jetton notification opcodes.
-- The scanner is a deposit monitor, not a withdrawal service. It does not sweep or spend funds.
+- Configure `TRONGRID_API_KEY` under Supabase Project Settings → Edge Functions → Secrets (or the Edge Function secrets page) after creating a production Mainnet API key in the TronGrid console. Never put the key in GitHub, SQL migrations, frontend JavaScript, or chat. Restrict the key to Mainnet and the read-only account/transaction endpoints used by this scanner; monitor quota and request failures. The scanner is a deposit monitor, not a withdrawal service. It does not sweep or spend funds.
 - Public RPC/explorer endpoints have rate limits and are best-effort infrastructure. For high-volume production, replace them with dedicated provider endpoints and monitor cursor lag.
