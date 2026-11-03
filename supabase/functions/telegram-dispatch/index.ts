@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createSupabaseContext } from "npm:@supabase/server";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -56,14 +57,20 @@ function renderNotification(payload:Record<string,unknown>):string {
 
 Deno.serve(async(req:Request)=>{
   if(req.method!=="POST") return json(405,{error:"method_not_allowed"});
-  if(!INTERNAL_SECRET||!safeEqual(req.headers.get("x-listener-secret")??"",INTERNAL_SECRET)) return json(401,{error:"unauthorized"});
   if(!SUPABASE_URL||!SERVICE_ROLE_KEY) return json(503,{error:"database_not_configured"});
   if(!TELEGRAM_BOT_TOKEN||!TELEGRAM_CHAT_ID) return json(503,{error:"telegram_secrets_missing"});
   let body:Record<string,unknown>;
   try { body=await req.json(); if(!body||typeof body!=="object"||Array.isArray(body)) throw new Error(); }
   catch { return json(400,{error:"invalid_json"}); }
+  const hasInternalSecret=!!INTERNAL_SECRET&&safeEqual(req.headers.get("x-listener-secret")??"",INTERNAL_SECRET);
+  if(!hasInternalSecret) {
+    if(body.action!=="dispatch") return json(401,{error:"unauthorized"});
+    const {data:context,error:authError}=await createSupabaseContext(req,{auth:"publishable"});
+    if(authError||!context) return json(401,{error:"unauthorized"});
+  }
   const admin=createClient(SUPABASE_URL,SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
   if(body.action==="test") {
+    if(!hasInternalSecret) return json(401,{error:"unauthorized"});
     try { await telegramSend("✅ <b>加密货币收款机器人连接成功</b>\nTelegram 通知通道已连通。后续链上检测、确认及异常状态将发送到此会话。"); return json(200,{ok:true,message:"test_message_sent"}); }
     catch(error) { return json(502,{error:error instanceof Error?error.message:"telegram_send_failed"}); }
   }
