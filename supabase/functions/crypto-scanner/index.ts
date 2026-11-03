@@ -48,6 +48,51 @@ async function rpc(endpoint: string, method: string, params: unknown[]) {
   }
   throw new Error("rpc_" + method + "_" + lastError.replace(/[^a-zA-Z0-9_-]/g, "_"));
 }
+
+function tronAddressHex(address: string): string | null {
+  const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  if (/^41[0-9a-fA-F]{40}$/.test(address)) return address.toLowerCase();
+  let value = 0n;
+  for (const char of address) {
+    const digit = alphabet.indexOf(char);
+    if (digit < 0) return null;
+    value = value * 58n + BigInt(digit);
+  }
+  let hex = value.toString(16);
+  if (hex.length % 2) hex = "0" + hex;
+  let bytes = hex.match(/.{2}/g) ?? [];
+  let leading = 0;
+  while (leading < address.length && address[leading] === "1") leading++;
+  bytes = [...Array(leading).fill("00"), ...bytes];
+  if (bytes.length !== 25) return null;
+  return bytes.slice(0, 21).join("").toLowerCase();
+}
+function tronDestinationMatches(actual: string, expected: string) {
+  if (actual === expected) return true;
+  const left = tronAddressHex(actual.replace(/^0x/i, ""));
+  const right = tronAddressHex(expected);
+  return !!left && !!right && left === right;
+}
+function tonRawAddress(address: string): string | null {
+  const raw = address.trim().toLowerCase();
+  if (/^-?\\d+:[0-9a-f]{64}$/.test(raw)) return raw;
+  try {
+    const normalized = address.replace(/-/g, "+").replace(/_/g, "/");
+    const binary = atob(normalized + "=".repeat((4 - normalized.length % 4) % 4));
+    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+    if (bytes.length !== 36) return null;
+    let crc = 0;
+    for (let i = 0; i < 34; i++) {
+      crc ^= bytes[i] << 8;
+      for (let bit = 0; bit < 8; bit++) crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff;
+    }
+    if (bytes[34] !== (crc >> 8) || bytes[35] !== (crc & 255)) return null;
+    const workchain = bytes[1] > 127 ? bytes[1] - 256 : bytes[1];
+    const hash = Array.from(bytes.slice(2, 34), b => b.toString(16).padStart(2, "0")).join("");
+    return workchain + ":" + hash;
+  } catch { return null; }
+}
+
 function hexNumber(value: string | null | undefined) { return value ? Number(BigInt(value)) : 0; }
 function safeAddressEqual(a: string, b: string, family: string) { return family === "evm" ? a.toLowerCase() === b.toLowerCase() : a === b; }
 function topicAddress(address: string) { return "0x" + address.toLowerCase().replace(/^0x/, "").padStart(64, "0"); }
@@ -181,44 +226,100 @@ async function scanSolana(db: ReturnType<typeof createClient>, asset: Asset, sec
   return transfers.length;
 }
 
-async function scanTron(db: ReturnType<typeof createClient>, asset: Asset, secret: string) {
-  if (!TRON_KEY) throw new Error("trongrid_api_key_missing");
-  const headers = { "TRON-PRO-API-KEY": TRON_KEY };
-  const base = "https://api.trongrid.io";
-  const head = await fetchJson(base + "/wallet/getnowblock", { method: "POST", headers: { "content-type": "application/json", ...headers }, body: "{}" });
-  const tip = Number(head.block_header?.raw_data?.number ?? 0);
-  if (!tip) throw new Error("tron_head_invalid");
-  let rows: any[] = [];
-  if (asset.token_contract) {
-    const url = base + "/v1/accounts/" + encodeURIComponent(asset.wallet_address) + "/transactions/trc20?only_confirmed=true&only_to=true&limit=200&contract_address=" + encodeURIComponent(asset.token_contract);
-    const result = await fetchJson(url, { headers });
-    rows = result.data ?? [];
-  } else {
-    const url = base + "/v1/accounts/" + encodeURIComponent(asset.wallet_address) + "/transactions?only_confirmed=true&only_to=true&limit=200&order_by=block_timestamp,desc";
-    const result = await fetchJson(url, { headers });
-    rows = result.data ?? [];
-  }
+
+async function scanTon(db: ReturnType<typeof createClient>, asset: Asset, secret: string) {
+  const params = new URLSearchParams({ account: asset.wallet_address, limit: "100", sort: "desc" });
+  const headers: Record<string, string> = {};
+  const apiKey = Deno.env.get("TONCENTER_API_KEY") ?? "";
+  if (apiKey) headers["X-API-Key"] = apiKey;
+  const result = await fetchJson("https://toncenter.com/api/v3/transactions?" + params.toString(), { headers });
+  const rows = result.transactions;
+  if (!Array.isArray(rows)) throw new Error("ton_transactions_invalid");
+  const expected = tonRawAddress(asset.wallet_address);
+  if (!expected) throw new Error("ton_deposit_address_invalid");
   const transfers: Transfer[] = [];
-  for (const row of rows) {
-    const block = Number(row.block_number ?? row.blockNumber ?? 0);
-    if (!block || !row.transaction_id && !row.txID) continue;
-    let amount = "0", destination = asset.wallet_address, eventIndex = 0;
-    if (asset.token_contract) {
-      if (String(row.token_info?.address ?? "").toLowerCase() !== asset.token_contract.toLowerCase()) continue;
-      if (String(row.to ?? "") !== asset.wallet_address) continue;
-      amount = String(row.value ?? "0"); eventIndex = Number(row.event_index ?? 0);
-    } else {
-      const contract = row.raw_data?.contract?.find((x: any) => x.type === "TransferContract");
-      if (!contract) continue;
-      const value = contract.parameter?.value ?? {};
-      amount = String(value.amount ?? "0");
-      eventIndex = Number(row.raw_data?.contract?.index ?? 0);
-    }
-    if (!/^\d+$/.test(amount) || BigInt(amount) <= 0n) continue;
-    transfers.push({ asset_code: asset.asset_code, transaction_hash: String(row.transaction_id ?? row.txID), event_index: eventIndex, destination_address: destination, amount_atomic: amount, block_height: block, confirmations: Math.max(0, tip - block + 1) });
+  let latestLt: string | null = null;
+  for (const tx of rows) {
+    const lt = String(tx.lt ?? "");
+    if (!latestLt && /^\\d+$/.test(lt)) latestLt = lt;
+    const message = tx.in_msg;
+    if (!message || message.bounced === true || message.bounce === true) continue;
+    if (tonRawAddress(String(message.destination ?? "")) !== expected) continue;
+    // Native GRAM only: reject Jetton notifications and other contract opcodes.
+    if (Number(message.opcode ?? 0) !== 0) continue;
+    if (message.decoded_opcode && String(message.decoded_opcode).toLowerCase() !== "text_comment") continue;
+    if (tx.description?.aborted === true || tx.description?.compute_ph?.success === false) continue;
+    const mcSeqno = Number(tx.mc_block_seqno ?? 0);
+    if (!Number.isSafeInteger(mcSeqno) || mcSeqno <= 0) continue;
+    const amount = String(message.value ?? "0");
+    if (!/^\\d+$/.test(amount) || BigInt(amount) <= 0n) continue;
+    const hash = String(tx.hash ?? "");
+    if (hash.length < 8) continue;
+    transfers.push({
+      asset_code: asset.asset_code, transaction_hash: hash, event_index: 0,
+      destination_address: asset.wallet_address, amount_atomic: amount,
+      block_height: mcSeqno, confirmations: 1,
+    });
   }
   await ingest(URL + "/functions/v1/crypto-listener", secret, transfers);
-  await markCursor(db, asset, rows[0]?.transaction_id ?? rows[0]?.txID ?? await getCursor(db, asset.asset_code), null);
+  await markCursor(db, asset, latestLt ?? await getCursor(db, asset.asset_code), null);
+  return transfers.length;
+}
+
+async function scanTron(db: ReturnType<typeof createClient>, asset: Asset, secret: string) {
+  const headers: Record<string, string> = { "content-type": "application/json" };
+  if (TRON_KEY) headers["TRON-PRO-API-KEY"] = TRON_KEY;
+  const base = "https://api.trongrid.io";
+  const head = await fetchJson(base + "/walletsolidity/getnowblock", { method: "POST", headers, body: "{}" });
+  const tip = Number(head.block_header?.raw_data?.number ?? 0);
+  if (!tip) throw new Error("tron_solidified_tip_invalid");
+  const saved = await getCursor(db, asset.asset_code);
+  const transfers: Transfer[] = [];
+  let fingerprint = "";
+  let latestCursor: string | null = null;
+  for (let page = 0; page < 3; page++) {
+    const path = asset.token_contract
+      ? "/v1/accounts/" + encodeURIComponent(asset.wallet_address) + "/transactions/trc20?only_confirmed=true&only_to=true&limit=200&contract_address=" + encodeURIComponent(asset.token_contract)
+      : "/v1/accounts/" + encodeURIComponent(asset.wallet_address) + "/transactions?only_confirmed=true&only_to=true&limit=200&order_by=block_timestamp,desc";
+    const result = await fetchJson(base + path + (fingerprint ? "&fingerprint=" + encodeURIComponent(fingerprint) : ""), { headers });
+    const rows = result.data;
+    if (!Array.isArray(rows)) throw new Error("tron_history_invalid");
+    let foundSaved = false;
+    for (const row of rows) {
+      const txHash = String(row.transaction_id ?? row.txID ?? "");
+      if (!latestCursor && txHash) latestCursor = txHash;
+      if (saved && txHash === saved) foundSaved = true;
+      const block = Number(row.block_number ?? row.blockNumber ?? 0);
+      if (!block || !txHash) continue;
+      let amount = "0", eventIndex = 0;
+      if (asset.token_contract) {
+        if (String(row.token_info?.address ?? "").toLowerCase() !== asset.token_contract.toLowerCase()) continue;
+        if (!tronDestinationMatches(String(row.to ?? ""), asset.wallet_address)) continue;
+        amount = String(row.value ?? "0");
+        eventIndex = Number(row.event_index ?? 0);
+      } else {
+        const contract = row.raw_data?.contract?.find((item: any) => item.type === "TransferContract");
+        if (!contract) continue;
+        const value = contract.parameter?.value ?? {};
+        if (!tronDestinationMatches(String(value.to_address ?? ""), asset.wallet_address)) continue;
+        if (Array.isArray(row.ret) && row.ret.length && row.ret.some((entry: any) => entry.contractRet && entry.contractRet !== "SUCCESS")) continue;
+        amount = String(value.amount ?? "0");
+        eventIndex = Number(contract.parameter?.index ?? 0);
+      }
+      if (!/^\\d+$/.test(amount) || BigInt(amount) <= 0n) continue;
+      transfers.push({
+        asset_code: asset.asset_code, transaction_hash: txHash, event_index: eventIndex,
+        destination_address: asset.wallet_address, amount_atomic: amount,
+        block_height: block, confirmations: Math.max(0, tip - block + 1),
+      });
+    }
+    if (foundSaved) break;
+    const next = String(result.meta?.fingerprint ?? "");
+    if (!next || next === fingerprint || rows.length < 200) break;
+    fingerprint = next;
+  }
+  await ingest(URL + "/functions/v1/crypto-listener", secret, transfers);
+  await markCursor(db, asset, latestCursor ?? saved, null);
   return transfers.length;
 }
 
@@ -241,6 +342,7 @@ Deno.serve(async (request: Request) => {
       else if (asset.chain_family === "evm") count = await scanEvm(db, asset, secret, asset.asset_code === "BNB_BEP20" ? BSC_RPC : ETH_RPC);
       else if (asset.chain_family === "solana") count = await scanSolana(db, asset, secret);
       else if (asset.chain_family === "tron") count = await scanTron(db, asset, secret);
+      else if (asset.chain_family === "ton") count = await scanTon(db, asset, secret);
       else throw new Error("provider_not_implemented");
       summary.push({ asset_code: asset.asset_code, scanned: true, transfers: count });
     } catch (error) {
