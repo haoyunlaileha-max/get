@@ -8,7 +8,7 @@ A responsive, Chinese-language hosting storefront prototype for the **Anonymous 
 - Simplified Chinese and Traditional Chinese interface, with language preference saved in browser local storage
 - Reference-inspired hosting storefront information architecture with an original Anonymous Hosting logo
 - Linux VPS, Dedicated Server, Windows RDP, GPU Compute, and Domains product categories with demo plans and filtering
-- Local-only plan configurator; it does not submit orders or transmit customer data
+- Supabase-backed live catalog and authenticated pending-order submission when the public client configuration and trusted Edge Function are deployed; demo-only fallback when not configured
 - Customer account portal with Supabase email/password sign-in, registration, password reset, profile editing, and user-scoped order history
 - Admin operations console for orders, payment events, provisioning queue, product/plan creation and editing (including pricing/specifications), activation, region availability, and per-plan data-center capacity assignments (verified admin role + RLS required)
 - Modular static frontend with no bundler requirement
