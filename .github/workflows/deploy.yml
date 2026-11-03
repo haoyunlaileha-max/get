@@ -31,11 +31,17 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir -p dist
-          cp index.html dist/index.html
+          cp index.html account.html admin.html dist/
           cp .nojekyll dist/.nojekyll
           cp favicon.svg dist/favicon.svg
           cp robots.txt dist/robots.txt
           cp -R assets dist/assets
+          cp -R zh dist/zh
+          test -f dist/index.html
+          test -f dist/account.html
+          test -f dist/admin.html
+          test -f dist/zh/index.html
+          test -f dist/zh/vps/index.html
       - name: Check whether GitHub Pages is enabled
         id: pages
         env:
