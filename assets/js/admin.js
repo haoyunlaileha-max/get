@@ -320,7 +320,7 @@ async function updateRow(table, id, values) {
 }
 function csvCell(value) {
   let textValue = String(value ?? "");
-  if (/^[=+@\-\\t\\r]/.test(textValue)) textValue = "'" + textValue;
+  if (/^\s*[=+@\-]/.test(textValue)) textValue = "'" + textValue;
   return '"' + textValue.replace(/"/g, '""') + '"';
 }
 async function exportOrders() {
@@ -365,7 +365,7 @@ async function exportOrders() {
     anchor.href = url;
     anchor.download = "anonymous-hosting-orders-" + new Date().toISOString().slice(0,10) + ".csv";
     document.body.append(anchor); anchor.click(); anchor.remove();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
     show(nodes.success, expectedCount > exportLimit ? tr("orders_export_limit") : tr("orders_exported"));
   } catch {
     show(nodes.error, tr("export_failed"));
