@@ -82,6 +82,7 @@ Apply migrations in order to the intended Anonymous Hosting Supabase project onl
 - `supabase/migrations/20261103032419_provisioning_queue.sql`
 - `supabase/migrations/20261103032425_admin_console_read_access.sql`
 - `supabase/migrations/20261103032449_plan_region_inventory.sql`
+- `supabase/migrations/20261103052950_fence_provisioning_job_leases.sql`
 - `supabase/migrations/20261103052132_lock_down_order_mutations.sql`
 
 Configure secrets in the Supabase project, never in GitHub source:
