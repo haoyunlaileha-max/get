@@ -116,4 +116,10 @@ for (const marker of ["getOrderDateBounds", "applyOrderDateFilters", "orderStart
 for (const marker of ['.admin-orders-toolbar', '.admin-orders-pagination']) assert.ok(css.includes(marker), `Missing admin order filter styling: ${marker}`);
 for (const marker of ['.admin-order-details', '.admin-order-detail-body', '.admin-order-items']) assert.ok(css.includes(marker), `Missing admin order detail styling: ${marker}`);
 for (const marker of ['paid_at timestamptz', 'customer_note text']) assert.ok(paymentSql.includes(marker) || coreSql.includes(marker), `Admin order detail field missing from schema: ${marker}`);
+
+const accountHtml = await readFile(new URL("../account.html", import.meta.url), "utf8");
+const tokenPreview = await readFile(new URL("../assets/js/token-auth-preview.js", import.meta.url), "utf8");
+for (const marker of ['id="token-login-tab"', 'id="token-signup-tab"', 'id="access-token"', 'id="generate-token"', 'id="generated-token"', 'id="copy-token"']) assert.ok(accountHtml.includes(marker), `Missing token auth UI: ${marker}`);
+for (const marker of ['crypto.getRandomValues', 'token-demo-warning', 'clipboard.writeText']) assert.ok(tokenPreview.includes(marker), `Missing safe token preview behavior: ${marker}`);
+assert.ok(accountHtml.includes('assets/js/token-auth-preview.js'), "Token auth preview script must be loaded");
 console.log("Checks passed: refreshed storefront, Simplified/Traditional Chinese locales, account portal, admin console, RLS schema, secure order/payment processing, and provisioning queue.");
