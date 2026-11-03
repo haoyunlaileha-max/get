@@ -18,6 +18,7 @@ const paymentSql = read("supabase/migrations/20261103032413_payment_event_proces
 const provisioningSql = read("supabase/migrations/20261103032419_provisioning_queue.sql");
 const adminSql = read("supabase/migrations/20261103032425_admin_console_read_access.sql");
 const inventorySql = read("supabase/migrations/20261103032449_plan_region_inventory.sql");
+const rateLimitCleanupSql = read("supabase/migrations/20261103043200_cleanup_token_auth_rate_limits.sql");
 const adminHtml = read("admin.html");
 const adminJs = read("assets/js/admin.js");
 const orderFn = read("supabase/functions/create-order/index.ts");
@@ -131,5 +132,8 @@ assert.ok(bootstrapTag >= 0 && tokenAuthTag > bootstrapTag, "Shared Supabase aut
 assert.ok(accountJs.includes("await window.AH_SUPABASE_READY"), "Account module must await the shared Supabase client");
 assert.ok(tokenAuth.includes("await window.AH_SUPABASE_READY"), "Token login must await the same shared Supabase client");
 assert.ok(tokenAuth.includes("auth.setSession"), "Token login must establish the verified Supabase session");
+
+for (const marker of ["ah_token_auth_rate_limits_updated_idx", "updated_at < now() - interval '24 hours'", "ah_consume_token_auth_attempt", "grant execute", "service_role"]) assert.ok(rateLimitCleanupSql.toLowerCase().includes(marker.toLowerCase()), `Missing bounded token-auth rate-limit cleanup behavior: ${marker}`);
+assert.ok(!/drop table|truncate table/i.test(rateLimitCleanupSql), "Rate-limit cleanup migration must not drop or truncate data");
 
 console.log("Checks passed: refreshed storefront, Simplified/Traditional Chinese locales, account portal, admin console, RLS schema, secure order/payment processing, and provisioning queue.");
