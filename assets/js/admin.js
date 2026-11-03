@@ -483,7 +483,7 @@ $("product-editor").addEventListener("submit",(event)=>{event.preventDefault();s
 $("plan-editor").addEventListener("submit",(event)=>{event.preventDefault();saveCatalog(event.currentTarget,"ah_plans");});
 $("plan-region-editor").addEventListener("submit",(event)=>{event.preventDefault();saveInventory(event.currentTarget);});
 $("product-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("product-editor").elements.sort_order.value="0"; },0);});
-$("plan-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("plan-editor").elements.currency.value="USD"; $("plan-editor").elements.price.value="0"; $("plan-editor").elements.sort_order.value="0"; },0);});
+$("plan-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("plan-editor").elements.currency.value="USDT"; $("plan-editor").elements.price.value="0"; $("plan-editor").elements.sort_order.value="0"; },0);});
 $("orders-filter").addEventListener("submit", (event) => {
   event.preventDefault();
   orderSearch = $("order-search").value.trim();
