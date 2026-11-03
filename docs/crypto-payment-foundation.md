@@ -19,7 +19,7 @@ TRON native TRX and USDT TRC-20 require a production TronGrid API key for reliab
 ## Safety and operations
 
 - The scanner uses public receiving addresses only; no signing keys or seed phrases are stored.
-- A separate random scanner secret is generated inside Supabase Vault. It is never committed to GitHub.
+- The existing Vault-managed internal cron credential is reused for scanner authentication and is never committed to GitHub.
 - Only the database cron job can invoke the scanner; the listener independently checks the same secret through a service-role-only RPC.
 - Chain observations are not accepted from the browser.
 - Repeated provider failures block new invoices for the affected asset.

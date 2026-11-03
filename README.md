@@ -34,7 +34,7 @@ The payment webhook and provisioning worker are present in source but are not de
 
 - The live catalog tables `ah_products`, `ah_plans`, and `ah_regions` are empty. The storefront is deployed, but it is not ready to accept real hosting orders until genuine products, prices, specifications, and data-center availability are entered.
 - Nine crypto assets are configured: BTC, ETH, USDT ERC-20, USDT TRC-20, LTC, TRX, SOL, BNB BEP-20, and GRAM on TON. XMR is excluded.
-- All nine chain listeners remain disabled with `listener_status = awaiting_provider`. The invoice endpoint refuses to issue a payment address while the selected chain listener is offline.
+- BTC, LTC, ETH, USDT ERC-20, BNB and SOL scanners are enabled; TRON and TON remain disabled pending provider configuration with `listener_status = awaiting_provider`. The invoice endpoint refuses to issue a payment address while the selected chain listener is offline.
 - Telegram notification delivery is deployed and its test message was verified. A Vault-authenticated Cron job runs the dispatcher every minute, but it only processes notification events already written to the outbox; it does not scan blockchains.
 - The GRAM Jetton master contract and a matching GRAM market-rate source have not been verified. GRAM invoice creation is intentionally blocked rather than substituting native TON pricing.
 - No chain scanner, automatic on-chain settlement, payment webhook integration, or automatic hosting provisioning should be represented as live.
