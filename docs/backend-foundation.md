@@ -123,7 +123,7 @@ Apply migration `20261103032425_admin_console_read_access.sql` after migrations 
 
 ## Token authentication rate limiting
 
-The `token-auth` Edge Function applies database-backed per-IP limits: at most five registrations per hour and fifteen login attempts per fifteen minutes. IP values are HMAC-SHA256 digests keyed with the server-side service-role secret; raw IP addresses are not stored. Migration `20261103043218_cleanup_token_auth_rate_limits.sql` adds an index and removes buckets that have been inactive for more than 24 hours during subsequent auth attempts, keeping this operational table bounded. These limits protect token registration and login only; order-creation abuse throttling remains future work.
+The `token-auth` Edge Function applies database-backed per-IP limits: at most five registrations per hour and fifteen login attempts per fifteen minutes. It also enforces a 4 KiB request-body limit while reading the actual stream, rather than relying only on the optional `Content-Length` header. IP values are HMAC-SHA256 digests keyed with the server-side service-role secret; raw IP addresses are not stored. Migration `20261103043218_cleanup_token_auth_rate_limits.sql` adds an index and removes buckets that have been inactive for more than 24 hours during subsequent auth attempts, keeping this operational table bounded. These limits protect token registration and login only; order-creation abuse throttling remains future work.
 
 ## Row-level security
 
