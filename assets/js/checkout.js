@@ -126,7 +126,7 @@
     appendText(summary, "p", "", text);
     if (linkToAccount) {
       const link = document.createElement("a");
-      link.href = "account.html";
+      link.href = document.body.dataset.accountUrl || "account.html";
       link.textContent = "前往账户中心查看订单";
       summary.append(link);
     }
