@@ -6,7 +6,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "
 const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") || "https://haoyunlaileha-max.github.io").split(",").map((v) => v.trim()).filter(Boolean);
 const ASSET_SYMBOLS: Record<string, string> = {
   BTC:"BTCUSDT", ETH:"ETHUSDT", LTC:"LTCUSDT", TRX:"TRXUSDT", SOL:"SOLUSDT",
-  BNB_BEP20:"BNBUSDT", TON:"TONUSDT", USDT_ERC20:"", USDT_TRC20:"",
+  BNB_BEP20:"BNBUSDT", TON:"GRAMUSDT", USDT_ERC20:"", USDT_TRC20:"",
 };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function reply(status:number, body:Record<string,unknown>, origin:string|null) {
@@ -67,8 +67,6 @@ Deno.serve(async(request:Request)=>{
     if(order.currency!=="USDT"||!Number.isSafeInteger(order.total_minor)||order.total_minor<=0) return reply(409,{error:"order_must_be_priced_in_usdt"},origin);
     if(!["pending","awaiting_payment"].includes(order.status)) return reply(409,{error:"order_not_payable"},origin);
     // Never issue an address while its chain listener is offline: funds could otherwise be lost or uncredited.
-    if(assetCode==="TON"&&!asset.token_contract) return reply(503,{error:"asset_contract_unverified"},origin);
-    if(assetCode==="TON") return reply(503,{error:"asset_rate_source_unverified"},origin);
     if(!asset.listener_enabled||asset.listener_status!=="ready") return reply(503,{error:"asset_monitoring_unavailable",asset:assetCode,monitoring:asset.listener_status},origin);
     const symbol=ASSET_SYMBOLS[assetCode],priceText=symbol?await marketPrice(symbol):"1";
     const priceScale=12,priceScaled=scaledDecimal(priceText,priceScale),decimals=Number(asset.decimals);
