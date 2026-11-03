@@ -9,12 +9,14 @@ The production scanner is a Supabase Edge Function invoked every minute by pg_cr
 - Ethereum native ETH and ERC-20 USDT: public Ethereum JSON-RPC; native block transactions and receipt success, ERC-20 Transfer logs filtered by the registered token contract and recipient.
 - BNB native: BNB Smart Chain public JSON-RPC.
 - Solana native SOL: public Solana JSON-RPC parsed System Program transfers; finality is required before credit.
+- TRON native TRX and USDT TRC-20: TronGrid confirmed account history, TRC-20 contract allowlist filtering, Base58/hex destination verification, and solidified block heights.
+- TON native GRAM: TON Center API v3 indexed account transactions, raw/friendly address normalization, successful inbound native-message filtering, and masterchain inclusion.
 
 The EVM scanner stores per-asset block cursors, overlaps recent blocks to refresh confirmation counts, and advances in bounded batches. UTXO and Solana observations are deduplicated by transaction/output or instruction index in the settlement ledger. Provider failures mark the adapter degraded so invoice creation fails closed until scanning recovers.
 
 ## Providers requiring credentials / additional adapter work
 
-TRON native TRX and USDT TRC-20 require a production TronGrid API key for reliable indexed account history; the worker supports `TRONGRID_API_KEY`, but these assets remain disabled until that key is configured and the provider returns healthy data. TON is not enabled: the existing registry entry is Toncoin, not GRAM, and a TON account-history adapter plus verified token master contract is not present.
+TRON native TRX and USDT TRC-20 use TronGrid confirmed account history and solidified block height. `TRONGRID_API_KEY` is optional for low-volume connectivity but strongly recommended for production quotas and reliability; provider errors and rate limits mark the assets degraded and stop new invoices. `TONCENTER_API_KEY` is optional; unauthenticated TON Center API v3 access is rate-limited.
 
 ## Safety and operations
 
@@ -23,5 +25,6 @@ TRON native TRX and USDT TRC-20 require a production TronGrid API key for reliab
 - Only the database cron job can invoke the scanner; the listener independently checks the same secret through a service-role-only RPC.
 - Chain observations are not accepted from the browser.
 - Repeated provider failures block new invoices for the affected asset.
+- The existing `TON` asset code is retained for backwards compatibility, while the native coin is displayed and priced as GRAM after the network ticker rebrand. Native GRAM is not a Jetton; the scanner accepts only native inbound messages with masterchain inclusion and rejects Jetton notification opcodes.
 - The scanner is a deposit monitor, not a withdrawal service. It does not sweep or spend funds.
 - Public RPC/explorer endpoints have rate limits and are best-effort infrastructure. For high-volume production, replace them with dedicated provider endpoints and monitor cursor lag.
