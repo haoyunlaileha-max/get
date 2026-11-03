@@ -60,6 +60,54 @@ function formatMoney(minor,currency){
   try{return new Intl.NumberFormat(language,{style:"currency",currency}).format(Number(minor)/100);}
   catch{return (Number(minor)/100).toFixed(2)+" "+currency;}
 }
+const orderStatusLabels={
+  draft:"草稿",pending:"待处理",awaiting_payment:"待付款",paid:"已付款",
+  provisioning:"正在开通",active:"运行中",suspended:"已暂停",
+  cancelled:"已取消",failed:"开通失败",refunded:"已退款"
+};
+function formatDate(value){
+  if(!value)return "—";
+  const date=new Date(value);
+  return Number.isNaN(date.getTime())?"—":date.toLocaleString(language);
+}
+function renderOrderCard(order){
+  const card=document.createElement("article");card.className="order-row";
+  const heading=document.createElement("div");heading.className="order-heading";
+  const orderId=document.createElement("strong");
+  orderId.textContent="订单 "+order.id.slice(0,8).toUpperCase();
+  const date=document.createElement("small");date.textContent=formatDate(order.created_at);
+  heading.append(orderId,date);
+  const meta=document.createElement("div");meta.className="order-meta";
+  const status=document.createElement("span");
+  status.className="order-status status-"+String(order.status||"unknown").replace(/[^a-z_]/g,"");
+  status.textContent=locale.text(orderStatusLabels[order.status]||"状态未知",language);
+  const total=document.createElement("strong");total.textContent=formatMoney(order.total_minor,order.currency);
+  meta.append(status,total);
+  const summary=document.createElement("summary");
+  summary.className="order-detail-toggle";
+  summary.textContent=locale.text("查看订单详情",language);
+  const details=document.createElement("details");details.className="order-details";
+  const detailGrid=document.createElement("dl");detailGrid.className="order-detail-grid";
+  const addDetail=(label,value)=>{
+    const wrap=document.createElement("div");
+    const term=document.createElement("dt");term.textContent=locale.text(label,language);
+    const desc=document.createElement("dd");desc.textContent=value||"—";
+    wrap.append(term,desc);detailGrid.append(wrap);
+  };
+  addDetail("订单编号",order.id);
+  addDetail("订单状态",orderStatusLabels[order.status]||"状态未知");
+  addDetail("创建时间",formatDate(order.created_at));
+  addDetail("更新时间",formatDate(order.updated_at));
+  if(order.paid_at)addDetail("付款确认时间",formatDate(order.paid_at));
+  if(order.customer_note)addDetail("配置备注",order.customer_note);
+  details.append(summary,detailGrid);
+  const lines=document.createElement("ul");lines.className="order-items";
+  for(const row of order.ah_order_items||[])lines.append(renderOrderItem(row,order.currency));
+  card.append(heading,meta);
+  if(lines.childElementCount)card.append(lines);
+  card.append(details);
+  return card;
+}
 function renderOrderItem(row,currency){
   const line=document.createElement("li");
   const label=document.createElement("span");
@@ -83,26 +131,14 @@ async function renderSession(session){
   document.getElementById("account-email").textContent=session.user.email||tr("signed_user");
   ordersState.hidden=false;ordersState.textContent=tr("loading_orders");ordersList.replaceChildren();
   await loadProfile(userId);
-  const {data,error}=await supabase.from("ah_orders").select("id,status,currency,total_minor,created_at,ah_order_items(description_snapshot,quantity,unit_price_minor)").eq("user_id",userId).order("created_at",{ascending:false}).limit(20);
+  const {data,error}=await supabase.from("ah_orders")
+    .select("id,status,currency,total_minor,created_at,updated_at,paid_at,customer_note,ah_order_items(description_snapshot,quantity,unit_price_minor)")
+    .eq("user_id",userId).order("created_at",{ascending:false}).limit(20);
   if(activeUserId!==userId)return;
   if(error){ordersState.textContent=tr("orders_error");return;}
   if(!data?.length){ordersState.textContent=tr("no_orders");return;}
   ordersState.hidden=true;
-  for(const order of data){
-    const item=document.createElement("article");item.className="order-row";
-    const details=document.createElement("div");
-    const id=document.createElement("strong");id.textContent="Order "+order.id.slice(0,8).toUpperCase();
-    const date=document.createElement("small");date.textContent=new Date(order.created_at).toLocaleString(language);
-    details.append(id,date);
-    const meta=document.createElement("div");meta.className="order-meta";
-    const status=document.createElement("span");status.className="order-status";status.textContent=String(order.status).replaceAll("_"," ");
-    const total=document.createElement("strong");total.textContent=formatMoney(order.total_minor,order.currency);
-    meta.append(status,total);item.append(details,meta);
-    const lines=document.createElement("ul");lines.className="order-items";
-    for(const row of order.ah_order_items||[])lines.append(renderOrderItem(row,order.currency));
-    if(lines.childElementCount)item.append(lines);
-    ordersList.append(item);
-  }
+  for(const order of data)ordersList.append(renderOrderCard(order));
 }
 function showError(error){message(authError,error?.message||tr("generic_error"));message(authSuccess,"");}
 document.getElementById("toggle-password").addEventListener("click",event=>{
