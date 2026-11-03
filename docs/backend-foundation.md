@@ -121,6 +121,10 @@ The console provides exact count metrics, recent order history, recent payment-e
 
 Apply migration `20261103032425_admin_console_read_access.sql` after migrations 0001–0004, then apply `20261103032449_plan_region_inventory.sql` to enable plan-region capacity management. Once the intended Supabase project is configured and the trusted administrator role is assigned, open `/admin.html`. The console will remain unavailable until the migrations, public browser configuration, and admin role are correctly set up.
 
+## Token authentication rate limiting
+
+The `token-auth` Edge Function applies database-backed per-IP limits: at most five registrations per hour and fifteen login attempts per fifteen minutes. IP values are HMAC-SHA256 digests keyed with the server-side service-role secret; raw IP addresses are not stored. Migration `20261103043200_cleanup_token_auth_rate_limits.sql` adds an index and removes buckets that have been inactive for more than 24 hours during subsequent auth attempts, keeping this operational table bounded. These limits protect token registration and login only; order-creation abuse throttling remains future work.
+
 ## Row-level security
 
 - Visitors can read active catalog entries and regions.
@@ -135,6 +139,6 @@ Apply migration `20261103032425_admin_console_read_access.sql` after migrations 
 
 - The storefront can load active products, plans, and regions from the Supabase catalog. Signed-in customers submit plan and region IDs to the `create-order` Edge Function; the function verifies the session and delegates to the service-role-only `ah_create_order` RPC, which derives prices from the database and reserves configured regional capacity. Successful submission creates a pending order only. The order function does not collect payment details or charge a customer. The webhook advances an order to paid only after a correctly signed normalized success event and database checks.
 - The normalized HMAC receiver is not a substitute for a provider-specific native signature adapter.
-- Refunds, disputes, chargebacks, provider API integration, audit monitoring, and per-user/IP rate limiting remain future work.
+- Refunds, disputes, chargebacks, provider API integration, audit monitoring, and order-creation abuse throttling remain future work. Token registration and login have separate database-backed per-IP limits.
 - Migrations and Edge Functions are not deployed to Supabase by this repository workflow. No secrets or project credentials are stored in this repository.
 - The admin console is committed and Pages-deployable, but it requires migrations 0001–0005, a configured public Supabase client, and a trusted admin role before operational data is visible.
