@@ -16,7 +16,7 @@ const profileSave = document.getElementById("profile-save");
 const profileState = document.getElementById("profile-state");
 const languageSelect = document.getElementById("account-language");
 let supabase;
-let mode = "login";
+let mode = new URLSearchParams(window.location.search).get("mode") === "signup" ? "signup" : "login";
 let activeUserId = null;
 let orderOffset = 0;
 let ordersLoading = false;
@@ -189,6 +189,7 @@ else{
 loadMoreOrdersButton.addEventListener("click",loadMoreOrders);
 document.getElementById("login-tab").addEventListener("click",()=>setMode("login"));
 document.getElementById("signup-tab").addEventListener("click",()=>setMode("signup"));
+setMode(mode);
 authForm.addEventListener("submit",async event=>{
   event.preventDefault();if(!supabase)return;
   message(authError,"");message(authSuccess,"");
