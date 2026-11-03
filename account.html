@@ -53,7 +53,11 @@
       </section>
       <div id="token-auth-message" class="account-notice token-auth-message" role="status" hidden></div>
     </section>
-    <section id="auth-panel" class="legacy-auth-panel" hidden aria-hidden="true"></section>
+    <section id="auth-panel" class="legacy-auth-panel" hidden aria-hidden="true">
+      <div class="account-tabs" role="tablist"><button type="button" id="login-tab">登录</button><button type="button" id="signup-tab">注册</button></div>
+      <form id="auth-form"><label for="auth-email">邮箱</label><input id="auth-email" type="email"><label for="auth-password">密码</label><div class="account-password-field"><input id="auth-password" type="password"><button id="toggle-password" type="button">显示</button></div><button id="auth-submit" type="submit">登录</button></form>
+      <button id="reset-password" type="button">重置密码</button>
+    </section>
     <section id="account-dashboard" hidden>
       <div class="account-user"><span class="account-avatar" aria-hidden="true">A</span><div><strong id="account-email"></strong><small data-i="authenticated">Authenticated customer</small></div></div>
       <section class="account-balance" id="balance"><div><div class="kicker">ACCOUNT BALANCE / 账户余额</div><h2 class="account-section-title">账户余额</h2><p class="account-balance-value">— <small>余额服务尚未接入</small></p><p class="account-inline-state">支付服务尚未连接。当前不会创建虚假充值记录、生成收款地址或收取款项。</p><div class="account-payment-chips"><span>BTC</span><span>XMR</span><span>ETH</span><span>USDT</span><span>LTC</span><span>TRX</span><span>SOL</span></div></div><div class="account-topup"><h3>账户充值</h3><p>选择金额与支付网络，创建充值订单。</p><label for="topup-amount">充值金额（USD）</label><select id="topup-amount" disabled><option>选择充值金额</option><option>10</option><option>25</option><option>50</option><option>100</option><option>250</option></select><label for="topup-method">支付方式</label><select id="topup-method" disabled><option>支付渠道尚未开放</option><option>Bitcoin (BTC)</option><option>Monero (XMR)</option><option>USDT</option><option>Ethereum (ETH)</option><option>Litecoin (LTC)</option><option>TRON (TRX)</option><option>Solana (SOL)</option></select><button class="btn btn-primary" type="button" disabled>充值通道尚未开放</button><small>支付通道上线后，将显示唯一收款地址、二维码、应付金额及确认状态。</small></div></section><section class="account-transactions"><h3>最近充值记录</h3><div class="account-notice">暂无充值记录。充值功能开放后，交易状态会显示在这里。</div></section>
