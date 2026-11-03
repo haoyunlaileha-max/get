@@ -17,23 +17,43 @@
     <div id="auth-setup" class="account-notice" role="status"><span data-i="setup_text">Authentication is not connected yet. Add your Supabase project URL and public anon/publishable key in</span> <code>assets/js/supabase-config.js</code> <span data-i="setup_suffix">to enable secure sign-in. Never put a service-role key here.</span></div>
     <div id="auth-error" class="account-error" role="alert" hidden></div>
     <div id="auth-success" class="account-success" role="status" hidden></div>
-    <section id="auth-panel" hidden>
-      <div class="account-tabs" role="tablist" aria-label="Account action">
-        <button type="button" class="account-tab active" id="login-tab" role="tab" aria-selected="true" data-i="sign_in">Sign in</button>
-        <button type="button" class="account-tab" id="signup-tab" role="tab" aria-selected="false" data-i="create_account">Create account</button>
+    <section class="token-auth" id="token-auth">
+      <div class="token-auth-heading">
+        <div class="kicker">PRIVATE ACCESS / 私密访问</div>
+        <h1 class="account-title" data-i="your_account">欢迎回来</h1>
+        <p class="account-lead">访问您的服务器控制面板</p>
       </div>
-      <form id="auth-form">
-        <label for="auth-email" data-i="email">Email address</label>
-        <input id="auth-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com">
-        <label for="auth-password" data-i="password">Password</label>
-        <div class="account-password-field">
-          <input id="auth-password" name="password" type="password" autocomplete="current-password" required minlength="8" maxlength="128" placeholder="At least 8 characters">
-          <button class="account-password-toggle" id="toggle-password" type="button" aria-label="Show password" aria-pressed="false" data-i="show">Show</button>
+      <div class="account-tabs token-tabs" role="tablist" aria-label="登录注册">
+        <button type="button" class="account-tab active" id="token-login-tab" role="tab" aria-selected="true">登录</button>
+        <button type="button" class="account-tab" id="token-signup-tab" role="tab" aria-selected="false">注册</button>
+      </div>
+      <section id="token-login-panel" class="token-panel" aria-labelledby="token-login-tab">
+        <label for="access-token">访问令牌</label>
+        <input id="access-token" name="access_token" type="password" autocomplete="off" spellcheck="false" placeholder="xxxx-xxxx-xxxx-xxxx" maxlength="80" aria-describedby="token-login-help">
+        <p class="token-help" id="token-login-help">输入创建账户时保存的访问令牌。</p>
+        <button class="btn btn-primary account-submit" id="token-login-submit" type="button">登录</button>
+        <p class="token-switch-copy">没有账户？ <button type="button" class="account-link-button" id="show-token-signup">查看注册方式</button></p>
+      </section>
+      <section id="token-signup-panel" class="token-panel" aria-labelledby="token-signup-tab" hidden>
+        <h2 class="token-signup-title">创建账户</h2>
+        <p class="token-signup-lead">只需一笔订单即可</p>
+        <p class="token-description">创建账户免费且即时完成。一个令牌即可取代你的姓名、邮箱和密码。正式启用后，令牌只会在创建时显示一次，并由服务器安全哈希保存。部署前需要先充值。</p>
+        <ol class="token-steps">
+          <li><span>1</span><div><strong>生成你的令牌</strong><small>点击下方按钮创建专属访问凭证</small></div></li>
+          <li><span>2</span><div><strong>妥善保存</strong><small>令牌只显示一次，请保存在安全的位置</small></div></li>
+          <li><span>3</span><div><strong>充值并部署</strong><small>账户充值后即可购买并部署服务</small></div></li>
+        </ol>
+        <button class="btn btn-primary account-submit" id="generate-token" type="button">创建我的令牌</button>
+        <div class="token-result" id="token-result" hidden aria-live="polite">
+          <label for="generated-token">你的演示令牌</label>
+          <div class="token-result-row"><input id="generated-token" type="text" readonly spellcheck="false"><button type="button" class="btn btn-ghost" id="copy-token">复制</button></div>
+          <p class="token-demo-warning">这是本地界面演示令牌，尚未提交服务器、哈希保存或创建真实账户，请勿用于实际登录。</p>
         </div>
-        <button class="btn btn-primary account-submit" id="auth-submit" type="submit" data-i="sign_in_secure">Sign in securely</button>
-      </form>
-      <button class="account-link-button" id="reset-password" type="button" data-i="reset_password">Send password reset email</button>
+        <p class="token-switch-copy">已有令牌？ <button type="button" class="account-link-button" id="show-token-login">登录</button></p>
+      </section>
+      <div id="token-auth-message" class="account-notice token-auth-message" role="status" hidden></div>
     </section>
+    <section id="auth-panel" class="legacy-auth-panel" hidden aria-hidden="true"></section>
     <section id="account-dashboard" hidden>
       <div class="account-user"><span class="account-avatar" aria-hidden="true">A</span><div><strong id="account-email"></strong><small data-i="authenticated">Authenticated customer</small></div></div>
       <section class="account-balance" id="balance"><div><div class="kicker">ACCOUNT BALANCE / 账户余额</div><h2 class="account-section-title">账户余额</h2><p class="account-balance-value">— <small>余额服务尚未接入</small></p><p class="account-inline-state">支付服务尚未连接。当前不会创建虚假充值记录、生成收款地址或收取款项。</p><div class="account-payment-chips"><span>BTC</span><span>XMR</span><span>ETH</span><span>USDT</span><span>LTC</span><span>TRX</span><span>SOL</span></div></div><div class="account-topup"><h3>账户充值</h3><p>选择金额与支付网络，创建充值订单。</p><label for="topup-amount">充值金额（USD）</label><select id="topup-amount" disabled><option>选择充值金额</option><option>10</option><option>25</option><option>50</option><option>100</option><option>250</option></select><label for="topup-method">支付方式</label><select id="topup-method" disabled><option>支付渠道尚未开放</option><option>Bitcoin (BTC)</option><option>Monero (XMR)</option><option>USDT</option><option>Ethereum (ETH)</option><option>Litecoin (LTC)</option><option>TRON (TRX)</option><option>Solana (SOL)</option></select><button class="btn btn-primary" type="button" disabled>充值通道尚未开放</button><small>支付通道上线后，将显示唯一收款地址、二维码、应付金额及确认状态。</small></div></section><section class="account-transactions"><h3>最近充值记录</h3><div class="account-notice">暂无充值记录。充值功能开放后，交易状态会显示在这里。</div></section>
@@ -52,9 +72,9 @@
       <button class="btn btn-ghost account-submit" id="load-more-orders" type="button" hidden data-i="load_more_orders">加载更多订单</button>
       <button class="btn btn-ghost account-submit" id="sign-out" type="button" data-i="sign_out">Sign out</button>
     </section>
-    <p class="account-footnote" data-i="privacy_note">Your credentials are sent directly to your configured Supabase project over HTTPS. This portal does not store passwords in this website.</p>
+    <p class="account-footnote">请妥善保管访问令牌。令牌验证服务接入后，账户凭证将由服务器安全处理。</p>
   </section>
 </main>
 <script src="assets/js/language.js"></script><script src="assets/js/supabase-config.js"></script>
-<script type="module" src="assets/js/account.js"></script>
+<script type="module" src="assets/js/account.js"></script><script src="assets/js/token-auth-preview.js"></script>
 </body></html>
