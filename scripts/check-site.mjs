@@ -22,6 +22,7 @@ const rateLimitCleanupSql = read("supabase/migrations/20261103043218_cleanup_tok
 const adminHtml = read("admin.html");
 const adminJs = read("assets/js/admin.js");
 const orderFn = read("supabase/functions/create-order/index.ts");
+const tokenAuthFn = read("supabase/functions/token-auth/index.ts");
 const paymentFn = read("supabase/functions/payment-webhook/index.ts");
 const provisioningFn = read("supabase/functions/provision-worker/index.ts");
 const supabaseConfig = read("supabase/config.toml");
@@ -122,6 +123,7 @@ const accountHtml = account;
 const tokenAuth = read("assets/js/token-auth.js");
 for (const marker of ['id="token-login-tab"', 'id="token-signup-tab"', 'id="access-token"', 'id="generate-token"', 'id="generated-token"', 'id="copy-token"', 'token-demo-warning']) assert.ok(accountHtml.includes(marker), `Missing token auth UI: ${marker}`);
 for (const marker of ['crypto.getRandomValues', 'clipboard.writeText', 'functions/v1/token-auth', 'requestAuth("register"', 'requestAuth("login"', 'auth.setSession']) assert.ok(tokenAuth.includes(marker), `Missing server-verified token auth behavior: ${marker}`);
+for (const marker of ["request.body?.getReader()", "value.byteLength", "totalBytes > 4096", "TextDecoder"]) assert.ok(tokenAuthFn.includes(marker), `Missing streamed token-auth body limit: ${marker}`);
 assert.ok(accountHtml.includes('assets/js/token-auth.js'), "Token auth client script must be loaded");
 assert.ok(accountJs.includes('const tokenAuthPanel = document.getElementById("token-auth")') && accountJs.includes('if(tokenAuthPanel)tokenAuthPanel.hidden=true'), "Authenticated dashboard must replace the token sign-in panel");
 const authBootstrap = read("assets/js/supabase-auth-bootstrap.js");
