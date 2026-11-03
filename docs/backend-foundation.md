@@ -82,6 +82,7 @@ Apply migrations in order to the intended Anonymous Hosting Supabase project onl
 - `supabase/migrations/20261103032419_provisioning_queue.sql`
 - `supabase/migrations/20261103032425_admin_console_read_access.sql`
 - `supabase/migrations/20261103032449_plan_region_inventory.sql`
+- `supabase/migrations/20261103051930_lock_down_order_mutations.sql`
 
 Configure secrets in the Supabase project, never in GitHub source:
 
@@ -115,11 +116,11 @@ Migration `20261103032449_plan_region_inventory.sql` adds `ah_plan_regions`, an 
 
 The static `admin.html` page is a browser-only operations interface. It verifies the current user with Supabase Auth and requires the verified JWT `app_metadata.role = admin`. The UI check is only a convenience gate: the database remains authoritative through admin RLS policies. Migration `20261103032425_admin_console_read_access.sql` grants authenticated users SELECT privileges on payment and provisioning records but adds RLS policies that return rows only when `ah_is_admin()` is true. Existing RLS policies already restrict product, plan, and region mutations to the same verified admin role.
 
-The console provides exact count metrics, recent order history, recent payment-event records, provisioning job state, product/plan activation toggles, region availability controls, admin-only product/plan create/edit forms, and plan-to-region inventory assignments. Product fields include slug, category, description and sort order. Plan fields include product association, unique code, price in major currency units (converted to integer minor units), currency, billing period, JSON specifications (CPU, RAM, storage, bandwidth, OS options), sort order and publication state. New records default to inactive; existing prices change only when an administrator explicitly edits and saves that plan. The browser validates inputs and database RLS remains authoritative. The console still does not expose direct order status changes, manual payment marking, provider credentials, or destructive operations. Configure only the public Supabase URL and anon/publishable key in `assets/js/supabase-config.js`; never place a service-role key in the browser. Admin users must be assigned `app_metadata.role = admin` by a trusted project administrator through the Supabase Auth Admin API or Dashboard; ordinary users must not be able to set this field themselves.
+The console provides exact count metrics, recent order history, recent payment-event records, provisioning job state, product/plan activation toggles, region availability controls, admin-only product/plan create/edit forms, and plan-to-region inventory assignments. Product fields include slug, category, description and sort order. Plan fields include product association, unique code, price in major currency units (converted to integer minor units), currency, billing period, JSON specifications (CPU, RAM, storage, bandwidth, OS options), sort order and publication state. New records default to inactive; existing prices change only when an administrator explicitly edits and saves that plan. The browser validates inputs and database RLS remains authoritative. The console still does not expose direct order status changes, manual payment marking, provider credentials, or destructive operations. Migration `20261103051930_lock_down_order_mutations.sql` removes all browser-authenticated INSERT/UPDATE/DELETE grants and admin write policies on `ah_orders` and `ah_order_items`; authenticated users (including admins) can only read rows allowed by RLS. Order creation, payment transitions, and provisioning updates remain restricted to service-role-only server workflows. Configure only the public Supabase URL and anon/publishable key in `assets/js/supabase-config.js`; never place a service-role key in the browser. Admin users must be assigned `app_metadata.role = admin` by a trusted project administrator through the Supabase Auth Admin API or Dashboard; ordinary users must not be able to set this field themselves.
 
 ### Admin rollout
 
-Apply migration `20261103032425_admin_console_read_access.sql` after migrations 0001–0004, then apply `20261103032449_plan_region_inventory.sql` to enable plan-region capacity management. Once the intended Supabase project is configured and the trusted administrator role is assigned, open `/admin.html`. The console will remain unavailable until the migrations, public browser configuration, and admin role are correctly set up.
+Apply migration `20261103032425_admin_console_read_access.sql` after migrations 0001–0004, then apply `20261103032449_plan_region_inventory.sql` to enable plan-region capacity management, and finally apply `20261103051930_lock_down_order_mutations.sql` to make browser access to orders read-only. Once the intended Supabase project is configured and the trusted administrator role is assigned, open `/admin.html`. The console will remain unavailable until the migrations, public browser configuration, and admin role are correctly set up.
 
 ## Token authentication rate limiting
 
@@ -129,7 +130,8 @@ The `token-auth` Edge Function applies database-backed per-IP limits: at most fi
 
 - Visitors can read active catalog entries and regions.
 - Customers can read/update their own profile and read only their own orders/items.
-- Catalog writes and order mutations are reserved for administrators or trusted server-side code.
+- Browser-authenticated users, including admins, have SELECT-only privileges on orders and order items; all order mutations use trusted service-role-only server workflows.
+- Catalog writes remain reserved for verified administrators.
 - Admin access uses only verified JWT `app_metadata.role=admin`, never user-editable `user_metadata`.
 - Payment event records have RLS enabled; only verified admins can read them through the admin console.
 - Provisioning job records have RLS enabled; only verified admins can read them through the admin console.
