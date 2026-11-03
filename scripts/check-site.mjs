@@ -122,4 +122,5 @@ const tokenPreview = read("assets/js/token-auth-preview.js");
 for (const marker of ['id="token-login-tab"', 'id="token-signup-tab"', 'id="access-token"', 'id="generate-token"', 'id="generated-token"', 'id="copy-token"', 'token-demo-warning']) assert.ok(accountHtml.includes(marker), `Missing token auth UI: ${marker}`);
 for (const marker of ['crypto.getRandomValues', 'clipboard.writeText', '令牌验证服务尚未接入']) assert.ok(tokenPreview.includes(marker), `Missing safe token preview behavior: ${marker}`);
 assert.ok(accountHtml.includes('assets/js/token-auth-preview.js'), "Token auth preview script must be loaded");
+assert.ok(accountJs.includes('const tokenAuthPanel = document.getElementById("token-auth")') && accountJs.includes('if(tokenAuthPanel)tokenAuthPanel.hidden=true'), "Authenticated dashboard must replace the token sign-in panel");
 console.log("Checks passed: refreshed storefront, Simplified/Traditional Chinese locales, account portal, admin console, RLS schema, secure order/payment processing, and provisioning queue.");
