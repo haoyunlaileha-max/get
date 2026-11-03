@@ -4,13 +4,13 @@
 
 The database has nine configured assets: BTC, ETH, USDT ERC-20, USDT TRC-20, LTC, TRX, SOL, BNB BEP-20 and GRAM on TON. XMR is excluded.
 
-The GRAM row uses the previously configured TON receiving wallet, ticker/display name GRAM, and the TON/GRAM network label. The quote adapter maps this legacy GRAM label to the TON/USDT market symbol. The actual GRAM Jetton master contract has not yet been populated in the asset registry; the current wallet address is a receiving address, not a token contract address. The invoice endpoint explicitly rejects GRAM invoices until the master contract is present and verified.
+The GRAM row uses the previously configured TON receiving wallet, ticker/display name GRAM, and the TON/GRAM network label. The actual GRAM Jetton master contract has not yet been populated in the asset registry; the current wallet address is a receiving address, not a token contract address. The invoice endpoint explicitly rejects GRAM invoices until both the master contract and a matching market-rate source are verified. It must not use the native TON price for a distinct Jetton.
 
 ## USDT pricing and invoice generation
 
 - Catalog plan prices are denominated in USDT (minor units are cents, 2 decimal places).
 - Order creation is server-side and rejects plans not priced in USDT.
-- The authenticated `create-crypto-invoice` Edge Function obtains a live USDT market quote from Binance public ticker endpoints for BTC, ETH, LTC, TRX, SOL, BNB and TON/GRAM; USDT network payments use a 1:1 quote.
+- The authenticated `create-crypto-invoice` Edge Function obtains live USDT market quotes from Binance public ticker endpoints for BTC, ETH, LTC, TRX, SOL and BNB; USDT network payments use a 1:1 quote. GRAM is deliberately blocked until its own market-rate source is verified.
 - Amount conversion uses integer arithmetic and each asset's atomic precision.
 - The database allocates a unique active invoice amount per asset and stores the quote, expiry and expected atomic amount.
 - Customers can select the asset/network after creating an order.
@@ -19,7 +19,7 @@ The GRAM row uses the previously configured TON receiving wallet, ticker/display
 
 The schema, USDT pricing path, authenticated invoice endpoint and checkout UI are deployed. However, all nine chain listeners remain disabled with `listener_status = awaiting_provider`. The invoice endpoint intentionally refuses to issue a payment address while the selected chain listener is offline, so customers cannot send funds into a flow that cannot reliably detect and credit them.
 
-No private keys or seed phrases are stored. No chain listener or scheduled scanner is active. The remaining production boundary is chain-specific transaction indexing, confirmation/reorg handling, a scheduler, and verification of the GRAM Jetton master contract. A successful website/Edge Function deployment does not mean automatic on-chain settlement is active.
+No private keys or seed phrases are stored. No chain transaction scanner is active. The Telegram notification dispatcher is scheduled every minute; that is separate from chain scanning. The remaining production boundary is chain-specific RPC/indexer providers, transaction indexing, confirmation/reorg handling, and verification of the GRAM Jetton master contract. A successful website/Edge Function deployment does not mean automatic on-chain settlement is active.
 
 ## Telegram payment notifications
 
@@ -33,6 +33,6 @@ Required Edge Function secrets (set in Supabase Dashboard > Edge Functions > Sec
 
 The chain listener calls `POST /functions/v1/telegram-dispatch` with header `x-listener-secret: <CRYPTO_LISTENER_INTERNAL_SECRET>` and JSON body `{"action":"dispatch"}` after writing deposit events. Send `{"action":"test"}` to the same endpoint to test the Telegram connection. The bot token and internal secret must never be committed to GitHub or placed in browser code.
 
-The notification outbox and dispatcher are deployed. Telegram delivery was verified with a real test message after the three Edge Function secrets were configured. A Supabase Cron job invokes the dispatcher every minute using a publishable key stored in Vault; the Edge Function accepts this key only for the fixed outbox-dispatch action, while the test action still requires the internal listener secret. The outbox RPCs are restricted by explicit EXECUTE grants to `service_role`, avoiding legacy JWT-role-claim checks that are not populated by the newer Supabase Secret API key format. No real deposit event is generated for testing. The on-chain scanners remain a separate deployment dependency because chain-specific providers and the GRAM Jetton master contract still need to be configured and verified.
+The notification outbox and dispatcher are deployed. Telegram delivery was verified with a real test message after the three Edge Function secrets were configured. A Supabase Cron job invokes the dispatcher every minute using a publishable key plus a separate random cron proof stored in Vault; the Edge Function validates the proof through a service-role-only database function. The test action still requires the internal listener secret. The outbox RPCs are restricted by explicit EXECUTE grants to `service_role`, avoiding legacy JWT-role-claim checks that are not populated by the newer Supabase Secret API key format. No real deposit event is generated for testing. The on-chain scanners remain a separate deployment dependency because chain-specific providers and the GRAM Jetton master contract still need to be configured and verified.
 
 Notification code is versioned alongside its applied database migrations; never commit bot credentials.
