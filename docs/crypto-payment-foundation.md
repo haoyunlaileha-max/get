@@ -34,3 +34,5 @@ Required Edge Function secrets (set in Supabase Dashboard > Edge Functions > Sec
 The chain listener calls `POST /functions/v1/telegram-dispatch` with header `x-listener-secret: <CRYPTO_LISTENER_INTERNAL_SECRET>` and JSON body `{"action":"dispatch"}` after writing deposit events. Send `{"action":"test"}` to the same endpoint to test the Telegram connection. The bot token and internal secret must never be committed to GitHub or placed in browser code.
 
 The notification outbox and dispatcher are deployed, but Telegram delivery cannot be verified until the three secrets are configured. No real deposit event is generated for testing. The on-chain scanners are still a separate deployment dependency.
+
+Notification code is versioned alongside its applied database migrations; never commit bot credentials.
