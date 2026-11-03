@@ -34,7 +34,15 @@ fr:{portal:"ESPACE CLIENT",your_account:"Votre compte",intro:"Connectez-vous pou
 ru:{portal:"КАБИНЕТ КЛИЕНТА",your_account:"Ваш аккаунт",intro:"Войдите, чтобы управлять услугами хостинга и просматривать заказы.",language_label:"Язык",back_store:"← На главную",setup_text:"Авторизация ещё не подключена. Добавьте URL проекта Supabase и публичный ключ в",setup_suffix:"для безопасного входа. Не размещайте здесь service-role ключ.",sign_in:"Войти",create_account:"Создать аккаунт",email:"Электронная почта",password:"Пароль",show:"Показать",hide:"Скрыть",sign_in_secure:"Безопасный вход",create_account_btn:"Создать аккаунт",reset_password:"Отправить письмо для сброса пароля",authenticated:"Проверенный клиент",profile_title:"Профиль",display_name:"Отображаемое имя",save_profile:"Сохранить профиль",your_orders:"Ваши заказы",loading_orders:"Загрузка заказов…",sign_out:"Выйти",privacy_note:"Данные для входа отправляются напрямую в ваш проект Supabase по HTTPS. Сайт не хранит пароли.",enter_email:"Сначала введите адрес электронной почты.",reset_sending:"Отправка…",reset_sent:"Если адрес зарегистрирован, будет отправлено письмо для сброса пароля.",signed_out:"Вы вышли из системы.",signup_check:"Аккаунт создан. Подтвердите адрес в письме перед входом.",no_orders:"Заказов пока нет. Они появятся после подключения оплаты.",orders_error:"Вход выполнен, но заказы не загружены. Проверьте миграцию базы и политики RLS.",profile_loading:"Загрузка профиля…",profile_saved:"Профиль сохранён.",profile_error:"Не удалось загрузить или сохранить профиль. Проверьте миграцию и политики RLS.",profile_saving:"Сохранение…",signed_user:"Вошедший пользователь",generic_error:"Произошла ошибка. Попробуйте ещё раз.",init_error:"Не удалось подключить Supabase. Проверьте URL и публичный ключ и обновите страницу."},
 es:{portal:"PORTAL DEL CLIENTE",your_account:"Tu cuenta",intro:"Inicia sesión para administrar tus servicios y consultar tus pedidos.",language_label:"Idioma",back_store:"← Volver a la tienda",setup_text:"La autenticación aún no está conectada. Añade la URL del proyecto Supabase y la clave pública en",setup_suffix:"para activar el acceso seguro. Nunca incluyas aquí una clave service-role.",sign_in:"Iniciar sesión",create_account:"Crear cuenta",email:"Correo electrónico",password:"Contraseña",show:"Mostrar",hide:"Ocultar",sign_in_secure:"Acceso seguro",create_account_btn:"Crear cuenta",reset_password:"Enviar correo para restablecer contraseña",authenticated:"Cliente autenticado",profile_title:"Perfil",display_name:"Nombre visible",save_profile:"Guardar perfil",your_orders:"Tus pedidos",loading_orders:"Cargando pedidos…",sign_out:"Cerrar sesión",privacy_note:"Tus credenciales se envían directamente a tu proyecto Supabase mediante HTTPS. Este sitio no almacena contraseñas.",enter_email:"Introduce primero tu correo electrónico.",reset_sending:"Enviando…",reset_sent:"Si la dirección está registrada, recibirás un correo para restablecer la contraseña.",signed_out:"Has cerrado sesión.",signup_check:"Cuenta creada. Confirma tu correo antes de iniciar sesión.",no_orders:"Aún no hay pedidos. Aparecerán aquí cuando se conecte el pago.",orders_error:"Has iniciado sesión, pero no se pudieron cargar los pedidos. Comprueba la migración y las políticas RLS.",profile_loading:"Cargando perfil…",profile_saved:"Perfil guardado.",profile_error:"No se pudo cargar o guardar el perfil. Comprueba la migración y las políticas RLS.",profile_saving:"Guardando…",signed_user:"Cliente conectado",generic_error:"Se produjo un error. Inténtalo de nuevo.",init_error:"No se pudo iniciar Supabase. Comprueba la URL y la clave pública y vuelve a cargar."}
 };
-function tr(key){return locale.text(messages.zh[key] || messages.en[key] || key, language);}
+const orderCancellationMessages = {
+  en:{cancel_order:"Cancel order",cancel_order_confirm:"Cancel this unpaid order? This action cannot be undone.",cancel_order_busy:"Cancelling…",cancel_order_retry:"Cancellation failed — retry",cancel_order_success:"Order cancelled.",cancel_order_unavailable:"This order can no longer be cancelled here."},
+  zh:{cancel_order:"取消订单",cancel_order_confirm:"确定取消这笔未付款订单吗？此操作无法撤销。",cancel_order_busy:"正在取消…",cancel_order_retry:"取消失败，点击重试",cancel_order_success:"订单已取消。",cancel_order_unavailable:"此订单当前无法通过此入口取消。"},
+  ar:{cancel_order:"إلغاء الطلب",cancel_order_confirm:"هل تريد إلغاء هذا الطلب غير المدفوع؟ لا يمكن التراجع عن ذلك.",cancel_order_busy:"جارٍ الإلغاء…",cancel_order_retry:"فشل الإلغاء — أعد المحاولة",cancel_order_success:"تم إلغاء الطلب.",cancel_order_unavailable:"لا يمكن إلغاء هذا الطلب من هنا الآن."},
+  fr:{cancel_order:"Annuler la commande",cancel_order_confirm:"Annuler cette commande impayée ? Cette action est irréversible.",cancel_order_busy:"Annulation…",cancel_order_retry:"Échec — réessayer",cancel_order_success:"Commande annulée.",cancel_order_unavailable:"Cette commande ne peut plus être annulée ici."},
+  ru:{cancel_order:"Отменить заказ",cancel_order_confirm:"Отменить этот неоплаченный заказ? Действие необратимо.",cancel_order_busy:"Отмена…",cancel_order_retry:"Не удалось отменить — повторить",cancel_order_success:"Заказ отменён.",cancel_order_unavailable:"Этот заказ сейчас нельзя отменить здесь."},
+  es:{cancel_order:"Cancelar pedido",cancel_order_confirm:"¿Cancelar este pedido sin pagar? Esta acción no se puede deshacer.",cancel_order_busy:"Cancelando…",cancel_order_retry:"Error al cancelar — reintentar",cancel_order_success:"Pedido cancelado.",cancel_order_unavailable:"Este pedido ya no se puede cancelar aquí."}
+};
+function tr(key){const pack=messages[language]||messages[language.split("-")[0]]||messages.en;return orderCancellationMessages[language]?.[key]||orderCancellationMessages[language.split("-")[0]]?.[key]||pack[key]||messages.zh[key]||messages.en[key]||key;}
 function applyLanguage(code){
   language=locale.normalize(code);
   document.documentElement.lang=language;
@@ -116,6 +124,14 @@ function renderOrderCard(order){
   card.append(heading,meta);
   if(lines.childElementCount)card.append(lines);
   card.append(details);
+  if(order.status==="pending"||order.status==="awaiting_payment"){
+    const cancelButton=document.createElement("button");
+    cancelButton.type="button";
+    cancelButton.className="btn btn-ghost order-cancel-button";
+    cancelButton.textContent=tr("cancel_order");
+    cancelButton.addEventListener("click",()=>cancelOrder(order.id,cancelButton));
+    card.append(cancelButton);
+  }
   return card;
 }
 function renderOrderItem(row,currency){
@@ -125,6 +141,35 @@ function renderOrderItem(row,currency){
   const price=document.createElement("strong");
   price.textContent=formatMoney(Number(row.unit_price_minor)*Number(row.quantity),currency);
   line.append(label,price);return line;
+}
+async function cancelOrder(orderId,button){
+  if(!supabase||!activeUserId||button.disabled)return;
+  if(!window.confirm(tr("cancel_order_confirm")))return;
+  const userId=activeUserId;
+  button.disabled=true;
+  button.textContent=tr("cancel_order_busy");
+  button.setAttribute("aria-busy","true");
+  try{
+    const {data,error}=await supabase.functions.invoke("cancel-order",{body:{order_id:orderId}});
+    if(error)throw error;
+    if(!data?.order||data.order.status!=="cancelled")throw new Error("cancellation_not_confirmed");
+    if(activeUserId!==userId)return;
+    ordersList.replaceChildren();
+    orderOffset=0;
+    ordersState.hidden=false;
+    ordersState.textContent=tr("loading_orders");
+    await loadMoreOrders();
+    if(activeUserId===userId){
+      ordersState.hidden=ordersList.childElementCount>0;
+      if(!ordersList.childElementCount)ordersState.textContent=tr("no_orders");
+    }
+  }catch(error){
+    if(activeUserId===userId){
+      button.disabled=false;
+      button.textContent=error?.message?.includes("order_not_cancellable")?tr("cancel_order_unavailable"):tr("cancel_order_retry");
+      button.removeAttribute("aria-busy");
+    }
+  }
 }
 async function loadProfile(userId){
   profileState.textContent=tr("profile_loading");
