@@ -10,7 +10,7 @@ The production scanner is a Supabase Edge Function invoked every minute by pg_cr
 - BNB native: BNB Smart Chain public JSON-RPC.
 - Solana native SOL: public Solana JSON-RPC parsed System Program transfers; finality is required before credit.
 - TRON native TRX and USDT TRC-20: TronGrid confirmed account history, TRC-20 contract allowlist filtering, Base58/hex destination verification, and solidified block heights.
-- TON native GRAM: TON Center API v3 indexed account transactions, raw/friendly address normalization, successful inbound native-message filtering, and masterchain inclusion.
+- TON native Toncoin (TON): TON Center API v3 indexed account transactions, raw/friendly address normalization, successful inbound native-message filtering, and masterchain inclusion. This is not a GRAM Jetton.
 
 The EVM scanner stores per-asset block cursors, overlaps recent blocks to refresh confirmation counts, and advances in bounded batches. UTXO and Solana observations are deduplicated by transaction/output or instruction index in the settlement ledger. Provider failures mark the adapter degraded so invoice creation fails closed until scanning recovers.
 
@@ -18,7 +18,7 @@ The EVM scanner stores per-asset block cursors, overlaps recent blocks to refres
 
 TRON native TRX and USDT TRC-20 require a production `TRONGRID_API_KEY` Edge Function secret. The scanner always sends it in the `TRON-PRO-API-KEY` header and fails closed (marks both TRON assets degraded and blocks new invoices) if it is missing or rejected. Create a dedicated production backend key in the TronGrid console; restrict it to Mainnet and the account-history, TRC-20 transfer, and solidified-block endpoints used by this scanner. Set the secret in Supabase Dashboard → Edge Functions → Secrets as `TRONGRID_API_KEY`; never put it in GitHub or frontend configuration. HTTP 429/502/503/504 and timeouts receive bounded exponential backoff with jitter; persistent failures mark the affected asset degraded. `TONCENTER_API_KEY` remains optional.
 
-## Manual order fulfilment
+## Customer account top-ups and balance crediting\n\nThe account page supports USDT-denominated top-ups (10, 25, 50, 100, 250, or 500 USDT) over every configured asset whose listener is currently ready. `create-account-topup` authenticates the customer, creates an idempotent top-up order, and only returns ready network choices. `create-crypto-invoice` then allocates the exact asset amount and receiving address. The customer balance is a sum of immutable `ah_account_ledger` credit entries; a database trigger creates exactly one credit only when the chain listener's confirmed payment event changes the linked top-up order to `paid`. Both top-up and ledger tables use owner-scoped RLS, and browser clients have read-only access. Pending transfers do not increase balance.\n\n## Manual order fulfilment
 
 After the chain listener confirms an exact payment, it calls the idempotent payment-event RPC to set the order to `paid`. The `ah_crypto_deposits` status trigger writes a deduplicated Telegram outbox notification; the scheduled `telegram-dispatch` worker sends the order and payment details to the configured administrator chat. The administrator manually fulfils the order. No automatic VPS provisioning, automatic delivery, signing, withdrawal, or fund sweeping is performed.
 
@@ -29,6 +29,6 @@ After the chain listener confirms an exact payment, it calls the idempotent paym
 - Only the database cron job can invoke the scanner; the listener independently checks the same secret through a service-role-only RPC.
 - Chain observations are not accepted from the browser.
 - Repeated provider failures block new invoices for the affected asset.
-- The existing `TON` asset code is retained for backwards compatibility, while the native coin is displayed and priced as GRAM after the network ticker rebrand. Native GRAM is not a Jetton; the scanner accepts only native inbound messages with masterchain inclusion and rejects Jetton notification opcodes.
-- Configure `TRONGRID_API_KEY` under Supabase Project Settings → Edge Functions → Secrets (or the Edge Function secrets page) after creating a production Mainnet API key in the TronGrid console. Never put the key in GitHub, SQL migrations, frontend JavaScript, or chat. Restrict the key to Mainnet and the read-only account/transaction endpoints used by this scanner; monitor quota and request failures. The scanner is a deposit monitor, not a withdrawal service. It does not sweep or spend funds.
+- The existing `TON` asset code is retained for backwards compatibility and is displayed/priced as Toncoin (TON). No GRAM Jetton is enabled; the scanner accepts only native inbound Toncoin messages with masterchain inclusion and rejects Jetton notification opcodes.
+- The production `TRONGRID_API_KEY` is configured as a Supabase Edge Function secret. Never put the key in GitHub, SQL migrations, frontend JavaScript, or chat. Restrict it to Mainnet and the read-only account/transaction endpoints used by this scanner; monitor quota and request failures. The scanner is a deposit monitor, not a withdrawal service. It does not sweep or spend funds.
 - Public RPC/explorer endpoints have rate limits and are best-effort infrastructure. For high-volume production, replace them with dedicated provider endpoints and monitor cursor lag.
