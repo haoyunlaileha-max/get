@@ -17,3 +17,7 @@ verify_jwt = false
 # Customer cancellation requires a valid Supabase user JWT.
 [functions.cancel-order]
 verify_jwt = true
+
+# Authenticated customer endpoint for USDT-denominated direct-wallet invoices.
+[functions.create-crypto-invoice]
+verify_jwt = true
