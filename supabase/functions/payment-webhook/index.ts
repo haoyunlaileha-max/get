@@ -71,6 +71,15 @@ Deno.serve(async (request: Request) => {
   const signatureHeader = request.headers.get("x-ah-signature") ?? "";
   if (!signatureHeader) return json(401, { error: "signature_required" });
 
+  const declaredLength = request.headers.get("content-length");
+  if (declaredLength !== null) {
+    const parsedLength = Number(declaredLength);
+    if (!Number.isSafeInteger(parsedLength) || parsedLength < 0) {
+      return json(400, { error: "invalid_content_length" });
+    }
+    if (parsedLength > MAX_BODY_BYTES) return json(413, { error: "request_too_large" });
+  }
+
   let rawBody: string;
   try {
     const reader = request.body?.getReader();
