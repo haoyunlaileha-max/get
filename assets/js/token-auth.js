@@ -94,7 +94,10 @@
   });
 
   loginButton?.addEventListener("click", async () => {
-    const token = (tokenInput.value || "").replace(/\s+/g, "").toUpperCase();
+    const compactToken = (tokenInput.value || "").replace(/[\s-]+/g, "").toUpperCase();
+    const token = /^[A-F0-9]{64}$/.test(compactToken)
+      ? compactToken.match(/.{4}/g).join("-")
+      : (tokenInput.value || "").replace(/\s+/g, "").toUpperCase();
     if (!token) {
       showMessage("请输入访问令牌。");
       return;
@@ -115,7 +118,11 @@
       showMessage("当前浏览器无法安全生成随机令牌，请使用现代浏览器。");
       return;
     }
-    if (!pendingToken || registrationComplete) pendingToken = makeToken();
+    if (!pendingToken || registrationComplete) {
+      pendingToken = makeToken();
+      registrationComplete = false;
+      result.hidden = true;
+    }
     setBusy(createButton, true, "正在安全创建…");
     try {
       const data = await requestAuth("register", pendingToken);
