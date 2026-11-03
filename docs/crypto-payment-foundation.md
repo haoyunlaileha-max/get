@@ -1,27 +1,22 @@
-# Direct-wallet crypto payment foundation
+# Direct-wallet cryptocurrency payment
 
-## Configured public receiving addresses
+## Assets and receiving addresses
 
-The Supabase table `public.ah_crypto_assets` contains the nine requested assets/networks:
-BTC, ETH, USDT ERC-20, USDT TRC-20, LTC, TRX, SOL, BNB BEP-20, and TON.
+The database has nine configured assets: BTC, ETH, USDT ERC-20, USDT TRC-20, LTC, TRX, SOL, BNB BEP-20 and GRAM on TON. XMR is excluded.
 
-XMR was explicitly removed. The supplied EVM address is shared by ETH, ERC-20 USDT, and BNB BEP-20; the supplied TRON address is shared by TRX and TRC-20 USDT. These are separate network assets despite sharing an address string.
+The GRAM row uses the previously configured TON receiving wallet, ticker/display name GRAM, and the TON/GRAM network label. The quote adapter maps this legacy GRAM label to the TON/USDT market symbol. The actual GRAM Jetton master contract has not yet been populated in the asset registry; the current wallet address is a receiving address, not a token contract address. Chain monitoring for this asset must remain disabled until the exact on-chain asset identity is verified.
 
-The TON wallet address is configured for the native TON network. The native asset ticker is TON; "GRAM" is retained only as the user's requested label because GRAM is not the current native TON ticker. A separate GRAM jetton would require its jetton master contract address.
+## USDT pricing and invoice generation
 
-## Safety state
+- Catalog plan prices are denominated in USDT (minor units are cents, 2 decimal places).
+- Order creation is server-side and rejects plans not priced in USDT.
+- The authenticated `create-crypto-invoice` Edge Function obtains a live USDT market quote from Binance public ticker endpoints for BTC, ETH, LTC, TRX, SOL, BNB and TON/GRAM; USDT network payments use a 1:1 quote.
+- Amount conversion uses integer arithmetic and each asset's atomic precision.
+- The database allocates a unique active invoice amount per asset and stores the quote, expiry and expected atomic amount.
+- Customers can select the asset/network after creating an order.
 
-All listeners are deliberately disabled with `listener_status = awaiting_provider`. Public wallet addresses are not credentials. No private keys, seed phrases, or signing capability are stored.
+## Safety state and deployment boundary
 
-The schema provides:
-- per-asset precision in atomic units (BTC/LTC 8, ETH/BNB 18, USDT 6, TRX 6, SOL/TON 9);
-- unique active invoice amount per asset;
-- deposit and transfer records with transaction/event deduplication;
-- confirmation and reorg states;
-- per-chain scan cursors and health counters.
+The schema, USDT pricing path, authenticated invoice endpoint and checkout UI are deployed. However, all nine chain listeners remain disabled with `listener_status = awaiting_provider`. The invoice endpoint intentionally refuses to issue a payment address while the selected chain listener is offline, so customers cannot send funds into a flow that cannot reliably detect and credit them.
 
-## Required before real-time monitoring
-
-Configure reliable RPC/indexer endpoints and credentials for Bitcoin, Litecoin, Ethereum, BNB Smart Chain, TRON, Solana, and TON, then deploy a chain-specific scanner and schedule it. Do not enable listeners until each chain's scanner, cursor persistence, confirmation policy, reorg handling, and amount matching have been verified. Fiat-to-crypto quotes are also required because current product prices are denominated in fiat.
-
-The payment UI must not claim that a deposit is monitored or confirmed until those services are active.
+No private keys or seed phrases are stored. No chain listener or scheduled scanner is active. The remaining production boundary is chain-specific transaction indexing, confirmation/reorg handling, a scheduler, and verification of the GRAM Jetton master contract. A successful website/Edge Function deployment does not mean automatic on-chain settlement is active.
