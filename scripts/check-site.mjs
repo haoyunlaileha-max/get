@@ -13,6 +13,7 @@ const productPageJs = read("assets/js/product-page.js");
 const localeJs = read("assets/js/language.js");
 const account = read("account.html");
 const accountJs = read("assets/js/account.js");
+const tokenAuth = read("assets/js/token-auth.js");
 const publicConfig = read("assets/js/supabase-config.js");
 const coreSql = read("supabase/migrations/20261103032042_anonymous_hosting_core.sql");
 const orderSql = read("supabase/migrations/20261103032407_secure_order_creation.sql");
@@ -167,9 +168,10 @@ for (const marker of ['.admin-order-details', '.admin-order-detail-body', '.admi
 for (const marker of ['paid_at timestamptz', 'customer_note text']) assert.ok(paymentSql.includes(marker) || coreSql.includes(marker), `Admin order detail field missing from schema: ${marker}`);
 
 const accountHtml = account;
-const tokenAuth = read("assets/js/token-auth.js");
 for (const marker of ['id="token-login-tab"', 'id="token-signup-tab"', 'id="access-token"', 'id="generate-token"', 'id="generated-token"', 'id="copy-token"', 'token-demo-warning']) assert.ok(accountHtml.includes(marker), `Missing token auth UI: ${marker}`);
 for (const marker of ['crypto.getRandomValues', 'clipboard.writeText', 'functions/v1/token-auth', 'requestAuth("register"', 'requestAuth("login"', 'auth.setSession']) assert.ok(tokenAuth.includes(marker), `Missing server-verified token auth behavior: ${marker}`);
+for (const marker of ["AbortController", "setTimeout(() => controller.abort(), 15000)", "登录请求超时", "response.status === 429"]) assert.ok(tokenAuth.includes(marker), `Missing bounded token-login failure handling: ${marker}`);
+for (const marker of ["sessionRenderTask", "sessionRenderGeneration", "setSession() and the explicit login handler"]) assert.ok(accountJs.includes(marker), `Missing deduplicated session rendering: ${marker}`);
 for (const marker of ["request.body?.getReader()", "value.byteLength", "totalBytes > 4096", "TextDecoder"]) assert.ok(tokenAuthFn.includes(marker), `Missing streamed token-auth body limit: ${marker}`);
 assert.ok(accountHtml.includes('assets/js/token-auth.js'), "Token auth client script must be loaded");
 assert.ok(accountJs.includes('const tokenAuthPanel = document.getElementById("token-auth")') && accountJs.includes('if(tokenAuthPanel)tokenAuthPanel.hidden=true'), "Authenticated dashboard must replace the token sign-in panel");
