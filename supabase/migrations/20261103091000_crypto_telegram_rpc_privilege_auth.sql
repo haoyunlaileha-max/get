@@ -1,5 +1,5 @@
 -- Supabase Secret API keys are validated at the API gateway and may not populate
--- the legacy request.jwt.claim.role setting. Restrict these SECURITY DEFINER RPCs
+-- legacy JWT role-claim setting. Restrict these SECURITY DEFINER RPCs
 -- by EXECUTE grants instead of a second, legacy JWT-claim check.
 begin;
 
