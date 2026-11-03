@@ -184,11 +184,58 @@
 
       const order = result.order || {};
       showResult(
-        "订单已创建，当前状态为待处理。订单编号：" + String(order.order_id || "").toUpperCase() +
-        "；金额：" + money(order.total_minor, order.currency) +
-        "。此步骤不会收取款项，支付与服务器开通尚未启用。",
+        "订单已创建，当前状态为待付款。订单编号：" + String(order.order_id || "").toUpperCase() +
+        "；应付金额：" + money(order.total_minor, order.currency) +
+        "。选择收款网络后，系统会按 USDT 报价换算币种金额。",
         true
       );
+      const assetPicker = document.createElement("div");
+      assetPicker.className = "crypto-invoice-picker";
+      assetPicker.style.cssText = "display:grid;gap:10px;margin-top:16px";
+      const assetLabel = appendText(assetPicker, "label", "", "选择支付币种 / 网络");
+      const assetSelect = document.createElement("select");
+      assetSelect.style.cssText = "width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:white;color:#111827";
+      assetSelect.setAttribute("aria-label", "选择支付币种和网络");
+      const assets = [
+        ["BTC","BTC · Bitcoin"],["ETH","ETH · Ethereum"],["USDT_ERC20","USDT · ERC-20"],["USDT_TRC20","USDT · TRC-20"],
+        ["LTC","LTC · Litecoin"],["TRX","TRX · TRON"],["SOL","SOL · Solana"],["BNB_BEP20","BNB · BNB Smart Chain"],
+        ["TON","GRAM · TON Network"]
+      ];
+      for (const [code,label] of assets) { const option=document.createElement("option"); option.value=code; option.textContent=label; assetSelect.append(option); }
+      assetLabel.append(assetSelect);
+      const invoiceButton = document.createElement("button");
+      invoiceButton.type = "button"; invoiceButton.className = "btn btn-primary"; invoiceButton.textContent = "生成链上收款金额";
+      const invoiceResult = document.createElement("div");
+      invoiceResult.className = "crypto-invoice-result";
+      invoiceResult.style.cssText = "white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px";
+      invoiceButton.addEventListener("click", async () => {
+        invoiceButton.disabled = true; invoiceResult.textContent = "正在获取实时 USDT 汇率并检查链上监听状态…";
+        try {
+          const response = await fetch(config.url.replace(/\\/$/, "") + "/functions/v1/create-crypto-invoice", {
+            method:"POST",
+            headers:{"Content-Type":"application/json",apikey:config.anonKey,Authorization:"Bearer "+session.access_token},
+            body:JSON.stringify({order_id:order.order_id,asset_code:assetSelect.value})
+          });
+          const result = await response.json().catch(()=>({}));
+          if (!response.ok) {
+            const messages = {
+              asset_monitoring_unavailable:"该网络的自动到账监听尚未启用，系统暂不开放此网络收款，避免转账后无法自动识别。",
+              market_rate_unavailable:"暂时无法取得可靠 USDT 实时汇率，请稍后重试。",
+              order_not_payable:"此订单当前不可支付。",
+              order_must_be_priced_in_usdt:"订单必须使用 USDT 计价。"
+            };
+            throw new Error(messages[result.error] || "暂时无法生成收款信息，请稍后重试。");
+          }
+          const invoice=result.invoice;
+          invoiceResult.textContent = "应付：" + invoice.expected_amount + " " + invoice.ticker + "\\n网络：" + invoice.network + "\\n收款地址：" + invoice.wallet_address + "\\n报价：" + invoice.quoted_usdt + " USDT\\n有效期：" + invoice.expires_at;
+          const copy=document.createElement("button"); copy.type="button"; copy.className="admin-toggle"; copy.textContent="复制收款地址";
+          copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(invoice.wallet_address);copy.textContent="已复制";}catch{copy.textContent="复制失败";}});
+          invoiceResult.append(document.createElement("br"),copy);
+        } catch(error) { invoiceResult.textContent=error?.message || "收款信息生成失败。"; }
+        finally { invoiceButton.disabled=false; }
+      });
+      assetPicker.append(invoiceButton,invoiceResult);
+      summary.append(assetPicker);
       submitButton.textContent = "订单已提交";
     } catch (error) {
       showResult(error?.message || "订单提交失败，请稍后重试。");
