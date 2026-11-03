@@ -71,11 +71,12 @@ async function rpc(endpoint: string, method: string, params: unknown[]) {
   throw new Error("rpc_" + method + "_" + lastError.replace(/[^a-zA-Z0-9_-]/g, "_"));
 }
 
-function tronAddressHex(address: string): string | null {
+async function tronAddressHex(address: string): Promise<string | null> {
+  const normalized = address.replace(/^0x/i, "");
+  if (/^41[0-9a-fA-F]{40}$/.test(normalized)) return normalized.toLowerCase();
   const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-  if (/^41[0-9a-fA-F]{40}$/.test(address)) return address.toLowerCase();
   let value = 0n;
-  for (const char of address) {
+  for (const char of normalized) {
     const digit = alphabet.indexOf(char);
     if (digit < 0) return null;
     value = value * 58n + BigInt(digit);
@@ -84,9 +85,14 @@ function tronAddressHex(address: string): string | null {
   if (hex.length % 2) hex = "0" + hex;
   let bytes = hex.match(/.{2}/g) ?? [];
   let leading = 0;
-  while (leading < address.length && address[leading] === "1") leading++;
+  while (leading < normalized.length && normalized[leading] === "1") leading++;
   bytes = [...Array(leading).fill("00"), ...bytes];
-  if (bytes.length !== 25) return null;
+  if (bytes.length !== 25 || bytes[0] !== "41") return null;
+  const payload = Uint8Array.from(bytes.slice(0, 21), value => parseInt(value, 16));
+  const firstHash = await crypto.subtle.digest("SHA-256", payload);
+  const secondHash = await crypto.subtle.digest("SHA-256", firstHash);
+  const expectedChecksum = Array.from(new Uint8Array(secondHash).slice(0, 4), value => value.toString(16).padStart(2, "0")).join("");
+  if (bytes.slice(21).join("").toLowerCase() !== expectedChecksum) return null;
   return bytes.slice(0, 21).join("").toLowerCase();
 }
 async function tronDestinationMatches(actual: string, expected: string) {
