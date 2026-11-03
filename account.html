@@ -11,17 +11,15 @@
 <header><div class="wrap nav"><a class="brand" href="index.html"><img class="brand-mark" src="assets/brand-mark.svg" alt=""><span>ANONYMOUS <b>HOSTING</b></span></a><div class="account-nav"><label class="sr-only" for="account-language" data-i="language_label">Language</label><select id="account-language" class="account-language" aria-label="选择语言"><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option></select><a class="btn btn-ghost" href="index.html" data-i="back_store">← Back to storefront</a></div></div></header>
 <main class="account-wrap">
   <section class="account-card">
-    <div class="kicker" data-i="portal">CUSTOMER PORTAL</div>
-    <h1 class="account-title" data-i="your_account">Your account</h1>
-    <p class="account-lead" data-i="intro">Sign in to manage your hosting services and view your orders.</p>
     <div id="auth-setup" class="account-notice" role="status"><span data-i="setup_text">Authentication is not connected yet. Add your Supabase project URL and public anon/publishable key in</span> <code>assets/js/supabase-config.js</code> <span data-i="setup_suffix">to enable secure sign-in. Never put a service-role key here.</span></div>
     <div id="auth-error" class="account-error" role="alert" hidden></div>
     <div id="auth-success" class="account-success" role="status" hidden></div>
     <section class="token-auth" id="token-auth">
       <div class="token-auth-heading">
         <div class="kicker">PRIVATE ACCESS / 私密访问</div>
-        <h1 class="account-title" data-i="your_account">欢迎回来</h1>
+        <h1 class="account-title">欢迎回来</h1>
         <p class="account-lead">访问您的服务器控制面板</p>
+        <div class="token-preview-note"><span class="token-preview-dot"></span><span>无邮箱 · 无密码 · 仅使用专属访问令牌</span></div>
       </div>
       <div class="account-tabs token-tabs" role="tablist" aria-label="登录注册">
         <button type="button" class="account-tab active" id="token-login-tab" role="tab" aria-selected="true">登录</button>
@@ -33,24 +31,27 @@
         <p class="token-help" id="token-login-help">输入创建账户时保存的访问令牌。</p>
         <button class="btn btn-primary account-submit" id="token-login-submit" type="button">登录</button>
         <p class="token-switch-copy">没有账户？ <button type="button" class="account-link-button" id="show-token-signup">查看注册方式</button></p>
+        <p class="token-external-link">了解更多请访问 <a href="https://anonport.com/zh#">anonport.com</a></p>
       </section>
       <section id="token-signup-panel" class="token-panel" aria-labelledby="token-signup-tab" hidden>
         <h2 class="token-signup-title">创建账户</h2>
         <p class="token-signup-lead">只需一笔订单即可</p>
-        <p class="token-description">创建账户免费且即时完成。一个令牌即可取代你的姓名、邮箱和密码。正式启用后，令牌只会在创建时显示一次，并由服务器安全哈希保存。部署前需要先充值。</p>
+        <p class="token-description">创建账户免费且即时完成。一个令牌即可取代你的姓名、邮箱和密码。正式服务将只在创建时显示完整令牌，并在服务器端进行哈希处理，此后无法查看或找回原始令牌。部署服务前需要先充值。</p>
+        <div class="token-security-note"><strong>安全提醒</strong><span>令牌相当于账户的唯一钥匙，请勿分享或截图发送给他人。</span></div>
         <ol class="token-steps">
-          <li><span>1</span><div><strong>生成你的令牌</strong><small>点击下方按钮创建专属访问凭证</small></div></li>
-          <li><span>2</span><div><strong>妥善保存</strong><small>令牌只显示一次，请保存在安全的位置</small></div></li>
-          <li><span>3</span><div><strong>充值并部署</strong><small>账户充值后即可购买并部署服务</small></div></li>
+          <li><span>1</span><div><strong>点击下方生成你的令牌</strong><small>系统为你创建一组随机访问凭证</small></div></li>
+          <li><span>2</span><div><strong>请妥善保存</strong><small>完整令牌只显示一次，我们无法为你找回</small></div></li>
+          <li><span>3</span><div><strong>充值并部署任意服务</strong><small>完成充值后，即可购买并部署所需服务</small></div></li>
         </ol>
         <button class="btn btn-primary account-submit" id="generate-token" type="button">创建我的令牌</button>
         <div class="token-result" id="token-result" hidden aria-live="polite">
-          <label for="generated-token">你的演示令牌</label>
+          <label for="generated-token">请立即复制并保存你的令牌</label>
           <div class="token-result-row"><input id="generated-token" type="text" readonly spellcheck="false"><button type="button" class="btn btn-ghost" id="copy-token">复制</button></div>
           <p class="token-demo-warning">这是本地界面演示令牌，尚未提交服务器、哈希保存或创建真实账户，请勿用于实际登录。</p>
         </div>
         <p class="token-switch-copy">已有令牌？ <button type="button" class="account-link-button" id="show-token-login">登录</button></p>
       </section>
+      <div class="token-implementation-note">当前为登录注册界面预览。令牌的服务器端创建、哈希存储和登录验证接口尚未接入。</div>
       <div id="token-auth-message" class="account-notice token-auth-message" role="status" hidden></div>
     </section>
     <section id="auth-panel" class="legacy-auth-panel" hidden aria-hidden="true">
