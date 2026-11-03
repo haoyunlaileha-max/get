@@ -63,12 +63,15 @@ Deno.serve(async(req:Request)=>{
   try { body=await req.json(); if(!body||typeof body!=="object"||Array.isArray(body)) throw new Error(); }
   catch { return json(400,{error:"invalid_json"}); }
   const hasInternalSecret=!!INTERNAL_SECRET&&safeEqual(req.headers.get("x-listener-secret")??"",INTERNAL_SECRET);
+  const admin=createClient(SUPABASE_URL,SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
   if(!hasInternalSecret) {
     if(body.action!=="dispatch") return json(401,{error:"unauthorized"});
     const {data:context,error:authError}=await createSupabaseContext(req,{auth:"publishable"});
     if(authError||!context) return json(401,{error:"unauthorized"});
+    const scheduleProof=req.headers.get("x-cron-secret")??"";
+    const {data:allowed,error:proofError}=await admin.rpc("ah_verify_crypto_cron_secret",{p_candidate:scheduleProof});
+    if(proofError||allowed!==true) return json(401,{error:"unauthorized"});
   }
-  const admin=createClient(SUPABASE_URL,SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
   if(body.action==="test") {
     if(!hasInternalSecret) return json(401,{error:"unauthorized"});
     try { await telegramSend("✅ <b>加密货币收款机器人连接成功</b>\nTelegram 通知通道已连通。后续链上检测、确认及异常状态将发送到此会话。"); return json(200,{ok:true,message:"test_message_sent"}); }
