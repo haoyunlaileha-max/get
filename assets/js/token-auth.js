@@ -48,14 +48,26 @@
 
   async function requestAuth(action, token) {
     if (!config.url || !config.anonKey) throw new Error("登录服务尚未配置，请稍后再试。");
-    const response = await fetch(config.url.replace(/\/+$/, "") + "/functions/v1/token-auth", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": config.anonKey
-      },
-      body: JSON.stringify({ action, token })
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    let response;
+    try {
+      response = await fetch(config.url.replace(/\/+$/, "") + "/functions/v1/token-auth", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": config.anonKey
+        },
+        body: JSON.stringify({ action, token }),
+        signal: controller.signal,
+        cache: "no-store"
+      });
+    } catch (error) {
+      if (error?.name === "AbortError") throw new Error("登录请求超时，请检查网络后重试。");
+      throw new Error("暂时无法连接登录服务，请检查网络后重试。");
+    } finally {
+      clearTimeout(timeoutId);
+    }
     let body = {};
     try { body = await response.json(); } catch { /* Ignore non-JSON error bodies. */ }
     if (response.ok) return body;
@@ -63,12 +75,13 @@
       invalid_token: "访问令牌不正确，请检查后重试。",
       invalid_token_format: "令牌格式不正确，请检查是否完整。",
       token_already_registered: "该令牌已经注册。请切换到登录页面。",
-      too_many_attempts: "操作过于频繁，请稍后再试。",
+      too_many_attempts: "登录尝试过于频繁（HTTP 429），请稍后再试。",
       origin_not_allowed: "当前网站来源未获授权，请联系管理员。",
       auth_service_not_configured: "登录服务尚未完成服务器配置。",
       account_creation_failed: "创建账户失败，请稍后重试。"
     };
-    throw new Error(errors[body.error] || "请求失败，请稍后重试。");
+    if (response.status === 429) throw new Error(errors[body.error] || errors.too_many_attempts);
+    throw new Error(errors[body.error] || ("登录服务暂时不可用（HTTP " + response.status + "），请稍后重试。"));
   }
 
   async function applySession(session) {
