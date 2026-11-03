@@ -199,20 +199,35 @@ async function loadMoreOrders(){
     if(activeUserId===userId){loadMoreOrdersButton.disabled=false;loadMoreOrdersButton.textContent=tr("load_more_orders");}
   }
 }
+let sessionRenderTask=null;
+let sessionRenderUserId=null;
+let sessionRenderGeneration=0;
 async function renderSession(session){
-  if(!session){activeUserId=null;orderOffset=0;ordersList.replaceChildren();loadMoreOrdersButton.hidden=true;dashboard.hidden=true;authPanel.hidden=false;if(tokenAuthPanel)tokenAuthPanel.hidden=false;return;}
-  const userId=session.user.id;activeUserId=userId;orderOffset=0;
-  authPanel.hidden=true;if(tokenAuthPanel)tokenAuthPanel.hidden=true;dashboard.hidden=false;
-  if(location.hash==="#balance")document.getElementById("balance").scrollIntoView({behavior:"smooth",block:"start"});
-  document.getElementById("account-email").textContent=session.user.user_metadata?.display_name||session.user.email||tr("signed_user");
-  ordersState.hidden=false;ordersState.textContent=tr("loading_orders");ordersList.replaceChildren();loadMoreOrdersButton.hidden=true;
-  await loadProfile(userId);
-  if(activeUserId!==userId)return;
-  await loadMoreOrders();
-  if(activeUserId!==userId)return;
-  if(location.hash==="#balance") document.getElementById("balance")?.scrollIntoView({behavior:"smooth",block:"start"});
-  if(!ordersList.childElementCount){ordersState.hidden=false;if(ordersState.textContent!==tr("orders_more_error"))ordersState.textContent=tr("no_orders");}
-  else ordersState.hidden=true;
+  if(!session){
+    sessionRenderGeneration++;sessionRenderTask=null;sessionRenderUserId=null;
+    activeUserId=null;orderOffset=0;ordersList.replaceChildren();loadMoreOrdersButton.hidden=true;
+    dashboard.hidden=true;authPanel.hidden=false;if(tokenAuthPanel)tokenAuthPanel.hidden=false;return;
+  }
+  const userId=session.user.id;
+  // setSession() and the explicit login handler can both request this render.
+  // Share one task so profile/order queries never race or render twice.
+  if(sessionRenderUserId===userId&&sessionRenderTask)return sessionRenderTask;
+  const generation=++sessionRenderGeneration;
+  sessionRenderUserId=userId;activeUserId=userId;orderOffset=0;
+  sessionRenderTask=(async()=>{
+    authPanel.hidden=true;if(tokenAuthPanel)tokenAuthPanel.hidden=true;dashboard.hidden=false;
+    if(location.hash==="#balance")document.getElementById("balance").scrollIntoView({behavior:"smooth",block:"start"});
+    document.getElementById("account-email").textContent=session.user.user_metadata?.display_name||session.user.email||tr("signed_user");
+    ordersState.hidden=false;ordersState.textContent=tr("loading_orders");ordersList.replaceChildren();loadMoreOrdersButton.hidden=true;
+    await loadProfile(userId);
+    if(generation!==sessionRenderGeneration||activeUserId!==userId)return;
+    await loadMoreOrders();
+    if(generation!==sessionRenderGeneration||activeUserId!==userId)return;
+    if(location.hash==="#balance")document.getElementById("balance")?.scrollIntoView({behavior:"smooth",block:"start"});
+    if(!ordersList.childElementCount){ordersState.hidden=false;if(ordersState.textContent!==tr("orders_more_error"))ordersState.textContent=tr("no_orders");}
+    else ordersState.hidden=true;
+  })();
+  return sessionRenderTask;
 }
 function showError(error){message(authError,error?.message||tr("generic_error"));message(authSuccess,"");}
 document.getElementById("toggle-password").addEventListener("click",event=>{
