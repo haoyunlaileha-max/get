@@ -97,7 +97,7 @@ for (const route of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index
 assert.ok(accountJs.includes('requestedMode === "signup"'), "Signup deep link must open registration mode");
 assert.ok(accountJs.includes('location.hash==="#balance"'), "Account balance deep link must scroll after login");
 const domainsPage = read("zh/domains/index.html");
-assert.equal((domainsPage.match(/<tr><td><strong>\./g) || []).length, 26, "Domain pricing table must contain 26 TLDs");
+assert.equal((domainsPage.match(/<tr><td><b>\./g) || []).length, 26, "Domain pricing table must contain 26 TLDs");
 assert.ok(domainsPage.includes('?mode=signup#auth-panel'), "Domain registration CTA must open signup mode");
 assert.ok(account.includes('id="load-more-orders"'), "Customer order load-more control must exist");
 for (const marker of ['.order-details', '.order-detail-grid', '.order-detail-toggle', '.status-failed', '.account-card{background:#fff']) assert.ok(css.includes(marker), `Missing light account/order detail styling: ${marker}`);
