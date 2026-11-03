@@ -163,9 +163,16 @@ function date(value) {
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? "—" : new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short" }).format(parsed);
 }
+const adminStatusLabels = {
+  draft:"草稿",pending:"待处理",awaiting_payment:"待付款",paid:"已付款",
+  provisioning:"开通中",active:"运行中",suspended:"已暂停",cancelled:"已取消",
+  failed:"失败",refunded:"已退款",queued:"排队中",processing:"处理中",
+  retry_wait:"等待重试",succeeded:"成功",rejected:"已拒绝"
+};
 function statusPill(value) {
   const status = String(value || "unknown");
-  return `<span class="admin-status status-${escapeHtml(status)}">${escapeHtml(status.replaceAll("_", " "))}</span>`;
+  const label = adminStatusLabels[status] || status.replaceAll("_", " ");
+  return `<span class="admin-status status-${escapeHtml(status)}">${escapeHtml(locale.text(label, language))}</span>`;
 }
 function applyLanguage() {
   document.documentElement.lang = language;
@@ -179,13 +186,48 @@ function renderOrders(rows) {
   $("orders-body").replaceChildren();
   if (!rows.length) {
     const row = document.createElement("tr"); const cell = document.createElement("td");
-    cell.colSpan = 5; cell.textContent = tr("empty"); row.append(cell); $("orders-body").append(row); return;
+    cell.colSpan = 6; cell.textContent = tr("empty"); row.append(cell); $("orders-body").append(row); return;
   }
   for (const order of rows) {
     const row = document.createElement("tr");
-    const values = [String(order.id).slice(0, 8), String(order.user_id).slice(0, 8), order.status, money(order.total_minor, order.currency), date(order.created_at)];
+    const values = [String(order.id).slice(0, 8).toUpperCase(), String(order.user_id).slice(0, 8), "", money(order.total_minor, order.currency), date(order.created_at)];
     for (const value of values) { const cell = document.createElement("td"); cell.textContent = value; row.append(cell); }
     row.children[2].innerHTML = statusPill(order.status);
+    const detailCell = document.createElement("td");
+    const details = document.createElement("details"); details.className = "admin-order-details";
+    const summary = document.createElement("summary"); summary.textContent = locale.text("查看详情", language);
+    details.append(summary);
+    const body = document.createElement("div"); body.className = "admin-order-detail-body";
+    const addLine = (label, value) => {
+      const line = document.createElement("p");
+      const strong = document.createElement("strong"); strong.textContent = locale.text(label, language) + "：";
+      const span = document.createElement("span"); span.textContent = value || "—";
+      line.append(strong, span); body.append(line);
+    };
+    addLine("完整订单编号", order.id);
+    addLine("更新时间", date(order.updated_at));
+    if (order.paid_at) addLine("付款确认时间", date(order.paid_at));
+    const region = order.ah_regions;
+    if (region) addLine("数据中心", [region.name, region.city, region.country_code].filter(Boolean).join(" · "));
+    if (order.customer_note) addLine("客户配置备注", order.customer_note);
+    const items = document.createElement("ul"); items.className = "admin-order-items";
+    for (const item of order.ah_order_items || []) {
+      const li = document.createElement("li");
+      const title = document.createElement("strong");
+      title.textContent = item.description_snapshot + " × " + item.quantity;
+      const price = document.createElement("span");
+      price.textContent = money(Number(item.unit_price_minor) * Number(item.quantity), order.currency);
+      li.append(title, price);
+      if (item.configuration && Object.keys(item.configuration).length) {
+        const config = document.createElement("small");
+        config.textContent = JSON.stringify(item.configuration);
+        li.append(config);
+      }
+      items.append(li);
+    }
+    if (items.childElementCount) body.append(items);
+    else addLine("商品明细", "暂无商品明细");
+    details.append(body); detailCell.append(details); row.append(detailCell);
     $("orders-body").append(row);
   }
 }
@@ -269,7 +311,7 @@ async function loadDashboard() {
   show(nodes.error, ""); show(nodes.success, "");
   try {
     const [orders, jobs, payments, products, plans, regions, ordersCount, paidCount, queuedCount, activePlansCount, mappings] = await Promise.all([
-      supabase.from("ah_orders").select("id,user_id,status,currency,total_minor,created_at").order("created_at", { ascending: false }).limit(50),
+      supabase.from("ah_orders").select("id,user_id,region_id,status,currency,total_minor,created_at,updated_at,paid_at,customer_note,ah_order_items(description_snapshot,quantity,unit_price_minor,configuration),ah_regions(name,city,country_code)").order("created_at", { ascending: false }).limit(50),
       supabase.from("ah_provisioning_jobs").select("id,order_id,status,attempts,max_attempts,provider_reference,last_error_code,created_at").order("created_at", { ascending: false }).limit(30),
       supabase.from("ah_payment_events").select("id,provider,event_id,order_id,event_type,amount_minor,currency,received_at").order("received_at", { ascending: false }).limit(30),
       supabase.from("ah_products").select("id,slug,name,category,description,is_active,sort_order").order("sort_order"),
