@@ -16,11 +16,13 @@ const orderPageSize = 20;
 let orderPage = 0;
 let orderSearch = "";
 let orderStatus = "all";
+let orderStartDate = "";
+let orderEndDate = "";
 let orderTotal = 0;
 
 const t = {
 en:{language:"Language",storefront:"Storefront",eyebrow:"OPERATIONS / CONTROL PLANE",title:"Operations console",subtitle:"Monitor orders, payments, provisioning and catalog availability.",refresh:"Refresh data",login_required:"Administrator sign-in required",login_copy:"Sign in with an account assigned the verified admin role, then return here.",open_account:"Open account sign-in",signed_in_as:"Signed in as",sign_out:"Sign out",orders:"Orders",all_records:"All records",paid:"Paid",paid_orders:"Paid orders",queued:"Provisioning queue",waiting_work:"Waiting / retrying",active:"Active plans",catalog:"Catalog",orders_title:"Recent orders",orders_desc:"Customer orders and their current lifecycle state.",order:"Order",customer:"Customer ID",status:"Status",total:"Total",created:"Created",jobs_title:"Provisioning jobs",jobs_desc:"Queue state, attempts and provider references.",payments_title:"Payment events",payments_desc:"Verified webhook audit records.",catalog_title:"Product catalog",catalog_desc:"Enable or disable products and plans. Price changes are intentionally not exposed here.",regions_title:"Data-center regions",regions_desc:"Control whether a region is available for new orders.",security_note:"Admin access is verified using Supabase app_metadata and enforced again by database RLS. Never share service-role keys with this page.",loading:"Loading operational data…",empty:"No records found.",load_error:"Could not load admin data. Check that migrations 0001–0005 are applied and admin RLS is enabled.",not_admin:"This account is not assigned the verified admin role. Ask an authorized project owner to set app_metadata.role = admin.",setup_error:"Add the Supabase project URL and public anon/publishable key to assets/js/supabase-config.js. Never add a service-role key.",enabled:"Enabled",disabled:"Disabled",activate:"Enable",deactivate:"Disable",region_active:"Active",region_inactive:"Inactive",maintenance:"Maintenance",set_active:"Set active",set_inactive:"Set inactive",set_maintenance:"Set maintenance",updated:"Saved successfully.",update_error:"Could not save this change. Verify database migrations and RLS policies.",no_jobs:"No provisioning jobs.",no_payments:"No payment events.",attempts:"Attempts",provider_ref:"Provider ref",event:"Event",amount:"Amount",refreshing:"Refreshing…",signing_out:"Signing out…",no_data:"No data"},
-zh:{language:"语言",storefront:"网站首页",eyebrow:"运营 / 控制中心",title:"运营管理后台",subtitle:"监控订单、支付、服务器开通任务和商品目录。",refresh:"刷新数据",login_required:"需要管理员登录",login_copy:"请使用已被授予管理员角色的账户登录，然后返回此页面。",open_account:"打开账户登录",signed_in_as:"当前登录",sign_out:"退出登录",orders:"订单总数",all_records:"全部记录",paid:"已付款",paid_orders:"已付款订单",queued:"开通任务",waiting_work:"等待 / 重试中",active:"启用套餐",catalog:"商品目录",orders_title:"最近订单",orders_desc:"客户订单及当前生命周期状态。",order_search_label:"搜索订单 / 客户 UUID",order_status_filter:"订单状态",filter_all:"全部状态",search_orders:"搜索",clear_filters:"清除筛选",previous_page:"上一页",next_page:"下一页",search_invalid:"请输入完整的订单 UUID 或客户 UUID。",export_orders:"导出 CSV",exporting_orders:"正在导出…",orders_exported:"订单 CSV 已导出。",orders_export_limit:"已导出前 5,000 笔匹配订单；结果达到导出上限。",export_failed:"导出失败，请检查管理员权限和网络连接。",order:"订单",customer:"客户 ID",status:"状态",total:"总金额",created:"创建时间",jobs_title:"服务器开通任务",jobs_desc:"队列状态、尝试次数和供应商编号。",payments_title:"支付事件",payments_desc:"已验证的 Webhook 审计记录。",catalog_title:"商品目录",catalog_desc:"启用或停用产品与套餐。此处不开放价格修改。",regions_title:"数据中心",regions_desc:"控制机房是否可用于新订单。",security_note:"管理员身份通过 Supabase app_metadata 验证，并由数据库 RLS 再次执行权限控制。切勿向此页面提供 service-role 密钥。",loading:"正在加载运营数据…",empty:"没有记录。",load_error:"无法加载后台数据。请确认已执行 0001–0005 迁移并启用管理员 RLS。",not_admin:"此账户没有经过验证的管理员角色。请项目授权管理员设置 app_metadata.role = admin。",setup_error:"请在 assets/js/supabase-config.js 中填写 Supabase 项目 URL 和公开 anon/publishable key。切勿填写 service-role 密钥。",enabled:"已启用",disabled:"已停用",activate:"启用",deactivate:"停用",region_active:"运行中",region_inactive:"已停用",maintenance:"维护中",set_active:"设为运行中",set_inactive:"设为停用",set_maintenance:"设为维护",updated:"保存成功。",update_error:"保存失败，请检查数据库迁移和 RLS 权限。",no_jobs:"暂无开通任务。",no_payments:"暂无支付事件。",attempts:"尝试次数",provider_ref:"供应商编号",event:"事件",amount:"金额",refreshing:"刷新中…",signing_out:"正在退出…",no_data:"暂无数据"},
+zh:{language:"语言",storefront:"网站首页",eyebrow:"运营 / 控制中心",title:"运营管理后台",subtitle:"监控订单、支付、服务器开通任务和商品目录。",refresh:"刷新数据",login_required:"需要管理员登录",login_copy:"请使用已被授予管理员角色的账户登录，然后返回此页面。",open_account:"打开账户登录",signed_in_as:"当前登录",sign_out:"退出登录",orders:"订单总数",all_records:"全部记录",paid:"已付款",paid_orders:"已付款订单",queued:"开通任务",waiting_work:"等待 / 重试中",active:"启用套餐",catalog:"商品目录",orders_title:"最近订单",orders_desc:"客户订单及当前生命周期状态。",order_search_label:"搜索订单 / 客户 UUID",order_date_from:"开始日期",order_date_to:"结束日期",date_range_invalid:"开始日期不能晚于结束日期，请检查日期范围。",order_status_filter:"订单状态",filter_all:"全部状态",search_orders:"搜索",clear_filters:"清除筛选",previous_page:"上一页",next_page:"下一页",search_invalid:"请输入完整的订单 UUID 或客户 UUID。",export_orders:"导出 CSV",exporting_orders:"正在导出…",orders_exported:"订单 CSV 已导出。",orders_export_limit:"已导出前 5,000 笔匹配订单；结果达到导出上限。",export_failed:"导出失败，请检查管理员权限和网络连接。",order:"订单",customer:"客户 ID",status:"状态",total:"总金额",created:"创建时间",jobs_title:"服务器开通任务",jobs_desc:"队列状态、尝试次数和供应商编号。",payments_title:"支付事件",payments_desc:"已验证的 Webhook 审计记录。",catalog_title:"商品目录",catalog_desc:"启用或停用产品与套餐。此处不开放价格修改。",regions_title:"数据中心",regions_desc:"控制机房是否可用于新订单。",security_note:"管理员身份通过 Supabase app_metadata 验证，并由数据库 RLS 再次执行权限控制。切勿向此页面提供 service-role 密钥。",loading:"正在加载运营数据…",empty:"没有记录。",load_error:"无法加载后台数据。请确认已执行 0001–0005 迁移并启用管理员 RLS。",not_admin:"此账户没有经过验证的管理员角色。请项目授权管理员设置 app_metadata.role = admin。",setup_error:"请在 assets/js/supabase-config.js 中填写 Supabase 项目 URL 和公开 anon/publishable key。切勿填写 service-role 密钥。",enabled:"已启用",disabled:"已停用",activate:"启用",deactivate:"停用",region_active:"运行中",region_inactive:"已停用",maintenance:"维护中",set_active:"设为运行中",set_inactive:"设为停用",set_maintenance:"设为维护",updated:"保存成功。",update_error:"保存失败，请检查数据库迁移和 RLS 权限。",no_jobs:"暂无开通任务。",no_payments:"暂无支付事件。",attempts:"尝试次数",provider_ref:"供应商编号",event:"事件",amount:"金额",refreshing:"刷新中…",signing_out:"正在退出…",no_data:"暂无数据"},
 ar:{language:"اللغة",storefront:"المتجر",eyebrow:"العمليات / لوحة التحكم",title:"لوحة العمليات",subtitle:"مراقبة الطلبات والمدفوعات والتجهيز وتوفر الكتالوج.",refresh:"تحديث البيانات",login_required:"يلزم تسجيل دخول المسؤول",login_copy:"سجّل الدخول بحساب يحمل دور المسؤول الموثّق ثم عُد إلى هنا.",open_account:"فتح تسجيل الدخول",signed_in_as:"تم تسجيل الدخول باسم",sign_out:"تسجيل الخروج",orders:"الطلبات",all_records:"كل السجلات",paid:"مدفوع",paid_orders:"الطلبات المدفوعة",queued:"قائمة التجهيز",waiting_work:"قيد الانتظار / إعادة المحاولة",active:"الخطط النشطة",catalog:"الكتالوج",orders_title:"أحدث الطلبات",orders_desc:"طلبات العملاء وحالتها الحالية.",order:"الطلب",customer:"معرّف العميل",status:"الحالة",total:"الإجمالي",created:"تاريخ الإنشاء",jobs_title:"مهام التجهيز",jobs_desc:"حالة المهام والمحاولات ومراجع المزوّد.",payments_title:"أحداث الدفع",payments_desc:"سجلات إشعارات الدفع الموثّقة.",catalog_title:"كتالوج المنتجات",catalog_desc:"تفعيل المنتجات والخطط أو تعطيلها. لا يمكن تعديل الأسعار هنا.",regions_title:"مناطق مراكز البيانات",regions_desc:"التحكم في توفر المنطقة للطلبات الجديدة.",security_note:"يتم التحقق من دور المسؤول عبر app_metadata وتطبيقه أيضاً بواسطة RLS. لا تضع مفاتيح service-role هنا.",loading:"جارٍ تحميل بيانات العمليات…",empty:"لا توجد سجلات.",load_error:"تعذر تحميل البيانات. تحقق من تطبيق عمليات الترحيل 0001–0005 وسياسات RLS.",not_admin:"هذا الحساب ليس مسؤولاً موثّقاً.",setup_error:"أضف رابط Supabase والمفتاح العام إلى ملف الإعداد. لا تضع مفتاح service-role.",enabled:"مفعّل",disabled:"معطّل",activate:"تفعيل",deactivate:"تعطيل",region_active:"نشط",region_inactive:"غير نشط",maintenance:"صيانة",set_active:"تعيين نشط",set_inactive:"تعيين غير نشط",set_maintenance:"تعيين صيانة",updated:"تم الحفظ.",update_error:"تعذر الحفظ. تحقق من الترحيلات وسياسات RLS.",no_jobs:"لا توجد مهام تجهيز.",no_payments:"لا توجد أحداث دفع.",attempts:"المحاولات",provider_ref:"مرجع المزوّد",event:"الحدث",amount:"المبلغ",refreshing:"جارٍ التحديث…",signing_out:"جارٍ تسجيل الخروج…",no_data:"لا توجد بيانات"},
 fr:{language:"Langue",storefront:"Boutique",eyebrow:"OPÉRATIONS / CONTRÔLE",title:"Console d’exploitation",subtitle:"Suivez les commandes, paiements, déploiements et disponibilités du catalogue.",refresh:"Actualiser",login_required:"Connexion administrateur requise",login_copy:"Connectez-vous avec un compte doté du rôle administrateur vérifié.",open_account:"Ouvrir la connexion",signed_in_as:"Connecté en tant que",sign_out:"Déconnexion",orders:"Commandes",all_records:"Tous les enregistrements",paid:"Payées",paid_orders:"Commandes payées",queued:"File de déploiement",waiting_work:"En attente / nouvelle tentative",active:"Offres actives",catalog:"Catalogue",orders_title:"Commandes récentes",orders_desc:"Commandes clients et état actuel.",order:"Commande",customer:"ID client",status:"État",total:"Total",created:"Créée le",jobs_title:"Tâches de déploiement",jobs_desc:"État, tentatives et références fournisseur.",payments_title:"Événements de paiement",payments_desc:"Journaux des webhooks vérifiés.",catalog_title:"Catalogue produits",catalog_desc:"Activer ou désactiver produits et offres. Les prix ne sont pas modifiables ici.",regions_title:"Régions des centres de données",regions_desc:"Gérer la disponibilité des régions pour les nouvelles commandes.",security_note:"Le rôle administrateur est vérifié via app_metadata et imposé par RLS. Ne placez jamais de clé service-role ici.",loading:"Chargement des données…",empty:"Aucun enregistrement.",load_error:"Chargement impossible. Vérifiez les migrations 0001–0005 et les règles RLS.",not_admin:"Ce compte ne possède pas le rôle administrateur vérifié.",setup_error:"Configurez l’URL Supabase et la clé publique dans le fichier de configuration. Jamais de clé service-role.",enabled:"Activé",disabled:"Désactivé",activate:"Activer",deactivate:"Désactiver",region_active:"Actif",region_inactive:"Inactif",maintenance:"Maintenance",set_active:"Définir actif",set_inactive:"Définir inactif",set_maintenance:"Définir maintenance",updated:"Enregistré.",update_error:"Échec de l’enregistrement. Vérifiez les migrations et RLS.",no_jobs:"Aucune tâche.",no_payments:"Aucun événement.",attempts:"Tentatives",provider_ref:"Réf. fournisseur",event:"Événement",amount:"Montant",refreshing:"Actualisation…",signing_out:"Déconnexion…",no_data:"Aucune donnée"},
 ru:{language:"Язык",storefront:"Магазин",eyebrow:"ОПЕРАЦИИ / ПАНЕЛЬ УПРАВЛЕНИЯ",title:"Панель операций",subtitle:"Заказы, платежи, развёртывание серверов и доступность каталога.",refresh:"Обновить данные",login_required:"Требуется вход администратора",login_copy:"Войдите под учётной записью с подтверждённой ролью администратора.",open_account:"Открыть вход",signed_in_as:"Выполнен вход:",sign_out:"Выйти",orders:"Заказы",all_records:"Все записи",paid:"Оплачено",paid_orders:"Оплаченные заказы",queued:"Очередь развёртывания",waiting_work:"Ожидание / повтор",active:"Активные тарифы",catalog:"Каталог",orders_title:"Последние заказы",orders_desc:"Заказы клиентов и их текущий статус.",order:"Заказ",customer:"ID клиента",status:"Статус",total:"Сумма",created:"Создан",jobs_title:"Задачи развёртывания",jobs_desc:"Статус, попытки и ссылки провайдера.",payments_title:"Платёжные события",payments_desc:"Проверенные записи webhook.",catalog_title:"Каталог продуктов",catalog_desc:"Включение и отключение продуктов и тарифов. Изменение цен здесь недоступно.",regions_title:"Регионы дата-центров",regions_desc:"Управление доступностью регионов для новых заказов.",security_note:"Роль администратора проверяется через app_metadata и дополнительно ограничивается RLS. Не добавляйте service-role ключ.",loading:"Загрузка данных…",empty:"Записей нет.",load_error:"Не удалось загрузить данные. Проверьте миграции 0001–0005 и RLS.",not_admin:"У этой учётной записи нет подтверждённой роли администратора.",setup_error:"Укажите URL Supabase и публичный ключ в файле конфигурации. Не используйте service-role ключ.",enabled:"Включено",disabled:"Отключено",activate:"Включить",deactivate:"Отключить",region_active:"Активен",region_inactive:"Неактивен",maintenance:"Обслуживание",set_active:"Сделать активным",set_inactive:"Отключить",set_maintenance:"Обслуживание",updated:"Сохранено.",update_error:"Не удалось сохранить. Проверьте миграции и RLS.",no_jobs:"Задач нет.",no_payments:"Событий нет.",attempts:"Попытки",provider_ref:"ID провайдера",event:"Событие",amount:"Сумма",refreshing:"Обновление…",signing_out:"Выход…",no_data:"Нет данных"},
@@ -318,6 +320,23 @@ async function updateRow(table, id, values) {
     show(nodes.error, tr("update_error"));
   } finally { busy = false; }
 }
+function getOrderDateBounds() {
+  if (orderStartDate && !/^\d{4}-\d{2}-\d{2}$/.test(orderStartDate)) throw new Error("invalid_date");
+  if (orderEndDate && !/^\d{4}-\d{2}-\d{2}$/.test(orderEndDate)) throw new Error("invalid_date");
+  if (orderStartDate && orderEndDate && orderStartDate > orderEndDate) throw new Error("invalid_date");
+  const start = orderStartDate ? new Date(orderStartDate + "T00:00:00") : null;
+  const end = orderEndDate ? new Date(orderEndDate + "T00:00:00") : null;
+  if ((start && Number.isNaN(start.getTime())) || (end && Number.isNaN(end.getTime()))) throw new Error("invalid_date");
+  if (start && start.toISOString().slice(0,10) !== orderStartDate) throw new Error("invalid_date");
+  if (end && end.toISOString().slice(0,10) !== orderEndDate) throw new Error("invalid_date");
+  if (end) end.setDate(end.getDate() + 1);
+  return { start: start?.toISOString(), end: end?.toISOString() };
+}
+function applyOrderDateFilters(query, bounds) {
+  if (bounds.start) query = query.gte("created_at", bounds.start);
+  if (bounds.end) query = query.lt("created_at", bounds.end);
+  return query;
+}
 function csvCell(value) {
   let textValue = String(value ?? "");
   if (/^\s*[=+@\-]/.test(textValue)) textValue = "'" + textValue;
@@ -335,6 +354,7 @@ async function exportOrders() {
   button.textContent = tr("exporting_orders");
   show(nodes.error, ""); show(nodes.success, "");
   try {
+    const dateBounds = getOrderDateBounds();
     const batchSize = 500;
     const exportLimit = 5000;
     const rows = [];
@@ -345,6 +365,7 @@ async function exportOrders() {
         .order("created_at", { ascending: false });
       if (orderStatus !== "all") query = query.eq("status", orderStatus);
       if (orderSearch) query = query.or("id.eq." + orderSearch + ",user_id.eq." + orderSearch);
+      query = applyOrderDateFilters(query, dateBounds);
       const { data, error, count } = await query.range(offset, offset + batchSize - 1);
       if (error) throw error;
       if (offset === 0) expectedCount = count ?? (data || []).length;
@@ -367,8 +388,8 @@ async function exportOrders() {
     document.body.append(anchor); anchor.click(); anchor.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     show(nodes.success, expectedCount > exportLimit ? tr("orders_export_limit") : tr("orders_exported"));
-  } catch {
-    show(nodes.error, tr("export_failed"));
+  } catch (error) {
+    show(nodes.error, error?.message === "invalid_date" ? tr("date_range_invalid") : tr("export_failed"));
   } finally {
     busy = false;
     button.disabled = false;
@@ -382,8 +403,10 @@ async function loadDashboard() {
   busy = true; nodes.refresh.disabled = true; nodes.refresh.textContent = tr("refreshing");
   show(nodes.error, ""); show(nodes.success, "");
   try {
+    const dateBounds = getOrderDateBounds();
     let ordersQuery = supabase.from("ah_orders").select("id,user_id,region_id,status,currency,total_minor,created_at,updated_at,paid_at,customer_note,ah_order_items(description_snapshot,quantity,unit_price_minor,configuration),ah_regions(name,city,country_code)", { count: "exact" }).order("created_at", { ascending: false });
     if (orderStatus !== "all") ordersQuery = ordersQuery.eq("status", orderStatus);
+    ordersQuery = applyOrderDateFilters(ordersQuery, dateBounds);
     if (orderSearch) {
       if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(orderSearch)) {
         show(nodes.error, tr("search_invalid")); return;
@@ -449,14 +472,20 @@ $("orders-filter").addEventListener("submit", (event) => {
   event.preventDefault();
   orderSearch = $("order-search").value.trim();
   orderStatus = $("order-status-filter").value || "all";
+  orderStartDate = $("order-date-from").value;
+  orderEndDate = $("order-date-to").value;
   orderPage = 0;
   loadDashboard();
 });
 $("clear-order-filters").addEventListener("click", () => {
   $("order-search").value = "";
   $("order-status-filter").value = "all";
+  $("order-date-from").value = "";
+  $("order-date-to").value = "";
   orderSearch = "";
   orderStatus = "all";
+  orderStartDate = "";
+  orderEndDate = "";
   orderPage = 0;
   loadDashboard();
 });
