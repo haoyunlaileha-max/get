@@ -4,7 +4,7 @@
 
 The database has nine configured assets: BTC, ETH, USDT ERC-20, USDT TRC-20, LTC, TRX, SOL, BNB BEP-20 and GRAM on TON. XMR is excluded.
 
-The GRAM row uses the previously configured TON receiving wallet, ticker/display name GRAM, and the TON/GRAM network label. The quote adapter maps this legacy GRAM label to the TON/USDT market symbol. The actual GRAM Jetton master contract has not yet been populated in the asset registry; the current wallet address is a receiving address, not a token contract address. Chain monitoring for this asset must remain disabled until the exact on-chain asset identity is verified.
+The GRAM row uses the previously configured TON receiving wallet, ticker/display name GRAM, and the TON/GRAM network label. The quote adapter maps this legacy GRAM label to the TON/USDT market symbol. The actual GRAM Jetton master contract has not yet been populated in the asset registry; the current wallet address is a receiving address, not a token contract address. The invoice endpoint explicitly rejects GRAM invoices until the master contract is present and verified.
 
 ## USDT pricing and invoice generation
 
