@@ -1,7 +1,7 @@
-// Public browser configuration only. These values are safe to expose when using Supabase.
-// Paste your project's Project URL and anon/public publishable key below.
+// Public browser configuration only.
+// The publishable key is designed for browser use; database access is protected by RLS.
 // NEVER place a service_role or secret key in this file.
 window.AH_SUPABASE_CONFIG = Object.freeze({
-  url: "",
-  anonKey: ""
+  url: "https://izuxtqmjdtzxvnfwppls.supabase.co",
+  anonKey: "sb_publishable_2BLyLQEvfTlKWSiOMkQMdQ_KBWG0FTx"
 });
