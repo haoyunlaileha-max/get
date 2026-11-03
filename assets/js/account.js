@@ -176,7 +176,7 @@ document.getElementById("toggle-password").addEventListener("click",event=>{
   button.textContent=tr(visible?"hide":"show");
   button.setAttribute("aria-label",tr(visible?"hide":"show"));button.setAttribute("aria-pressed",String(visible));
 });
-const requestedMode = new URLSearchParams(location.search).get("mode");
+// Reuse the requestedMode declared near the top of this module.
 if(requestedMode === "signup") setMode("signup");
 if(!config.url||!config.anonKey){setup.hidden=false;authPanel.hidden=false;submitButton.disabled=true;resetButton.disabled=true;setup.textContent="登录与注册界面已就绪。配置 Supabase 项目 URL 和公开 anon/publishable key 后即可启用；当前不会提交或保存账户凭据。";}
 else{
