@@ -133,7 +133,7 @@ Apply migration `20261102000500_admin_console_read_access.sql` after migrations 
 
 ## Current limitations
 
-- The order function creates pending orders. The webhook advances an order to paid only after a correctly signed normalized success event and database checks.
+- The storefront can load active products, plans, and regions from the Supabase catalog. Signed-in customers submit plan and region IDs to the `create-order` Edge Function; the function verifies the session and delegates to the service-role-only `ah_create_order` RPC, which derives prices from the database and reserves configured regional capacity. Successful submission creates a pending order only. The order function does not collect payment details or charge a customer. The webhook advances an order to paid only after a correctly signed normalized success event and database checks.
 - The normalized HMAC receiver is not a substitute for a provider-specific native signature adapter.
 - Refunds, disputes, chargebacks, provider API integration, audit monitoring, and per-user/IP rate limiting remain future work.
 - Migrations and Edge Functions are not deployed to Supabase by this repository workflow. No secrets or project credentials are stored in this repository.
