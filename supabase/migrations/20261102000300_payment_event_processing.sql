@@ -49,7 +49,7 @@ declare
   v_event public.ah_payment_events%rowtype;
   v_event_row_id uuid;
 begin
-  if coalesce(auth.role(), '') <> 'service_role' then
+  if coalesce(current_setting('request.jwt.claim.role', true), '') <> 'service_role' then
     raise exception 'not_authorized' using errcode = '42501';
   end if;
 
@@ -128,5 +128,6 @@ revoke all on function public.ah_apply_payment_event(text, text, uuid, text, big
   from public, anon, authenticated;
 grant execute on function public.ah_apply_payment_event(text, text, uuid, text, bigint, text, text)
   to service_role;
+
 
 commit;
