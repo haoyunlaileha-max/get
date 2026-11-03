@@ -169,3 +169,44 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 
 .account-page #auth-setup{display:none!important}
 .account-page .legacy-auth-panel{display:none!important}
+
+
+/* Refined token portal layout */
+.account-page{background:#f6f8f7!important}
+.account-page header{position:relative}
+.account-page .account-wrap{width:min(460px,calc(100% - 32px));margin:clamp(34px,7vh,76px) auto 72px}
+.account-page .account-card{padding:clamp(25px,5vw,38px);border:1px solid #e7ece9;border-radius:20px;box-shadow:0 20px 55px rgba(24,48,36,.075)}
+.account-page .token-auth-heading .account-title{font-size:clamp(32px,6vw,40px);line-height:1.2;letter-spacing:-1.4px;margin:13px 0 7px}
+.account-page .token-auth-heading .account-lead{font-size:14px;color:#66736c;margin:0 0 17px}
+.token-preview-note{display:flex;align-items:center;gap:9px;padding:10px 12px;margin:0 0 23px;border:1px solid #e5eee8;border-radius:10px;background:#f8fbf9;color:#617168;font-size:11px}
+.token-preview-dot{width:7px;height:7px;border-radius:50%;background:#16865f;box-shadow:0 0 0 3px #16865f18;flex:none}
+.account-page .token-tabs{margin:0 0 25px;padding:4px;background:#f2f5f3;border-color:#e7ece9}
+.account-page .token-tabs .account-tab{min-height:42px;font-size:13px}
+.account-page .token-panel>label{font-size:13px;font-weight:650;color:#26372e}
+.account-page .token-panel>input{min-height:52px;background:#fbfcfb;border-color:#dce5df;font-size:13px;letter-spacing:.7px}
+.account-page .token-help{font-size:11px;color:#849087}
+.account-page .token-panel .account-submit{min-height:49px;margin-top:22px;border-radius:10px;font-size:14px}
+.account-page .token-switch-copy{margin-top:19px;color:#7b877f;font-size:12px}
+.account-page .token-switch-copy .account-link-button{font-size:12px}
+.account-page .token-signup-title{font-size:26px;letter-spacing:-.8px}
+.account-page .token-signup-lead{margin:4px 0 14px;font-size:13px}
+.account-page .token-description{font-size:12px;line-height:1.9;color:#66736b;margin-bottom:15px}
+.token-security-note{display:flex;flex-direction:column;gap:3px;margin:0 0 21px;padding:11px 13px;border:1px solid #e3ece6;border-radius:10px;background:#f8fbf9;color:#758178;font-size:11px;line-height:1.6}
+.token-security-note strong{font-size:11px;color:#267451}
+.account-page .token-steps{gap:17px;margin:20px 0 23px}
+.account-page .token-steps li{gap:12px}
+.account-page .token-steps li>span{width:29px;height:29px;background:#eaf5ee;color:#14784f}
+.account-page .token-steps strong{font-size:12px;color:#26372e}
+.account-page .token-steps small{font-size:11px;color:#849087}
+.account-page .token-result{border-color:#d8e9de;background:#f7fbf8}
+.account-page .token-result input{background:#fff}
+.account-page .token-demo-warning{color:#8a5b22}
+.token-external-link{text-align:center;margin:11px 0 0;color:#929c95;font-size:11px}
+.token-external-link a{color:#147d5d;text-decoration:underline;text-underline-offset:3px}
+.token-implementation-note{margin-top:22px;padding-top:15px;border-top:1px solid #edf0ee;color:#98a19b;font-size:10px;line-height:1.7;text-align:center}
+.account-page .account-footnote{display:none}
+@media(max-width:520px){
+ .account-page .account-wrap{margin:24px auto 44px}
+ .account-page .account-card{padding:24px 20px;border-radius:16px}
+ .account-page .token-auth-heading .account-title{font-size:32px}
+}
