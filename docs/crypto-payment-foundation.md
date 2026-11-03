@@ -39,9 +39,9 @@ The ingress function is not itself a blockchain scanner. A chain-specific provid
 
 ## Current production boundary
 
-The schema, USDT pricing path, authenticated invoice endpoint, checkout UI, Telegram notification dispatcher and crypto listener ingress are deployed. The nine asset rows remain disabled with `listener_status = awaiting_provider` until each chain's provider, scanner, confirmation/reorg handling and receiving-address verification are configured. The ingress deployment does not imply automatic on-chain scanning or live payment acceptance.
+All nine chain listeners remain disabled with `listener_status = awaiting_provider` until each chain's provider, scanner, confirmation/reorg handling and receiving-address verification are configured. The schema, USDT pricing path, authenticated invoice endpoint, checkout UI, Telegram notification dispatcher and crypto listener ingress are deployed. The Telegram dispatcher is separate from chain scanning; its successful delivery does not mean blockchain monitoring is active. The ingress deployment does not imply automatic on-chain scanning or live payment acceptance.
 
-GRAM remains blocked: the current address is a TON receiving address, not a verified GRAM Jetton master contract, and a separate GRAM market-rate source is required.
+GRAM invoice generation remains blocked: the current address is a TON receiving address, not a verified GRAM Jetton master contract; the actual GRAM Jetton master contract has not yet been populated, and a separate GRAM market-rate source is required.
 
 ## Telegram payment notifications
 
