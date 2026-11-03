@@ -30,6 +30,8 @@ const paymentFn = read("supabase/functions/payment-webhook/index.ts");
 const provisioningFn = read("supabase/functions/provision-worker/index.ts");
 const cryptoInvoiceFn = read("supabase/functions/create-crypto-invoice/index.ts");
 const cryptoSql = read("supabase/migrations/20261103080000_crypto_usdt_pricing_and_invoice_rpc.sql");
+const telegramFn = read("supabase/functions/telegram-dispatch/index.ts");
+const telegramSql = read("supabase/migrations/20261103081000_crypto_telegram_notification_outbox.sql");
 const supabaseConfig = read("supabase/config.toml");
 const backendDocs = read("docs/backend-foundation.md");
 
@@ -48,6 +50,8 @@ for (const marker of ["SUPABASE_SERVICE_ROLE_KEY", "ah_create_crypto_invoice", "
 for (const marker of ["alter column currency type varchar(4)", "currency<>'USDT'", "ah_create_crypto_invoice", "unique_violation", "quote_price_usdt", "ticker='GRAM'", "service_role"]) assert.ok(cryptoSql.includes(marker), `Missing USDT invoice database safeguard: ${marker}`);
 assert.ok(adminHtml.includes('value="USDT" readonly'), "Admin catalog must price plans in USDT only");
 assert.ok(adminJs.includes('const currency="USDT"'), "Admin catalog writes must enforce USDT pricing");
+for (const marker of ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "CRYPTO_LISTENER_INTERNAL_SECRET", "sendMessage", "ah_claim_crypto_telegram_notifications", "ah_finish_crypto_telegram_notification"]) assert.ok(telegramFn.includes(marker), "Missing Telegram delivery behavior: " + marker);
+for (const marker of ["ah_crypto_telegram_outbox", "ah_enqueue_crypto_telegram_event", "ah_claim_crypto_telegram_notifications", "ah_finish_crypto_telegram_notification", "skip locked", "service_role"]) assert.ok(telegramSql.toLowerCase().includes(marker.toLowerCase()), "Missing Telegram outbox safeguard: " + marker);
 for (const marker of ["product-language", "configure-dialog", "AH_LOCALE"]) assert.ok(productPageJs.includes(marker), `Missing product page interaction: ${marker}`);
 for (const marker of ["zh-TW", "zh-CN", "const normalize", "const text", "function apply", "traditional", "simplified"]) assert.ok(localeJs.includes(marker), `Missing Chinese locale behavior: ${marker}`);
 for (const category of ["vps", "dedicated", "rdp", "gpu", "domains"]) assert.ok(html.includes(`data-type="${category}"`), `Missing plan category: ${category}`);
