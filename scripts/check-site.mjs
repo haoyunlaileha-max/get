@@ -83,4 +83,8 @@ for (const marker of ['.order-details', '.order-detail-grid', '.order-detail-tog
 for (const marker of ['customer_note text', 'description_snapshot text', 'unit_price_minor bigint']) assert.ok(coreSql.includes(marker), `Account order field is not present in the core schema: ${marker}`);
 assert.ok(paymentSql.includes('paid_at timestamptz'), 'Payment confirmation timestamp must come from the payment migration');
 assert.ok(paymentSql.includes('paid_at = now()') && paymentSql.includes("set status = 'paid'"), "Account payment timestamp must match the payment-event schema");
+for (const marker of ['ah_order_items(description_snapshot,quantity,unit_price_minor,configuration)', 'ah_regions(name,city,country_code)', 'function renderOrders(rows)', 'admin-order-details', 'admin-order-items', '付款确认时间', '客户配置备注', '完整订单编号', 'adminStatusLabels']) assert.ok(adminJs.includes(marker), `Missing admin order detail behavior: ${marker}`);
+assert.ok(adminHtml.includes('data-i="order_details"') && adminHtml.includes('<td colspan="6">—</td>'), "Admin orders table must include the detail column");
+for (const marker of ['.admin-order-details', '.admin-order-detail-body', '.admin-order-items']) assert.ok(css.includes(marker), `Missing admin order detail styling: ${marker}`);
+for (const marker of ['paid_at timestamptz', 'customer_note text']) assert.ok(paymentSql.includes(marker) || coreSql.includes(marker), `Admin order detail field missing from schema: ${marker}`);
 console.log("Checks passed: refreshed storefront, Simplified/Traditional Chinese locales, account portal, admin console, RLS schema, secure order/payment processing, and provisioning queue.");
