@@ -61,7 +61,24 @@
     </section>
     <section id="account-dashboard" hidden>
       <div class="account-user"><span class="account-avatar" aria-hidden="true">A</span><div><strong id="account-email"></strong><small data-i="authenticated">Authenticated customer</small></div></div>
-      <section class="account-balance" id="balance"><div><div class="kicker">ACCOUNT BALANCE / 账户余额</div><h2 class="account-section-title">账户余额</h2><p class="account-balance-value">— <small>余额服务尚未接入</small></p><p class="account-inline-state">支付服务尚未连接。当前不会创建虚假充值记录、生成收款地址或收取款项。</p><div class="account-payment-chips"><span>BTC</span><span>XMR</span><span>ETH</span><span>USDT</span><span>LTC</span><span>TRX</span><span>SOL</span></div></div><div class="account-topup"><h3>账户充值</h3><p>选择金额与支付网络，创建充值订单。</p><label for="topup-amount">充值金额（USD）</label><select id="topup-amount" disabled><option>选择充值金额</option><option>10</option><option>25</option><option>50</option><option>100</option><option>250</option></select><label for="topup-method">支付方式</label><select id="topup-method" disabled><option>支付渠道尚未开放</option><option>Bitcoin (BTC)</option><option>Monero (XMR)</option><option>USDT</option><option>Ethereum (ETH)</option><option>Litecoin (LTC)</option><option>TRON (TRX)</option><option>Solana (SOL)</option></select><button class="btn btn-primary" type="button" disabled>充值通道尚未开放</button><small>支付通道上线后，将显示唯一收款地址、二维码、应付金额及确认状态。</small></div></section><section class="account-transactions"><h3>最近充值记录</h3><div class="account-notice">暂无充值记录。充值功能开放后，交易状态会显示在这里。</div></section>
+      <section class="account-balance" id="balance">
+        <div class="account-balance-summary">
+          <div class="kicker">ACCOUNT BALANCE / 账户余额</div><h2 class="account-section-title">账户余额</h2>
+          <p class="account-balance-value"><span id="account-balance-value">0.00 USDT</span><small id="account-balance-caption">链上确认后自动入账，可用于购买服务</small></p>
+          <div class="account-payment-chips" id="account-payment-chips"><span>TRX</span><span>USDT TRC-20</span><span>TON</span></div>
+          <p class="account-inline-state" id="account-balance-state" role="status">正在加载账户余额…</p>
+        </div>
+        <div class="account-topup">
+          <h3>账户充值</h3><p>选择充值金额和收款网络，生成专属链上付款信息。</p>
+          <label for="topup-amount">充值金额（USDT）</label>
+          <select id="topup-amount"><option value="1000">10 USDT</option><option value="2500">25 USDT</option><option value="5000">50 USDT</option><option value="10000">100 USDT</option><option value="25000">250 USDT</option><option value="50000">500 USDT</option></select>
+          <label for="topup-method">支付网络</label><select id="topup-method"><option value="">正在加载可用网络…</option></select>
+          <button class="btn btn-primary" id="topup-submit" type="button" disabled>生成充值收款信息</button>
+          <small>仅向页面显示的地址和精确金额转账。不同网络资产不可互转，过期报价请重新生成。</small>
+          <div id="topup-invoice" class="topup-invoice" role="status" aria-live="polite" hidden></div>
+        </div>
+      </section>
+      <section class="account-transactions"><h3>最近充值记录</h3><div id="topup-history" class="topup-history"><div class="account-notice">正在加载充值记录…</div></div></section>
       <section class="account-profile">
         <h2 class="account-section-title" data-i="profile_title">Profile</h2>
         <form id="profile-form">
@@ -81,5 +98,5 @@
   </section>
 </main>
 <script src="assets/js/language.js"></script><script src="assets/js/supabase-config.js"></script>
-<script src="assets/js/supabase-auth-bootstrap.js"></script><script type="module" src="assets/js/account.js"></script><script src="assets/js/token-auth.js"></script>
+<script src="assets/js/supabase-auth-bootstrap.js"></script><script type="module" src="assets/js/account.js"></script><script src="assets/js/token-auth.js"></script><script type="module" src="assets/js/account-topup.js"></script>
 </body></html>
