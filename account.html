@@ -47,11 +47,11 @@
         <div class="token-result" id="token-result" hidden aria-live="polite">
           <label for="generated-token">请立即复制并保存你的令牌</label>
           <div class="token-result-row"><input id="generated-token" type="text" readonly spellcheck="false"><button type="button" class="btn btn-ghost" id="copy-token">复制</button></div>
-          <p class="token-demo-warning">这是本地界面演示令牌，尚未提交服务器、哈希保存或创建真实账户，请勿用于实际登录。</p>
+          <p class="token-demo-warning">令牌只显示一次，请立即复制并保存在安全位置。遗失后无法找回。</p>
         </div>
         <p class="token-switch-copy">已有令牌？ <button type="button" class="account-link-button" id="show-token-login">登录</button></p>
       </section>
-      <div class="token-implementation-note">当前为登录注册界面预览。令牌的服务器端创建、哈希存储和登录验证接口尚未接入。</div>
+      <div class="token-implementation-note">访问令牌由服务器端验证，Supabase Auth 负责安全存储凭据；网站不会保存明文令牌。</div>
       <div id="token-auth-message" class="account-notice token-auth-message" role="status" hidden></div>
     </section>
     <section id="auth-panel" class="legacy-auth-panel" hidden aria-hidden="true">
@@ -81,5 +81,5 @@
   </section>
 </main>
 <script src="assets/js/language.js"></script><script src="assets/js/supabase-config.js"></script>
-<script type="module" src="assets/js/account.js"></script><script src="assets/js/token-auth-preview.js"></script>
+<script type="module" src="assets/js/account.js"></script><script src="assets/js/token-auth.js"></script>
 </body></html>
