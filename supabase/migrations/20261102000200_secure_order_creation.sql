@@ -29,7 +29,7 @@ declare
   v_order_id uuid;
   v_total bigint;
 begin
-  if coalesce(auth.role(), '') <> 'service_role' then
+  if coalesce(current_setting('request.jwt.claim.role', true), '') <> 'service_role' then
     raise exception 'not_authorized' using errcode = '42501';
   end if;
 
@@ -140,5 +140,6 @@ $$;
 
 revoke all on function public.ah_create_order(uuid, uuid, uuid, integer, text, text) from public, anon, authenticated;
 grant execute on function public.ah_create_order(uuid, uuid, uuid, integer, text, text) to service_role;
+
 
 commit;
