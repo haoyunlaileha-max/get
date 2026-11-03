@@ -16,7 +16,11 @@ The EVM scanner stores per-asset block cursors, overlaps recent blocks to refres
 
 ## Providers requiring credentials / additional adapter work
 
-TRON native TRX and USDT TRC-20 use TronGrid confirmed account history and solidified block height. `TRONGRID_API_KEY` is optional for low-volume connectivity but strongly recommended for production quotas and reliability; provider errors and rate limits mark the assets degraded and stop new invoices. `TONCENTER_API_KEY` is optional; unauthenticated TON Center API v3 access is rate-limited.
+TRON native TRX and USDT TRC-20 require a production `TRONGRID_API_KEY` Edge Function secret. The scanner always sends it in the `TRON-PRO-API-KEY` header and fails closed (marks both TRON assets degraded and blocks new invoices) if it is missing or rejected. Create a dedicated production backend key in the TronGrid console; restrict it to Mainnet and the account-history, TRC-20 transfer, and solidified-block endpoints used by this scanner. Set the secret in Supabase Dashboard → Edge Functions → Secrets as `TRONGRID_API_KEY`; never put it in GitHub or frontend configuration. HTTP 429/502/503/504 and timeouts receive bounded exponential backoff with jitter; persistent failures mark the affected asset degraded. `TONCENTER_API_KEY` remains optional.
+
+## Manual order fulfilment
+
+After the chain listener confirms an exact payment, it calls the idempotent payment-event RPC to set the order to `paid`. The `ah_crypto_deposits` status trigger writes a deduplicated Telegram outbox notification; the scheduled `telegram-dispatch` worker sends the order and payment details to the configured administrator chat. The administrator manually fulfils the order. No automatic VPS provisioning, automatic delivery, signing, withdrawal, or fund sweeping is performed.
 
 ## Safety and operations
 
