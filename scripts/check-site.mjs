@@ -86,10 +86,12 @@ assert.ok(paymentSql.includes('paid_at = now()') && paymentSql.includes("set sta
 for (const marker of ['ah_order_items(description_snapshot,quantity,unit_price_minor,configuration)', 'ah_regions(name,city,country_code)', 'function renderOrders(rows)', 'admin-order-details', 'admin-order-items', '付款确认时间', '客户配置备注', '完整订单编号', 'adminStatusLabels']) assert.ok(adminJs.includes(marker), `Missing admin order detail behavior: ${marker}`);
 assert.ok(adminHtml.includes('data-i="order_details"') && adminHtml.includes('<td colspan="6">—</td>'), "Admin orders table must include the detail column");
 for (const marker of ['id="orders-filter"', 'id="order-search"', 'id="order-status-filter"', 'id="orders-prev"', 'id="orders-next"']) assert.ok(adminHtml.includes(marker), `Missing admin order filter control: ${marker}`);
+assert.ok(adminHtml.includes('id="order-date-from"') && adminHtml.includes('id="order-date-to"'), "Admin order date controls must exist");
 assert.ok(adminHtml.includes('id="export-orders"'), "Admin order export control must exist");
 for (const marker of ["async function exportOrders()", "exportLimit = 5000", "URL.createObjectURL", "csvCell", "orders_export_limit"]) assert.ok(adminJs.includes(marker), "Missing safe order CSV export behavior: " + marker);
 assert.ok(adminJs.includes(String.raw`/^\s*[=+@\-]/`), "CSV export must neutralize spreadsheet formula prefixes");
 for (const marker of ['orderPageSize = 20', 'ordersQuery.range', 'ordersQuery.or', 'ordersQuery.eq("status", orderStatus)', 'renderOrderPagination', 'search_invalid']) assert.ok(adminJs.includes(marker), `Missing admin order search/pagination behavior: ${marker}`);
+for (const marker of ["getOrderDateBounds", "applyOrderDateFilters", "orderStartDate", "orderEndDate", "date_range_invalid"]) assert.ok(adminJs.includes(marker), "Missing order date filter behavior: " + marker);
 for (const marker of ['.admin-orders-toolbar', '.admin-orders-pagination']) assert.ok(css.includes(marker), `Missing admin order filter styling: ${marker}`);
 for (const marker of ['.admin-order-details', '.admin-order-detail-body', '.admin-order-items']) assert.ok(css.includes(marker), `Missing admin order detail styling: ${marker}`);
 for (const marker of ['paid_at timestamptz', 'customer_note text']) assert.ok(paymentSql.includes(marker) || coreSql.includes(marker), `Admin order detail field missing from schema: ${marker}`);
