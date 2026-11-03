@@ -82,7 +82,8 @@ for (const marker of ['paid_at', 'customer_note', 'ah_order_items(description_sn
 for (const marker of ['ah_regions(name,city,country_code)', 'addDetail("数据中心",regionLabel)', 'region?.country_code']) assert.ok(accountJs.includes(marker), "Missing customer order region detail: " + marker);
 for (const marker of ["loadMoreOrders", "ordersPageSize = 20", ".range(orderOffset,orderOffset+ordersPageSize-1)", "orders_more_error"]) assert.ok(accountJs.includes(marker), "Missing customer order pagination: " + marker);
 for (const marker of ['id="balance"', 'ACCOUNT BALANCE', 'topup-amount', '充值通道尚未开放']) assert.ok(account.includes(marker), "Missing safe account balance preview: " + marker);
-for (const route of ['zh/vps/', 'zh/dedicated/', 'zh/rdp/', 'zh/gpu/', 'zh/domains/']) assert.ok(indexHtml.includes(route), "Missing product route: " + route);
+for (const route of ['zh/vps/', 'zh/dedicated/', 'zh/rdp/', 'zh/gpu/', 'zh/domains/']) assert.ok(html.includes(route), "Missing product route: " + route);
+for (const route of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html","zh/domains/index.html","zh/account/index.html"]) assert.ok(existsSync(new URL("../" + route, import.meta.url)), "Missing localized page: " + route);
 assert.ok(account.includes('id="load-more-orders"'), "Customer order load-more control must exist");
 for (const marker of ['.order-details', '.order-detail-grid', '.order-detail-toggle', '.status-failed', '.account-card{background:#fff']) assert.ok(css.includes(marker), `Missing light account/order detail styling: ${marker}`);
 for (const marker of ['customer_note text', 'description_snapshot text', 'unit_price_minor bigint']) assert.ok(coreSql.includes(marker), `Account order field is not present in the core schema: ${marker}`);
