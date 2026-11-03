@@ -39,7 +39,11 @@ async function verifySignature(rawBody: string, header: string) {
   const parts: Record<string, string> = {};
   for (const part of header.split(",")) {
     const separator = part.indexOf("=");
-    if (separator > 0) parts[part.slice(0, separator).trim()] = part.slice(separator + 1).trim();
+    if (separator <= 0) continue;
+    const name = part.slice(0, separator).trim();
+    if (name !== "t" && name !== "v1") continue;
+    if (Object.hasOwn(parts, name)) return false;
+    parts[name] = part.slice(separator + 1).trim();
   }
   const timestamp = Number(parts.t);
   const signature = parts.v1 ?? "";
