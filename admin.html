@@ -41,6 +41,10 @@
       <div class="admin-orders-pagination"><span id="orders-page-label">第 1 页</span><div><button class="admin-toggle" id="orders-prev" type="button" disabled data-i="previous_page">上一页</button><button class="admin-toggle" id="orders-next" type="button" disabled data-i="next_page">下一页</button></div></div>
       <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th data-i="order">Order</th><th data-i="customer">Customer ID</th><th data-i="status">Status</th><th data-i="total">Total</th><th data-i="created">Created</th><th data-i="order_details">订单详情</th></tr></thead><tbody id="orders-body"><tr><td colspan="6">—</td></tr></tbody></table></div>
     </section>
+    <section class="admin-panel" id="reconciliation-panel">
+      <div class="admin-panel-head"><div><h2 data-i="reconciliation_title">Provisioning reconciliation</h2><p data-i="reconciliation_desc">Provider resources created after an order changed state; review and clean up manually.</p></div><strong id="reconciliation-count">0</strong></div>
+      <div id="reconciliation-list" class="admin-record-list"></div>
+    </section>
     <div class="admin-columns">
       <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="jobs_title">Provisioning jobs</h2><p data-i="jobs_desc">Queue state, attempts and provider references.</p></div></div><div id="jobs-list" class="admin-record-list"></div></section>
       <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="payments_title">Payment events</h2><p data-i="payments_desc">Verified webhook audit records.</p></div></div><div id="payments-list" class="admin-record-list"></div></section>
