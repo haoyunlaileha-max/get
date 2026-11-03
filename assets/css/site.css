@@ -82,3 +82,16 @@ body{background:#fff;color:#17231f}
 .order-items{border-color:#e7ece8;color:#66736b}
 .order-items strong{color:#24332b}
 @media(max-width:520px){.order-detail-grid{grid-template-columns:1fr}.order-meta{text-align:left;margin-top:4px}}
+
+
+/* Admin order inspection: expandable, read-only customer/order context. */
+.admin-order-details{min-width:150px;max-width:360px;white-space:normal}
+.admin-order-details summary{color:#176b45;font-size:11px;font-weight:600;cursor:pointer;list-style-position:inside}
+.admin-order-detail-body{margin-top:9px;padding:10px;border:1px solid #e4ebe6;border-radius:8px;background:#f8faf9;white-space:normal;overflow-wrap:anywhere}
+.admin-order-detail-body p{margin:5px 0;font-size:11px;line-height:1.5;color:#526159}
+.admin-order-detail-body p strong{color:#26372e}
+.admin-order-items{display:grid;gap:7px;margin:9px 0 0;padding:9px 0 0 18px;border-top:1px solid #e4ebe6}
+.admin-order-items li{font-size:11px;color:#34443a}
+.admin-order-items li strong,.admin-order-items li span{display:block}
+.admin-order-items li small{display:block;margin-top:4px;color:#738078;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:640px){.admin-order-details{max-width:260px}.admin-order-detail-body{min-width:220px}}
