@@ -30,7 +30,7 @@ create or replace function public.ah_plan_regions_set_updated_at()
 returns trigger
 language plpgsql
 set search_path = pg_catalog
-as $
+as $$
 begin
   new.updated_at = now();
   return new;
