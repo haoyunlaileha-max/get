@@ -16,7 +16,8 @@ const profileSave = document.getElementById("profile-save");
 const profileState = document.getElementById("profile-state");
 const languageSelect = document.getElementById("account-language");
 let supabase;
-let mode = new URLSearchParams(window.location.search).get("mode") === "signup" ? "signup" : "login";
+const requestedMode = new URLSearchParams(window.location.search).get("mode");
+let mode = requestedMode === "signup" ? "signup" : "login";
 let activeUserId = null;
 let orderOffset = 0;
 let ordersLoading = false;
@@ -156,6 +157,7 @@ async function renderSession(session){
   if(!session){activeUserId=null;orderOffset=0;ordersList.replaceChildren();loadMoreOrdersButton.hidden=true;dashboard.hidden=true;authPanel.hidden=false;return;}
   const userId=session.user.id;activeUserId=userId;orderOffset=0;
   authPanel.hidden=true;dashboard.hidden=false;
+  if(location.hash==="#balance")document.getElementById("balance").scrollIntoView({behavior:"smooth",block:"start"});
   document.getElementById("account-email").textContent=session.user.email||tr("signed_user");
   ordersState.hidden=false;ordersState.textContent=tr("loading_orders");ordersList.replaceChildren();loadMoreOrdersButton.hidden=true;
   await loadProfile(userId);
