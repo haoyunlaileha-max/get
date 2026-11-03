@@ -23,16 +23,38 @@ function response(status: number, body: Record<string, unknown>) {
   return new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 }
 async function fetchJson(url: string, init: RequestInit = {}, timeout = 12_000): Promise<any> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeout);
-  try {
-    const result = await fetch(url, { ...init, signal: controller.signal, headers: { accept: "application/json", ...(init.headers ?? {}) } });
-    if (!result.ok) throw new Error("provider_http_" + result.status);
-    return await result.json();
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") throw new Error("provider_timeout");
-    throw error;
-  } finally { clearTimeout(timer); }
+  const maxAttempts = 3;
+  let lastError: Error = new Error("provider_request_failed");
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    try {
+      const result = await fetch(url, { ...init, signal: controller.signal, headers: { accept: "application/json", ...(init.headers ?? {}) } });
+      if (!result.ok) {
+        const status = result.status;
+        const retryAfter = Number(result.headers.get("retry-after") ?? "0");
+        lastError = new Error("provider_http_" + status);
+        if (attempt + 1 < maxAttempts && (status === 429 || status === 503 || status === 502 || status === 504)) {
+          const backoff = Math.min(2_000, Math.max(retryAfter > 0 ? retryAfter * 1_000 : 0, 250 * (2 ** attempt)) + Math.floor(Math.random() * 200));
+          await new Promise(resolve => setTimeout(resolve, backoff));
+          continue;
+        }
+        throw lastError;
+      }
+      return await result.json();
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith("provider_http_")) throw error;
+      lastError = error instanceof Error && error.name === "AbortError"
+        ? new Error("provider_timeout")
+        : error instanceof Error ? error : new Error("provider_request_failed");
+      if (attempt + 1 < maxAttempts && (lastError.message === "provider_timeout" || lastError instanceof TypeError)) {
+        await new Promise(resolve => setTimeout(resolve, Math.min(1_500, 250 * (2 ** attempt)) + Math.floor(Math.random() * 200)));
+        continue;
+      }
+      throw lastError;
+    } finally { clearTimeout(timer); }
+  }
+  throw lastError;
 }
 async function rpc(endpoint: string, method: string, params: unknown[]) {
   const candidates = endpoint.includes("ethereum") || endpoint.includes("cloudflare")
@@ -267,8 +289,8 @@ async function scanTon(db: ReturnType<typeof createClient>, asset: Asset, secret
 }
 
 async function scanTron(db: ReturnType<typeof createClient>, asset: Asset, secret: string) {
-  const headers: Record<string, string> = { "content-type": "application/json" };
-  if (TRON_KEY) headers["TRON-PRO-API-KEY"] = TRON_KEY;
+  if (!TRON_KEY) throw new Error("trongrid_api_key_missing");
+  const headers: Record<string, string> = { "content-type": "application/json", "TRON-PRO-API-KEY": TRON_KEY };
   const base = "https://api.trongrid.io";
   const head = await fetchJson(base + "/walletsolidity/getnowblock", { method: "POST", headers, body: "{}" });
   const tip = Number(head.block_header?.raw_data?.number ?? 0);
