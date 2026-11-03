@@ -1,14 +1,6 @@
 -- Automated chain scanner: isolated Vault secret, authenticated internal RPC and one-minute worker.
 begin;
 
-do $$
-begin
-  if not exists (select 1 from vault.secrets where name = 'crypto_scan_cron_secret') then
-    perform vault.create_secret(encode(gen_random_bytes(32), 'hex'), 'crypto_scan_cron_secret', 'Internal authentication for the crypto chain scanner cron');
-  end if;
-end
-$$;
-
 create or replace function public.ah_crypto_scan_authorized(p_secret text)
 returns boolean
 language sql
@@ -21,7 +13,7 @@ as $$
     and length(p_secret) >= 32
     and exists (
       select 1 from vault.decrypted_secrets
-      where name = 'crypto_scan_cron_secret' and decrypted_secret = p_secret
+      where name = 'crypto_cron_secret' and decrypted_secret = p_secret
     ),
     false
   );
@@ -49,7 +41,7 @@ select cron.schedule(
              || '/functions/v1/crypto-scanner',
       headers := jsonb_build_object(
         'Content-Type', 'application/json',
-        'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'crypto_scan_cron_secret')
+        'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'crypto_cron_secret')
       ),
       body := '{}'::jsonb
     );
