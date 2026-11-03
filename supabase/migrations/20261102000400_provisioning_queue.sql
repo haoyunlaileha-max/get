@@ -73,7 +73,7 @@ declare
   v_region jsonb;
   v_items jsonb;
 begin
-  if coalesce(auth.role(), '') <> 'service_role' then
+  if coalesce(current_setting('request.jwt.claim.role', true), '') <> 'service_role' then
     raise exception 'not_authorized' using errcode = '42501';
   end if;
 
@@ -179,7 +179,7 @@ declare
   v_job public.ah_provisioning_jobs%rowtype;
   v_order_id uuid;
 begin
-  if coalesce(auth.role(), '') <> 'service_role' then
+  if coalesce(current_setting('request.jwt.claim.role', true), '') <> 'service_role' then
     raise exception 'not_authorized' using errcode = '42501';
   end if;
   if p_job_id is null or p_success is null then
@@ -252,5 +252,9 @@ revoke all on function public.ah_claim_provisioning_job() from public, anon, aut
 revoke all on function public.ah_finish_provisioning_job(uuid, boolean, text, text) from public, anon, authenticated;
 grant execute on function public.ah_claim_provisioning_job() to service_role;
 grant execute on function public.ah_finish_provisioning_job(uuid, boolean, text, text) to service_role;
+
+
+-- Trigger-only privileged function; prevent direct RPC invocation by browser roles.
+revoke all on function public.ah_enqueue_paid_order() from public, anon, authenticated;
 
 commit;
