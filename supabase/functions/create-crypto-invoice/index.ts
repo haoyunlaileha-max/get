@@ -60,7 +60,7 @@ Deno.serve(async(request:Request)=>{
     const admin=createClient(SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
     const [{data:order,error:orderError},{data:asset,error:assetError}]=await Promise.all([
       admin.from("ah_orders").select("id,user_id,status,currency,total_minor").eq("id",orderId).eq("user_id",userData.user.id).maybeSingle(),
-      admin.from("ah_crypto_assets").select("asset_code,ticker,network,decimals,wallet_address,listener_enabled,listener_status").eq("asset_code",assetCode).maybeSingle(),
+      admin.from("ah_crypto_assets").select("asset_code,ticker,network,token_contract,decimals,wallet_address,listener_enabled,listener_status").eq("asset_code",assetCode).maybeSingle(),
     ]);
     if(orderError||!order) return reply(404,{error:"order_not_found"},origin);
     if(assetError||!asset) return reply(404,{error:"asset_not_found"},origin);
