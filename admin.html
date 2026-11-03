@@ -27,6 +27,15 @@
     </div>
     <section class="admin-panel">
       <div class="admin-panel-head"><div><h2 data-i="orders_title">Recent orders</h2><p data-i="orders_desc">Customer orders and their current lifecycle state.</p></div><span class="admin-count" id="orders-count">0</span></div>
+      <form id="orders-filter" class="admin-orders-toolbar">
+        <label class="admin-order-search"><span data-i="order_search_label">搜索订单 / 客户 UUID</span><input id="order-search" type="search" maxlength="36" autocomplete="off" placeholder="输入完整订单 ID 或客户 ID"></label>
+        <label class="admin-order-status"><span data-i="order_status_filter">订单状态</span><select id="order-status-filter">
+          <option value="all" data-i="filter_all">全部状态</option><option value="draft">草稿</option><option value="pending">待处理</option><option value="awaiting_payment">待付款</option><option value="paid">已付款</option><option value="provisioning">开通中</option><option value="active">运行中</option><option value="suspended">已暂停</option><option value="cancelled">已取消</option><option value="failed">失败</option><option value="refunded">已退款</option>
+        </select></label>
+        <button class="btn btn-primary" type="submit" data-i="search_orders">搜索</button>
+        <button class="admin-toggle" id="clear-order-filters" type="button" data-i="clear_filters">清除筛选</button>
+      </form>
+      <div class="admin-orders-pagination"><span id="orders-page-label">第 1 页</span><div><button class="admin-toggle" id="orders-prev" type="button" disabled data-i="previous_page">上一页</button><button class="admin-toggle" id="orders-next" type="button" disabled data-i="next_page">下一页</button></div></div>
       <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th data-i="order">Order</th><th data-i="customer">Customer ID</th><th data-i="status">Status</th><th data-i="total">Total</th><th data-i="created">Created</th><th data-i="order_details">订单详情</th></tr></thead><tbody id="orders-body"><tr><td colspan="6">—</td></tr></tbody></table></div>
     </section>
     <div class="admin-columns">
