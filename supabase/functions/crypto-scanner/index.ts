@@ -35,9 +35,18 @@ async function fetchJson(url: string, init: RequestInit = {}, timeout = 12_000):
   } finally { clearTimeout(timer); }
 }
 async function rpc(endpoint: string, method: string, params: unknown[]) {
-  const result = await fetchJson(endpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }) });
-  if (result.error) throw new Error("rpc_" + method + "_failed");
-  return result.result;
+  const candidates = endpoint.includes("ethereum") || endpoint.includes("cloudflare")
+    ? [endpoint, "https://ethereum-rpc.publicnode.com", "https://1rpc.io/eth"]
+    : endpoint.includes("bsc") ? [endpoint, "https://bsc-rpc.publicnode.com"] : [endpoint];
+  let lastError = "rpc_failed";
+  for (const candidate of [...new Set(candidates)]) {
+    try {
+      const result = await fetchJson(candidate, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }) });
+      if (result.error) { lastError = String(result.error.message ?? "rpc_error").slice(0, 50); continue; }
+      return result.result;
+    } catch (error) { lastError = error instanceof Error ? error.message.slice(0, 50) : "rpc_error"; }
+  }
+  throw new Error("rpc_" + method + "_" + lastError.replace(/[^a-zA-Z0-9_-]/g, "_"));
 }
 function hexNumber(value: string | null | undefined) { return value ? Number(BigInt(value)) : 0; }
 function safeAddressEqual(a: string, b: string, family: string) { return family === "evm" ? a.toLowerCase() === b.toLowerCase() : a === b; }
@@ -221,7 +230,7 @@ Deno.serve(async (request: Request) => {
   if (!(await authorized(db, secret))) return response(401, { error: "scanner_authentication_failed" });
   const { data: assets, error } = await db.from("ah_crypto_assets")
     .select("asset_code,chain_family,ticker,network,token_contract,decimals,wallet_address,confirmations_required,listener_enabled,listener_status")
-    .eq("listener_enabled", true).eq("listener_status", "ready").order("asset_code");
+    .eq("listener_enabled", true).order("asset_code");
   if (error) return response(500, { error: "asset_registry_read_failed" });
   const summary: Record<string, unknown>[] = [];
   for (const asset of (assets ?? []) as Asset[]) {
