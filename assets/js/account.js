@@ -42,7 +42,7 @@ const orderCancellationMessages = {
   ru:{cancel_order:"Отменить заказ",cancel_order_confirm:"Отменить этот неоплаченный заказ? Действие необратимо.",cancel_order_busy:"Отмена…",cancel_order_retry:"Не удалось отменить — повторить",cancel_order_success:"Заказ отменён.",cancel_order_unavailable:"Этот заказ сейчас нельзя отменить здесь."},
   es:{cancel_order:"Cancelar pedido",cancel_order_confirm:"¿Cancelar este pedido sin pagar? Esta acción no se puede deshacer.",cancel_order_busy:"Cancelando…",cancel_order_retry:"Error al cancelar — reintentar",cancel_order_success:"Pedido cancelado.",cancel_order_unavailable:"Este pedido ya no se puede cancelar aquí."}
 };
-function tr(key){const pack=messages[language]||messages[language.split("-")[0]]||messages.en;return orderCancellationMessages[language]?.[key]||orderCancellationMessages[language.split("-")[0]]?.[key]||pack[key]||messages.zh[key]||messages.en[key]||key;}
+function tr(key){const cancelPack=orderCancellationMessages[language]||orderCancellationMessages[language.split("-")[0]];if(cancelPack?.[key])return cancelPack[key];return locale.text(messages.zh[key]||messages.en[key]||key,language);}
 function applyLanguage(code){
   language=locale.normalize(code);
   document.documentElement.lang=language;
