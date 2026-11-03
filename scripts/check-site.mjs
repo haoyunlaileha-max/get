@@ -186,5 +186,5 @@ for (const marker of ["ah_token_auth_rate_limits_updated_idx", "updated_at < now
 assert.ok(!/drop table|truncate table/i.test(rateLimitCleanupSql), "Rate-limit cleanup migration must not drop or truncate data");
 
 for (const marker of ["create-crypto-invoice", "telegram-dispatch", "awaiting_provider", "catalog tables", "GRAM"]) assert.ok(readme.includes(marker), `Missing accurate live deployment note: ${marker}`);
-for (const marker of ["all nine chain listeners remain disabled", "does not scan blockchains", "GRAM invoice", "not been verified"]) assert.ok(cryptoDocs.toLowerCase().includes(marker.toLowerCase()), `Missing crypto production safety note: ${marker}`);
+for (const marker of ["all nine chain listeners remain disabled", "separate from chain scanning", "GRAM invoice", "not been verified"]) assert.ok(cryptoDocs.toLowerCase().includes(marker.toLowerCase()), `Missing crypto production safety note: ${marker}`);
 console.log("Checks passed: storefront, Chinese locales, account/admin portals, database/RLS safeguards, crypto invoice and Telegram outbox security, deployment documentation, and explicit chain-listener fail-closed status.");
