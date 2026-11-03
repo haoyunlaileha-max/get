@@ -53,7 +53,7 @@ async function refreshBalance(){
     if(ledger.error)throw ledger.error;
     if(topups.error)throw topups.error;
     const total=(ledger.data||[]).reduce((sum,row)=>sum+BigInt(String(row.amount_minor)),0n);
-    text(balanceValue,(Number(total)/100).toFixed(2)+" USDT");
+    text(balanceValue,(total/100n).toString()+"."+(total%100n).toString().padStart(2,"0")+" USDT");
     text(balanceState,"余额仅在链上交易达到所需确认数后自动入账。");
     historyPanel.replaceChildren();
     if(!topups.data?.length){const empty=document.createElement("div");empty.className="account-notice";empty.textContent="暂无充值记录。创建充值订单后，状态会显示在这里。";historyPanel.append(empty);return;}
@@ -117,8 +117,10 @@ async function start(){
     client.auth.onAuthStateChange((_event,next)=>{queueMicrotask(async()=>{
       session=next;
       if(session){await loadAssets();await refreshBalance();}
-      else{assets=[];assetSelect.replaceChildren(new Option("登录后加载可用网络",""));assetSelect.disabled=true;submitButton.disabled=true;text(balanceValue,"0.00 USDT");text(balanceState,"登录后查看账户余额。");historyPanel.replaceChildren();}
+      else{assets=[];pendingKey=null;pendingOrderId=null;assetSelect.replaceChildren(new Option("登录后加载可用网络",""));assetSelect.disabled=true;submitButton.disabled=true;text(balanceValue,"0.00 USDT");text(balanceState,"登录后查看账户余额。");historyPanel.replaceChildren();}
     });});
+    window.setInterval(()=>{if(session&&document.visibilityState==="visible")refreshBalance();},30000);
+    document.addEventListener("visibilitychange",()=>{if(session&&document.visibilityState==="visible")refreshBalance();});
   }catch{ text(balanceState,"账户充值服务初始化失败，请刷新页面重试。"); }
 }
 submitButton.addEventListener("click",submitTopup);
