@@ -138,7 +138,7 @@ for (const marker of ["admin.html", "20261103032425_admin_console_read_access.sq
 for (const marker of ['paid_at', 'customer_note', 'ah_order_items(description_snapshot,quantity,unit_price_minor)', 'orderStatusLabels', 'renderOrderCard', '查看订单详情', 'active:"运行中"', '付款确认时间']) assert.ok(accountJs.includes(marker), `Missing customer order detail behavior: ${marker}`);
 for (const marker of ['ah_regions(name,city,country_code)', 'addDetail("数据中心",regionLabel)', 'region?.country_code']) assert.ok(accountJs.includes(marker), "Missing customer order region detail: " + marker);
 for (const marker of ["loadMoreOrders", "ordersPageSize = 20", ".range(orderOffset,orderOffset+ordersPageSize-1)", "orders_more_error"]) assert.ok(accountJs.includes(marker), "Missing customer order pagination: " + marker);
-for (const marker of ['id="balance"', 'ACCOUNT BALANCE', 'topup-amount', '充值通道尚未开放']) assert.ok(account.includes(marker), "Missing safe account balance preview: " + marker);
+for (const marker of ['id="balance"', 'ACCOUNT BALANCE', 'topup-amount', 'topup-method', 'topup-submit', 'topup-invoice', 'topup-history']) assert.ok(account.includes(marker), "Missing live account top-up feature: " + marker);
 for (const route of ['zh/vps/', 'zh/dedicated/', 'zh/rdp/', 'zh/gpu/', 'zh/domains/']) assert.ok(html.includes(route), "Missing product route: " + route);
 for (const route of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html","zh/domains/index.html","zh/account/index.html"]) assert.ok(existsSync(new URL("../" + route, import.meta.url)), "Missing localized page: " + route);
 for (const route of ["zh/index.html"]) assert.ok(existsSync(new URL("../" + route, import.meta.url)), "Missing localized storefront: " + route);
