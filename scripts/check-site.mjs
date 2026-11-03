@@ -33,6 +33,7 @@ const cryptoSql = read("supabase/migrations/20261103080000_crypto_usdt_pricing_a
 const telegramFn = read("supabase/functions/telegram-dispatch/index.ts");
 const telegramSql = read("supabase/migrations/20261103081000_crypto_telegram_notification_outbox.sql");
 const telegramSchedulerSql = read("supabase/migrations/20261103090000_crypto_telegram_outbox_scheduler.sql");
+const telegramPrivilegeSql = read("supabase/migrations/20261103091000_crypto_telegram_rpc_privilege_auth.sql");
 const supabaseConfig = read("supabase/config.toml");
 const backendDocs = read("docs/backend-foundation.md");
 
@@ -55,6 +56,8 @@ for (const marker of ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "CRYPTO_LISTENER
 for (const marker of ["ah_crypto_telegram_outbox", "ah_enqueue_crypto_telegram_event", "ah_claim_crypto_telegram_notifications", "ah_finish_crypto_telegram_notification", "skip locked", "service_role"]) assert.ok(telegramSql.toLowerCase().includes(marker.toLowerCase()), "Missing Telegram outbox safeguard: " + marker);
 for (const marker of ["create extension if not exists pg_cron", "create extension if not exists pg_net", "vault.create_secret", "project_url", "publishable_key", "ah-crypto-telegram-outbox-dispatch", "net.http_post", "cron.schedule"]) assert.ok(telegramSchedulerSql.toLowerCase().includes(marker.toLowerCase()), "Missing scheduled Telegram dispatcher: " + marker);
 for (const marker of ["createSupabaseContext", 'auth:"publishable"', "hasInternalSecret", 'body.action!=="dispatch"', 'body.action==="test"']) assert.ok(telegramFn.includes(marker), "Missing restricted cron authentication behavior: " + marker);
+for (const marker of ["ah_claim_crypto_telegram_notifications", "ah_finish_crypto_telegram_notification", "revoke all on function", "grant execute on function", "to service_role"]) assert.ok(telegramPrivilegeSql.toLowerCase().includes(marker.toLowerCase()), "Missing Telegram worker RPC privilege restriction: " + marker);
+assert.ok(!telegramPrivilegeSql.includes("request.jwt.claim.role"), "Telegram worker RPC authorization must rely on explicit EXECUTE grants, not legacy JWT role claims");
 for (const marker of ["create extension if not exists pg_cron", "create extension if not exists pg_net", "vault.create_secret", "project_url", "publishable_key", "ah-crypto-telegram-outbox-dispatch", "net.http_post", "cron.schedule"]) assert.ok(telegramSchedulerSql.toLowerCase().includes(marker.toLowerCase()), "Missing scheduled Telegram dispatcher: " + marker);
 for (const marker of ["createSupabaseContext", 'auth:"publishable"', "hasInternalSecret", 'body.action!=="dispatch"', 'body.action==="test"']) assert.ok(telegramFn.includes(marker), "Missing restricted cron authentication behavior: " + marker);
 assert.ok(!/service_role|secret key/i.test(telegramSchedulerSql), "Cron migration must never store a privileged service-role credential");
