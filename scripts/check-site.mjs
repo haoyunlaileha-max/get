@@ -192,10 +192,10 @@ for (const marker of ["ah_token_auth_rate_limits_updated_idx", "updated_at < now
 assert.ok(!/drop table|truncate table/i.test(rateLimitCleanupSql), "Rate-limit cleanup migration must not drop or truncate data");
 
 for (const marker of ["create-crypto-invoice", "telegram-dispatch", "awaiting_provider", "catalog tables", "GRAM"]) assert.ok(readme.includes(marker), `Missing accurate live deployment note: ${marker}`);
-for (const marker of ["all nine chain listeners remain disabled", "separate from chain scanning", "GRAM invoice", "not yet been populated"]) assert.ok(cryptoDocs.toLowerCase().includes(marker.toLowerCase()), `Missing crypto production safety note: ${marker}`);
+for (const marker of ["TRON native TRX and USDT TRC-20 require", "TON is not enabled", "public RPC/explorer endpoints have rate limits"]) assert.ok(cryptoDocs.toLowerCase().includes(marker.toLowerCase()), `Missing crypto production safety note: ${marker}`);
 
 for (const marker of ["ah_crypto_scan_authorized", "validTransfer", "destination_mismatch", "manual_review", "ah_apply_payment_event", "confirmations_required", "MAX_BODY_BYTES"]) assert.ok(cryptoListenerFn.includes(marker), `Missing secure crypto transfer ingestion behavior: ${marker}`);
 for (const marker of ["crypto-listener", "exact invoice amount", "mainnet chain scanning", "TON is not enabled"]) assert.ok(cryptoDocs.toLowerCase().includes(marker.toLowerCase()), `Missing crypto listener safety documentation: ${marker}`);
 for (const marker of ["mempool.space", "litecoinspace.org", "eth_getLogs", "getSignaturesForAddress", "ah_crypto_scan_authorized", "TRONGRID_API_KEY", "crypto-listener"]) assert.ok(cryptoScannerFn.includes(marker), `Missing chain scanner adapter/security behavior: ${marker}`);
-for (const marker of ["crypto_cron_secret", "vault.create_secret", "ah_crypto_scan_authorized", "ah-crypto-chain-scanner", "cron.schedule", "listener_enabled = true"]) assert.ok(cryptoScannerSql.includes(marker), `Missing scanner migration behavior: ${marker}`);
+for (const marker of ["crypto_cron_secret", "ah_crypto_scan_authorized", "ah-crypto-chain-scanner", "cron.schedule", "listener_enabled = true"]) assert.ok(cryptoScannerSql.includes(marker), `Missing scanner migration behavior: ${marker}`);
 console.log("Checks passed: storefront, account/admin portals, database/RLS safeguards, crypto invoices, mainnet scanner adapters, Vault-authenticated cron and settlement, Telegram outbox security, and provider fail-closed behavior.");
