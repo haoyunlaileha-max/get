@@ -107,3 +107,5 @@ body{background:#fff;color:#17231f}
 .admin-orders-pagination>div{display:flex;gap:7px}
 .admin-orders-pagination button:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:520px){.admin-orders-toolbar>*{flex:1 1 100%}.admin-orders-pagination{align-items:flex-start;flex-direction:column}}
+
+.admin-orders-toolbar #export-orders{white-space:nowrap}
