@@ -39,6 +39,11 @@ document.querySelectorAll("[data-order]").forEach((button) => button.addEventLis
 document.getElementById("config-close").addEventListener("click", () => configureDialog.close());
 configureDialog.addEventListener("click", (event) => { if (event.target === configureDialog) configureDialog.close(); });
 document.getElementById("configure-form").addEventListener("submit", (event) => {
+  if (window.AH_CHECKOUT?.ready) {
+    event.preventDefault();
+    window.AH_CHECKOUT.submit(event);
+    return;
+  }
   event.preventDefault();
   configSummary.hidden = false;
   configSummary.textContent = "配置预览：" + configTitle.textContent + " · " + configPrice.textContent + " · " + document.getElementById("config-region").value + " · " + document.getElementById("config-os").value + "。演示环境，不会提交订单。";
