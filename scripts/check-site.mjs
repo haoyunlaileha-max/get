@@ -34,6 +34,7 @@ const telegramFn = read("supabase/functions/telegram-dispatch/index.ts");
 const telegramSql = read("supabase/migrations/20261103081000_crypto_telegram_notification_outbox.sql");
 const telegramSchedulerSql = read("supabase/migrations/20261103090000_crypto_telegram_outbox_scheduler.sql");
 const telegramPrivilegeSql = read("supabase/migrations/20261103091000_crypto_telegram_rpc_privilege_auth.sql");
+const cryptoCronSecureSql = read("supabase/migrations/20261103093000_crypto_worker_cron_schedule_secure.sql");
 const supabaseConfig = read("supabase/config.toml");
 const backendDocs = read("docs/backend-foundation.md");
 
@@ -48,7 +49,7 @@ for (const marker of ["window.AH_CHECKOUT?.ready", "window.AH_CHECKOUT.submit"])
 for (const marker of ["functions/v1/create-order", "Idempotency-Key", "ah_products", "ah_regions", "ah_plans", "plan_id", "region_id", "auth.getSession", "选择收款网络后，系统会按 USDT 报价换算币种金额。"]) assert.ok(checkoutJs.includes(marker), `Missing checkout integration: ${marker}`);
 for (const marker of ["productCategory", "categoryMap[product.category] === pageCategory", "data-plan-id"]) assert.ok(checkoutJs.includes(marker), `Missing product page catalog filtering: ${marker}`);
 for (const marker of ["create-crypto-invoice", "USDT", "asset_monitoring_unavailable", "wallet_address", "expected_amount"]) assert.ok(checkoutJs.includes(marker), `Missing direct crypto checkout behavior: ${marker}`);
-for (const marker of ["SUPABASE_SERVICE_ROLE_KEY", "ah_create_crypto_invoice", "market_rate_unavailable", "asset_monitoring_unavailable", "auth.getUser", "formatAtomic", "BTCUSDT", "TONUSDT"]) assert.ok(cryptoInvoiceFn.includes(marker), `Missing secure crypto invoice behavior: ${marker}`);
+for (const marker of ["SUPABASE_SERVICE_ROLE_KEY", "ah_create_crypto_invoice", "market_rate_unavailable", "asset_monitoring_unavailable", "asset_rate_source_unverified", "token_contract", "auth.getUser", "formatAtomic", "BTCUSDT", "TONUSDT"]) assert.ok(cryptoInvoiceFn.includes(marker), `Missing secure crypto invoice behavior: ${marker}`);
 for (const marker of ["alter column currency type varchar(4)", "currency<>'USDT'", "ah_create_crypto_invoice", "unique_violation", "quote_price_usdt", "ticker='GRAM'", "service_role"]) assert.ok(cryptoSql.includes(marker), `Missing USDT invoice database safeguard: ${marker}`);
 assert.ok(adminHtml.includes('value="USDT" readonly'), "Admin catalog must price plans in USDT only");
 assert.ok(adminJs.includes('const currency="USDT"'), "Admin catalog writes must enforce USDT pricing");
@@ -56,6 +57,7 @@ for (const marker of ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "CRYPTO_LISTENER
 for (const marker of ["ah_crypto_telegram_outbox", "ah_enqueue_crypto_telegram_event", "ah_claim_crypto_telegram_notifications", "ah_finish_crypto_telegram_notification", "skip locked", "service_role"]) assert.ok(telegramSql.toLowerCase().includes(marker.toLowerCase()), "Missing Telegram outbox safeguard: " + marker);
 for (const marker of ["create extension if not exists pg_cron", "create extension if not exists pg_net", "vault.create_secret", "project_url", "publishable_key", "ah-crypto-telegram-outbox-dispatch", "net.http_post", "cron.schedule"]) assert.ok(telegramSchedulerSql.toLowerCase().includes(marker.toLowerCase()), "Missing scheduled Telegram dispatcher: " + marker);
 for (const marker of ["createSupabaseContext", 'auth:"publishable"', "hasInternalSecret", 'body.action!=="dispatch"', 'body.action==="test"']) assert.ok(telegramFn.includes(marker), "Missing restricted cron authentication behavior: " + marker);
+for (const marker of ["ah_verify_crypto_cron_secret", "crypto_cron_secret", "x-cron-secret", "cron.unschedule", "cron.schedule"]) assert.ok(cryptoCronSecureSql.includes(marker), "Missing private Vault-backed cron authentication: " + marker);
 for (const marker of ["ah_claim_crypto_telegram_notifications", "ah_finish_crypto_telegram_notification", "revoke all on function", "grant execute on function", "to service_role"]) assert.ok(telegramPrivilegeSql.toLowerCase().includes(marker.toLowerCase()), "Missing Telegram worker RPC privilege restriction: " + marker);
 assert.ok(!telegramPrivilegeSql.includes("request.jwt.claim.role"), "Telegram worker RPC authorization must rely on explicit EXECUTE grants, not legacy JWT role claims");
 for (const marker of ["create extension if not exists pg_cron", "create extension if not exists pg_net", "vault.create_secret", "project_url", "publishable_key", "ah-crypto-telegram-outbox-dispatch", "net.http_post", "cron.schedule"]) assert.ok(telegramSchedulerSql.toLowerCase().includes(marker.toLowerCase()), "Missing scheduled Telegram dispatcher: " + marker);
