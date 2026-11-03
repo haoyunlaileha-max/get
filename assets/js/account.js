@@ -183,6 +183,9 @@ else{
   try{
     const {createClient}=await import("https://esm.sh/@supabase/supabase-js@2");
     supabase=createClient(config.url,config.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+    // Share the exact auth client with token login so both flows use one session store.
+    window.AH_SUPABASE_AUTH_CLIENT=supabase;
+    window.AH_RENDER_ACCOUNT_SESSION=renderSession;
     setup.hidden=true;authPanel.hidden=false;
     const {data,error}=await supabase.auth.getSession();if(error)throw error;
     await renderSession(data.session);
