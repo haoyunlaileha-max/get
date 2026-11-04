@@ -416,3 +416,34 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 .admin-page :focus-visible{outline:3px solid #84caff!important;outline-offset:2px}
 
 @media(max-width:600px){.crypto-invoice-card{grid-template-columns:1fr!important}.crypto-invoice-card>div:first-child{justify-items:center}.crypto-invoice-card strong{font-size:13px!important}}
+
+/* Reference-style balance recharge layout */
+.account-balance.topup-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(250px,.95fr);gap:22px;align-items:start;padding:28px;margin:22px 0;background:#fff!important;border:1px solid #e5e7eb;border-radius:12px}
+.topup-main{display:grid;gap:20px;min-width:0}
+.topup-heading h2{margin:0 0 8px;font-size:22px;font-weight:750;color:#101828}
+.topup-heading p{margin:0;color:#667085;font-size:13px}
+.topup-step{display:grid;gap:10px}
+.topup-step h3{display:flex;align-items:center;gap:9px;margin:0;font-size:14px;color:#101828}
+.topup-step h3 span{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#eef2ff;color:#2458d3;font-size:12px}
+.topup-amount-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.topup-amount-option{min-height:64px;display:grid;place-items:center;position:relative;padding:10px;border:1px solid #d9dce3;border-radius:10px;background:#fff;color:#101828;cursor:pointer}
+.topup-amount-option strong{font-size:18px;font-weight:750}
+.topup-amount-option.selected{border:2px solid #2458e6;background:#eef2ff;color:#2458d3;padding:9px}
+.topup-amount-option.selected:after{content:"✓";position:absolute;right:9px;top:5px;font-size:12px;font-weight:800}
+.topup-amount-option:focus-visible,.topup-main select:focus-visible{outline:3px solid #b2ccff;outline-offset:2px}
+.topup-amount-source{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.topup-main select{width:100%;min-height:46px;padding:10px 12px;border:1px solid #dfe2e8;border-radius:8px;background:#fff;color:#344054;font-size:14px}
+.topup-payment-step{margin-top:0}
+.topup-continue{width:min(240px,100%);min-height:52px;display:flex;justify-content:center;align-items:center;gap:12px;border-radius:9px;background:#2458df!important;border-color:#2458df!important;color:#fff!important;font-weight:700}
+.topup-continue span{font-size:18px}
+.topup-note{font-size:12px;color:#667085;line-height:1.6}
+.topup-preview{display:grid;gap:0;padding:16px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;color:#344054}
+.topup-preview h3{margin:0 0 10px;font-size:13px;font-weight:650;color:#344054}
+.topup-preview>div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;font-size:13px;border-bottom:1px solid #f0f1f3}
+.topup-preview>div strong{font-size:14px;color:#101828;font-variant-numeric:tabular-nums}
+.topup-preview>div .topup-preview-add{color:#039855}
+.topup-preview .topup-preview-total{margin-top:4px;padding-top:14px;border-bottom:0}
+.topup-preview-total strong{font-size:20px!important;color:#2458df!important}
+.topup-preview p{margin:8px 0 0;color:#98a2b3;font-size:11px;line-height:1.55}
+@media(max-width:760px){.account-balance.topup-layout{grid-template-columns:1fr;padding:20px}.topup-preview{order:2}.topup-amount-grid{gap:7px}.topup-amount-option{min-height:60px}}
+@media(max-width:420px){.topup-amount-option strong{font-size:16px}.topup-heading h2{font-size:20px}}
