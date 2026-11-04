@@ -22,7 +22,7 @@ function setAmount(amount,custom=false){
 }
 function updateTopupPreview(){
   const amount=Number(amountSelect.value)||3000;
-  const bonus=selectedBonus(amount);
+  const bonus=customMode?0:selectedBonus(amount);
   const current=currentBalanceMinor;
   text(document.getElementById("topup-preview-current"),dollars(current));
   text(document.getElementById("topup-preview-add"),dollars(amount));
