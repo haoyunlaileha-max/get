@@ -217,5 +217,5 @@ $function$
 
 revoke all on function public.ah_expire_unpaid_orders() from public, anon, authenticated;
 grant execute on function public.ah_expire_unpaid_orders() to postgres;
-select cron.schedule('ah-expire-unpaid-orders','* * * * *','select public.ah_expire_unpaid_orders();');
+select cron.schedule('ah-expire-unpaid-orders','30 seconds','select public.ah_expire_unpaid_orders();');
 select public.ah_expire_unpaid_orders();
