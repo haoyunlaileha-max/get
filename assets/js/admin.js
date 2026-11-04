@@ -44,8 +44,9 @@ function editorTr(key) { const value = inventoryText.zh[key] || editorText.zh[ke
 function formValues(form) { return Object.fromEntries(new FormData(form).entries()); }
 function fillProductEditor(product) {
   const form = $("product-editor"); form.reset();
-  for (const key of ["id","name","slug","category","description","sort_order","image_path"]) form.elements.namedItem(key).value = product?.[key] ?? (key === "sort_order" ? 0 : "");
+  for (const key of ["id","name","slug","category_id","description","sort_order","image_path"]) form.elements.namedItem(key).value = product?.[key] ?? (key === "sort_order" ? 0 : "");
   form.elements.is_active.checked = Boolean(product?.is_active);
+  $("product-category").value=product?.category_id||$("product-category").options[0]?.value||"";
   const preview=$("product-image-preview");preview.replaceChildren();
   if(product?.image_path){const image=document.createElement("img");image.src=supabase.storage.from("product-images").getPublicUrl(product.image_path).data.publicUrl;image.alt=product.name||"商品图片";preview.append(image);const note=document.createElement("span");note.textContent="当前商品图片";preview.append(note);}
   else preview.textContent="尚未上传商品图片";
@@ -621,7 +622,7 @@ $("product-editor").addEventListener("submit",(event)=>{event.preventDefault();s
 $("plan-editor").addEventListener("submit",(event)=>{event.preventDefault();saveCatalog(event.currentTarget,"ah_plans");});
 $("plan-region-editor").addEventListener("submit",(event)=>{event.preventDefault();saveInventory(event.currentTarget);});
 $("region-editor").addEventListener("submit",(event)=>{event.preventDefault();saveRegion(event.currentTarget);});
-$("product-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("product-editor").elements.sort_order.value="0"; },0);});
+$("product-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("product-editor").elements.sort_order.value="0"; $("product-image-preview").textContent="尚未上传商品图片"; },0);});
 $("plan-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("plan-editor").elements.currency.value="USDT"; $("plan-editor").elements.price.value="0"; $("plan-editor").elements.sort_order.value="0"; },0);});
 $("orders-filter").addEventListener("submit", (event) => {
   event.preventDefault();
