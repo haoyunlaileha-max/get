@@ -30,6 +30,7 @@ const adminHtml = read("admin.html");
 const adminJs = read("assets/js/admin.js");
 const orderFn = read("supabase/functions/create-order/index.ts");
 const tokenAuthFn = read("supabase/functions/token-auth/index.ts");
+const cancelOrderFn = read("supabase/functions/cancel-order/index.ts");
 const paymentFn = read("supabase/functions/payment-webhook/index.ts");
 const provisioningFn = read("supabase/functions/provision-worker/index.ts");
 const cryptoInvoiceFn = read("supabase/functions/create-crypto-invoice/index.ts");
@@ -65,6 +66,11 @@ for (const marker of ["window.AH_CHECKOUT?.ready", "window.AH_CHECKOUT.submit"])
 for (const marker of ["functions/v1/create-order", "Idempotency-Key", "ah_products", "ah_regions", "ah_plans", "plan_id", "region_id", "auth.getSession", "选择收款网络后，系统会按 USDT 报价换算币种金额。"]) assert.ok(checkoutJs.includes(marker), `Missing checkout integration: ${marker}`);
 for (const marker of ["productCategory", "categoryMap[product.category] === pageCategory", "data-plan-id", "ah_plan_regions", "sellablePlanIds", "capacity_units", "dataset.osOptions"]) assert.ok(checkoutJs.includes(marker), `Missing product page catalog filtering: ${marker}`);
 for (const marker of ["create-crypto-invoice", "USDT", "asset_monitoring_unavailable", "wallet_address", "expected_amount"]) assert.ok(checkoutJs.includes(marker), `Missing direct crypto checkout behavior: ${marker}`);
+for (const [name, source] of [["token-auth", tokenAuthFn], ["create-order", orderFn], ["cancel-order", cancelOrderFn]]) {
+  for (const origin of ["https://haoyunlaileha-max.github.io", "https://anonport.com", "https://www.anonport.com"]) {
+    assert.ok(source.includes(origin), `${name} must allow the production storefront origin: ${origin}`);
+  }
+}
 for (const marker of ["SUPABASE_SERVICE_ROLE_KEY", "ah_create_crypto_invoice", "market_rate_unavailable", "asset_monitoring_unavailable", "token_contract", "auth.getUser", "formatAtomic", "BTCUSDT", "TONUSDT"]) assert.ok(cryptoInvoiceFn.includes(marker), `Missing secure crypto invoice behavior: ${marker}`);
 for (const marker of ["alter column currency type varchar(4)", "currency<>'USDT'", "ah_create_crypto_invoice", "unique_violation", "quote_price_usdt", "ticker='TON'", "service_role"]) assert.ok(cryptoSql.includes(marker), `Missing USDT invoice database safeguard: ${marker}`);
 assert.ok(adminHtml.includes('name="currency" value="USDT"') && adminJs.includes('currency:"USDT"'), "Admin catalog must price plans in USDT only");
