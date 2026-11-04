@@ -8,7 +8,8 @@ The `ah_*` schema and functions are isolated from unrelated application tables. 
 
 - `ah_profiles`: one profile row per Supabase Auth user.
 - `ah_regions`: data-center regions and availability state.
-- `ah_products` and `ah_plans`: active catalog and authoritative prices.
+- `ah_product_categories`: admin-managed product taxonomy with public read limited to active categories and admin-only writes.
+- `ah_products` and `ah_plans`: active catalog and authoritative prices. Products may reference a category and a public product-image object path; image uploads are restricted to admins by Storage RLS and the bucket enforces a 5 MB image-only allowlist.
 - `ah_orders` and `ah_order_items`: customer orders and immutable checkout snapshots.
 - `ah_payment_events`: minimal audit records for accepted payment-success notifications; unique provider/event IDs prevent duplicate processing.
 - `ah_provisioning_jobs`: durable, one-per-order provisioning work queue with leases, retry scheduling, attempt limits, and provider references.
