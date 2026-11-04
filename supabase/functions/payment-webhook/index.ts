@@ -160,6 +160,7 @@ Deno.serve(async (request: Request) => {
       if (message.includes("order_not_found")) return json(404, { error: "order_not_found" });
       if (message.includes("amount_or_currency_mismatch")) return json(409, { error: "payment_amount_or_currency_mismatch" });
       if (message.includes("order_not_payable")) return json(409, { error: "order_not_payable" });
+      if (message.includes("order_expired")) return json(409, { error: "order_expired" });
       if (message.includes("payment_event_conflict")) return json(409, { error: "event_id_conflict" });
       if (message.includes("not_authorized")) return json(403, { error: "webhook_not_authorized" });
       return json(400, { error: "payment_event_rejected" });
