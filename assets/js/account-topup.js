@@ -7,7 +7,7 @@ const balanceValue=document.getElementById("account-balance-value");
 const balanceState=document.getElementById("account-balance-state");
 const historyPanel=document.getElementById("topup-history");
 const refreshButton=document.getElementById("topup-refresh");
-let client=null,session=null,assets=[],pendingKey=null,pendingOrderId=null,busy=false;
+let client=null,session=null,assets=[],pendingKey=null,pendingOrderId=null,pendingAmountMinor=null,busy=false;
 
 function money(minor){return (Number(minor)/100).toFixed(2)+" USDT";}
 function text(node,value){if(node)node.textContent=value;}
@@ -95,16 +95,19 @@ async function submitTopup(){
       if(!pendingKey)pendingKey=crypto.randomUUID();
       const created=await api("create-account-topup",{action:"create",amount_minor:amount,idempotency_key:pendingKey});
       pendingOrderId=created.order_id;
+      pendingAmountMinor=amount;
+      amountSelect.disabled=true;
     }
+    if(pendingAmountMinor!==amount)throw new Error("当前充值订单金额已锁定，请完成该订单或刷新充值页面后再创建新订单。");
     submitButton.textContent="正在生成链上收款信息…";
     const result=await api("create-crypto-invoice",{order_id:pendingOrderId,asset_code:assetCode});
     invoiceCard(result.invoice);
-    pendingKey=null;pendingOrderId=null;
+    pendingKey=null;pendingOrderId=null;pendingAmountMinor=null;amountSelect.disabled=false;
     await refreshBalance();
   }catch(error){
     showInvoiceError(error.message==="asset_monitoring_unavailable"?"该收款网络暂不可用，系统已阻止生成付款地址。":error.message==="market_rate_unavailable"?"暂时无法取得可靠实时汇率，请稍后重试。":error.message==="asset_contract_unverified"?"该代币合约尚未核验，暂不开放收款。":error.message);
   }finally{
-    busy=false;submitButton.disabled=!assets.length;submitButton.textContent="生成充值收款信息";
+    busy=false;submitButton.disabled=!assets.length;amountSelect.disabled=Boolean(pendingOrderId);submitButton.textContent=pendingOrderId?"继续生成此金额的收款信息":"生成充值收款信息";
   }
 }
 async function start(){
@@ -117,7 +120,7 @@ async function start(){
     client.auth.onAuthStateChange((_event,next)=>{queueMicrotask(async()=>{
       session=next;
       if(session){await loadAssets();await refreshBalance();}
-      else{assets=[];pendingKey=null;pendingOrderId=null;assetSelect.replaceChildren(new Option("登录后加载可用网络",""));assetSelect.disabled=true;submitButton.disabled=true;text(balanceValue,"0.00 USDT");text(balanceState,"登录后查看账户余额。");historyPanel.replaceChildren();}
+      else{assets=[];pendingKey=null;pendingOrderId=null;pendingAmountMinor=null;amountSelect.disabled=false;assetSelect.replaceChildren(new Option("登录后加载可用网络",""));assetSelect.disabled=true;submitButton.disabled=true;text(balanceValue,"0.00 USDT");text(balanceState,"登录后查看账户余额。");historyPanel.replaceChildren();}
     });});
     window.setInterval(()=>{if(session&&document.visibilityState==="visible")refreshBalance();},30000);
     document.addEventListener("visibilitychange",()=>{if(session&&document.visibilityState==="visible")refreshBalance();});
