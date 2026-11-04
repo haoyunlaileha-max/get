@@ -68,7 +68,7 @@
           <input type="hidden" name="id">
           <label><span data-i="product_name">Product name</span><input name="name" required maxlength="100"></label>
           <label><span data-i="product_slug">Slug</span><input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" maxlength="80"></label>
-          <label><span data-i="product_category">Category</span><select name="category" id="product-category" required></select></label>
+          <label><span data-i="product_category">Category</span><select name="category_id" id="product-category" required></select></label>
           <label><span>商品主图（JPG / PNG / WebP / AVIF，最大 5 MB）</span><input name="image_file" type="file" accept="image/jpeg,image/png,image/webp,image/avif"></label>
           <input type="hidden" name="image_path"><div id="product-image-preview" class="admin-image-preview" aria-live="polite">尚未上传商品图片</div>
           <label><span data-i="description">Description</span><textarea name="description" rows="2" maxlength="1000"></textarea></label>
