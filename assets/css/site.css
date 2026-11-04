@@ -968,3 +968,36 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
     align-self:stretch!important;
   }
 }
+
+
+/* Final alignment: Continue sits level with the selected payment network. */
+@media(min-width:861px){
+  .account-page .topup-payment-action-row>.topup-continue{
+    grid-column:2!important;
+    grid-row:4!important;
+    align-self:stretch!important;
+    justify-self:stretch!important;
+    width:100%!important;
+    height:52px!important;
+    min-height:52px!important;
+    max-width:none!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+  }
+}
+/* Pending-payment badges use the same neutral appearance as cancelled badges. */
+.account-page #orders-list .order-status.status-awaiting_payment,
+.account-page .account-activity-panel .order-status.status-awaiting_payment,
+.account-page .order-status.status-awaiting_payment,
+.account-page .status-awaiting_payment{
+  display:inline-block!important;
+  padding:5px 9px!important;
+  border:1px solid #d0d5dd!important;
+  border-radius:6px!important;
+  background:#fff!important;
+  background-color:#fff!important;
+  color:#101828!important;
+  font-weight:600!important;
+  opacity:1!important;
+  box-shadow:none!important;
+}
