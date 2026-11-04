@@ -284,10 +284,32 @@
             throw new Error(messages[result.error] || "暂时无法生成收款信息，请稍后重试。");
           }
           const invoice=result.invoice;
-          invoiceResult.textContent = "应付：" + invoice.expected_amount + " " + invoice.ticker + "\n网络：" + invoice.network + "\n收款地址：" + invoice.wallet_address + "\n报价：" + invoice.quoted_usdt + " USDT\n有效期：" + invoice.expires_at;
-          const copy=document.createElement("button"); copy.type="button"; copy.className="admin-toggle"; copy.textContent="复制收款地址";
+          invoiceResult.replaceChildren();
+          const invoiceCard=document.createElement("div");
+          invoiceCard.className="crypto-invoice-card";
+          invoiceCard.style.cssText="display:grid;grid-template-columns:240px minmax(0,1fr);gap:18px;align-items:start;padding:16px;background:#fff;color:#101828;border:1px solid #d0d5dd;border-radius:12px;margin-top:12px";
+          const qrWrap=document.createElement("div");
+          qrWrap.style.cssText="display:grid;justify-items:center;gap:8px";
+          const qrNode=document.createElement("div");
+          qrNode.style.cssText="width:220px;height:220px;padding:8px;background:#fff;border:1px solid #eaecf0;border-radius:8px";
+          const qrCaption=document.createElement("small");qrCaption.textContent="扫描二维码获取收款地址";qrCaption.style.color="#475467";
+          qrWrap.append(qrNode,qrCaption);
+          const info=document.createElement("div");info.style.cssText="display:grid;gap:8px;min-width:0;color:#101828";
+          const addInvoiceLine=(label,value)=>{const line=document.createElement("div");line.style.cssText="display:grid;gap:2px";const title=document.createElement("small");title.textContent=label;title.style.color="#475467";const val=document.createElement("strong");val.textContent=value;val.style.cssText="font-size:14px;overflow-wrap:anywhere;color:#101828";line.append(title,val);info.append(line);};
+          addInvoiceLine("应付金额",invoice.expected_amount+" "+invoice.ticker);
+          addInvoiceLine("支付网络",invoice.network);
+          addInvoiceLine("收款地址",invoice.wallet_address);
+          addInvoiceLine("订单总有效期至",new Date(invoice.order_expires_at||invoice.expires_at).toLocaleString());
+          addInvoiceLine("报价",invoice.quoted_usdt+" USDT");
+          const copy=document.createElement("button");copy.type="button";copy.className="admin-toggle";copy.textContent="复制收款地址";
           copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(invoice.wallet_address);copy.textContent="已复制";}catch{copy.textContent="复制失败";}});
-          invoiceResult.append(document.createElement("br"),copy);
+          info.append(copy);invoiceCard.append(qrWrap,info);invoiceResult.append(invoiceCard);
+          try{
+            if(!window.QRCode){
+              await new Promise((resolve,reject)=>{const script=document.createElement("script");script.src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";script.onload=resolve;script.onerror=reject;document.head.append(script);});
+            }
+            new window.QRCode(qrNode,{text:invoice.wallet_address,width:204,height:204,colorDark:"#111827",colorLight:"#ffffff",correctLevel:window.QRCode.CorrectLevel.M});
+          }catch{qrCaption.textContent="二维码暂不可用，请复制下方收款地址";}
         } catch(error) { invoiceResult.textContent=error?.message || "收款信息生成失败。"; }
         finally { invoiceButton.disabled=false; }
       });
