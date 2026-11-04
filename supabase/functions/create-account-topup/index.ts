@@ -41,7 +41,7 @@ Deno.serve(async(request:Request)=>{
   if(action==="assets") {
     if(Object.keys(body).length!==1)return reply(400,{error:"unexpected_request_field"},origin);
   } else if(action==="create") {
-    if(Object.keys(body).some(k=>!["action","amount_minor","idempotency_key"].includes(k)))return reply(400,{error:"unexpected_request_field"},origin);
+    if(Object.keys(body).some(k=>!["action","amount_minor","bonus_eligible","idempotency_key"].includes(k)))return reply(400,{error:"unexpected_request_field"},origin);
   } else return reply(400,{error:"invalid_action"},origin);
   try {
     const auth=createClient(URL,ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
@@ -57,11 +57,11 @@ Deno.serve(async(request:Request)=>{
     }
     const amount=body.amount_minor;
     const key=body.idempotency_key;
-    if(typeof amount!=="number"||!Number.isSafeInteger(amount)||amount<MIN_AMOUNT_MINOR||typeof key!=="string"||!UUID.test(key)) {
+    if(typeof amount!=="number"||!Number.isSafeInteger(amount)||amount<MIN_AMOUNT_MINOR||typeof body.bonus_eligible!=="boolean"||typeof key!=="string"||!UUID.test(key)) {
       return reply(400,{error:"invalid_topup_request"},origin);
     }
     const {data:orderId,error}=await admin.rpc("ah_create_account_topup",{
-      p_user_id:userData.user.id,p_amount_minor:amount,p_idempotency_key:"topup:"+key
+      p_user_id:userData.user.id,p_amount_minor:amount,p_bonus_eligible:body.bonus_eligible,p_idempotency_key:"topup:"+key
     });
     if(error||!orderId)return reply(500,{error:error?.message==="topup_idempotency_conflict"?"topup_idempotency_conflict":"topup_creation_failed"},origin);
     return reply(201,{order_id:orderId,amount_minor:amount,currency:"USDT"},origin);
