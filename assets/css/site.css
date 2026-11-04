@@ -460,3 +460,20 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 .topup-custom-wrap>small{font-size:11px;line-height:1.5;color:#667085}
 .topup-custom-wrap.active .topup-custom-field{border-color:#2458df;background:#eef2ff}
 @media(max-width:420px){.topup-amount-option small{font-size:10px}}
+
+/* Token logos and custom payment-network picker */
+.topup-native-select-hidden{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+.topup-asset-picker{position:relative;width:100%;min-width:0}
+.topup-asset-trigger{width:100%;min-height:48px;display:flex;align-items:center;gap:11px;padding:8px 12px;border:1px solid #dfe2e8;border-radius:9px;background:#fff;color:#344054;text-align:left;font-size:14px;cursor:pointer}
+.topup-asset-trigger:disabled{opacity:.65;cursor:not-allowed}
+.topup-asset-trigger>span:nth-child(2){flex:1}
+.topup-asset-chevron{font-size:20px;color:#667085}
+.topup-asset-logo,.topup-asset-logo-fallback{width:28px;height:28px;flex:0 0 28px;border-radius:50%;object-fit:contain;background:#fff}
+.topup-asset-logo-fallback{display:grid;place-items:center;background:#eef2ff;color:#3448a5;font-size:9px;font-weight:800}
+.topup-asset-menu{position:absolute;z-index:30;top:calc(100% + 6px);left:0;right:0;max-height:320px;overflow:auto;padding:5px;border:1px solid #e4e7ec;border-radius:10px;background:#fff;box-shadow:0 12px 28px rgba(16,24,40,.14)}
+.topup-asset-menu[hidden]{display:none}
+.topup-asset-option{width:100%;min-height:46px;display:flex;align-items:center;gap:11px;padding:8px 10px;border:0;border-radius:7px;background:#fff;color:#344054;text-align:left;font-size:13px;cursor:pointer}
+.topup-asset-option:hover,.topup-asset-option[aria-selected="true"]{background:#f2f4f7}
+.topup-asset-option>span:nth-child(2){flex:1}
+.topup-asset-check{color:#2458df;font-weight:800}
+.topup-continue{gap:0}
