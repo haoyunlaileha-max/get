@@ -107,7 +107,8 @@ async function refreshBalance(){
     ]);
     if(ledger.error)throw ledger.error;
     if(topups.error)throw topups.error;
-    const total=(ledger.data||[]).reduce((sum,row)=>sum+BigInt(String(row.amount_minor)),0n);\n    currentBalanceMinor=total;updateTopupPreview();
+    const total=(ledger.data||[]).reduce((sum,row)=>sum+BigInt(String(row.amount_minor)),0n);
+    currentBalanceMinor=total;updateTopupPreview();
     text(balanceValue,(total/100n).toString()+"."+(total%100n).toString().padStart(2,"0")+" USDT");
     text(balanceState,"余额仅在链上交易达到所需确认数后自动入账。");
     historyPanel.replaceChildren();
@@ -182,6 +183,7 @@ async function start(){
     document.addEventListener("visibilitychange",()=>{if(session&&document.visibilityState==="visible")refreshBalance();});
   }catch{ text(balanceState,"账户充值服务初始化失败，请刷新页面重试。"); }
 }
-updateTopupPreview();\nsubmitButton.addEventListener("click",submitTopup);
+updateTopupPreview();
+submitButton.addEventListener("click",submitTopup);
 refreshButton?.addEventListener("click",refreshBalance);
 start();
