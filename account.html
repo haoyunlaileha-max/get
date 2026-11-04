@@ -60,7 +60,7 @@
       <button id="reset-password" type="button">重置密码</button>
     </section>
     <section id="account-dashboard" hidden>
-      <div class="account-user"><span class="account-avatar" aria-hidden="true">A</span><div><strong id="account-email"></strong><small data-i="authenticated">Authenticated customer</small></div></div>
+      <div class="account-user"><span class="account-avatar" aria-hidden="true">ID</span><div><strong id="account-email"></strong><small id="account-client-info">客户端令牌账户 · 已验证</small></div></div>
       <section class="account-balance topup-layout" id="balance">
         <div class="account-topup topup-main">
           <div class="topup-heading">
@@ -122,15 +122,6 @@
         </div>
       </section>
       <section class="account-transactions"><div class="topup-history-heading"><h3>最近充值记录</h3><button class="btn btn-ghost" id="topup-refresh" type="button">刷新状态</button></div><div id="topup-history" class="topup-history"><div class="account-notice">正在加载充值记录…</div></div></section>
-      <section class="account-profile">
-        <h2 class="account-section-title" data-i="profile_title">Profile</h2>
-        <form id="profile-form">
-          <label for="profile-name" data-i="display_name">Display name</label>
-          <input id="profile-name" name="display_name" type="text" maxlength="80" autocomplete="name" placeholder="Your name">
-          <button class="btn btn-primary account-profile-submit" id="profile-save" type="submit" data-i="save_profile">Save profile</button>
-        </form>
-        <p id="profile-state" class="account-inline-state" role="status"></p>
-      </section>
       <h2 class="account-section-title" data-i="your_orders">Your orders</h2>
       <div id="orders-state" class="account-notice" data-i="loading_orders">Loading your orders…</div>
       <div id="orders-list" class="orders-list"></div>
