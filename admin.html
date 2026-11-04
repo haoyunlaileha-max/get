@@ -85,7 +85,7 @@
           <div class="admin-editor-row"><label><span data-i="price">Price (major currency units)</span><input name="price" type="number" required min="0" max="999999999" step="0.01" value="0"></label><label><span data-i="currency">计价币种（固定 USDT）</span><input name="currency" value="USDT" readonly maxlength="4" aria-label="USDT"></label></div>
           <label><span data-i="billing_period">Billing period</span><select name="billing_period"><option value="hourly">Hourly</option><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="annually">Annually</option><option value="one_time">One time</option></select></label>
           <label><span data-i="description">Description</span><textarea name="description" rows="2" maxlength="1000"></textarea></label>
-          <label><span data-i="specs_json">Specifications (JSON)</span><textarea name="specs" rows="5" spellcheck="false">{ "cpu": "2 vCPU", "ram": "4 GB", "storage": "80 GB NVMe", "bandwidth": "4 TB", "os_options": ["Ubuntu 24.04", "Debian 12"] }</textarea></label>
+          <div class="admin-spec-editor"><div class="admin-spec-heading"><strong>套餐规格参数</strong><small id="plan-spec-category-hint">根据所属商品分类填写对应规格</small></div><div id="plan-spec-fields" class="admin-spec-fields"></div><details class="admin-spec-advanced"><summary>高级规格（JSON，可选）</summary><label><span data-i="specs_json">其他规格参数（JSON）</span><textarea name="specs" rows="4" spellcheck="false">{}</textarea></label></details></div>
           <label><span data-i="sort_order">Sort order</span><input name="sort_order" type="number" min="0" max="100000" step="1" value="0"></label>
           <label class="admin-check"><input name="is_active" type="checkbox"><span data-i="publish_plan">Publish plan immediately</span></label>
           <div class="admin-editor-actions"><button class="btn btn-primary" type="submit" data-i="save_plan">Save plan</button><button class="admin-toggle" type="reset" data-i="clear_form">Clear</button></div>
@@ -136,5 +136,5 @@
   </section>
 </main>
 <script src="assets/js/language.js"></script><script src="assets/js/supabase-config.js"></script>
-<script type="module" src="assets/js/admin.js"></script>
+<script type="module" src="assets/js/admin.js?v=20261104-category-spec-fields-1"></script>
 </body></html>
