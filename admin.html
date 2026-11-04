@@ -6,7 +6,7 @@
 <meta name="description" content="AnonPort operations console.">
 <title>运营管理后台 — AnonPort</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/css/site.css?v=20261104-admin-white-contrast-2">
+<link rel="stylesheet" href="assets/css/site.css?v=20261104-admin-release-gates-1">
 </head>
 <body class="admin-page">
 <header><div class="wrap nav"><a class="brand" href="index.html"><img class="brand-mark" src="assets/brand-mark.svg" alt=""><span>ANONPORT</span> <span class="admin-brand-tag">ADMIN</span></a><div class="account-nav"><label class="sr-only" for="admin-language" data-i="language">Language</label><select id="admin-language" class="account-language" aria-label="选择语言"><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option></select><a class="btn btn-ghost" href="index.html" data-i="storefront">Storefront</a></div></div></header>
@@ -26,7 +26,7 @@
       <article class="admin-metric"><span data-i="active">Active plans</span><strong id="metric-plans">—</strong><small data-i="catalog">Catalog</small></article>
     </div>
     <section class="admin-panel" id="launch-readiness">
-      <div class="admin-panel-head"><div><h2>主网上线检查</h2><p>根据当前真实目录、机房库存和链上监听配置计算，不使用演示数据。</p></div><span class="admin-count">LIVE</span></div>
+      <div class="admin-panel-head"><div><h2>主网上线检查</h2><p>根据当前真实目录、机房库存和链上监听配置计算，不使用演示数据。</p></div><span class="admin-release-status is-blocked" id="launch-gate-status" aria-live="polite">NO-GO</span></div>
       <div class="admin-metrics">
         <article class="admin-metric"><span>已发布产品</span><strong id="metric-live-products">—</strong><small>Active products</small></article>
         <article class="admin-metric"><span>已发布套餐</span><strong id="metric-live-plans">—</strong><small>Active plans</small></article>
@@ -34,7 +34,7 @@
         <article class="admin-metric"><span>可售套餐 / 机房</span><strong id="metric-sellable-mappings">—</strong><small>Available mappings</small></article>
         <article class="admin-metric"><span>就绪收款网络</span><strong id="metric-ready-assets">—</strong><small>Ready mainnet listeners</small></article>
       </div>
-      <p id="launch-readiness-state" class="admin-editor-note" role="status">正在检查主网上线条件…</p>
+      <p id="launch-readiness-state" class="admin-editor-note" role="status">正在检查主网上线条件…</p><ul id="launch-gate-list" class="admin-launch-gates" aria-live="polite"></ul>
     </section>
     <section class="admin-panel">
       <div class="admin-panel-head"><div><h2 data-i="orders_title">Recent orders</h2><p data-i="orders_desc">Customer orders and their current lifecycle state.</p></div><span class="admin-count" id="orders-count">0</span></div>
@@ -114,5 +114,5 @@
   </section>
 </main>
 <script src="assets/js/language.js"></script><script src="assets/js/supabase-config.js"></script>
-<script type="module" src="assets/js/admin.js?v=20261104-admin-white-contrast-2"></script>
+<script type="module" src="assets/js/admin.js?v=20261104-admin-release-gates-1"></script>
 </body></html>
