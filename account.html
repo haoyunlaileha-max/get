@@ -61,22 +61,42 @@
     </section>
     <section id="account-dashboard" hidden>
       <div class="account-user"><span class="account-avatar" aria-hidden="true">A</span><div><strong id="account-email"></strong><small data-i="authenticated">Authenticated customer</small></div></div>
-      <section class="account-balance" id="balance">
-        <div class="account-balance-summary">
-          <div class="kicker">ACCOUNT BALANCE / 账户余额</div><h2 class="account-section-title">账户余额</h2>
-          <p class="account-balance-value"><span id="account-balance-value">0.00 USDT</span><small id="account-balance-caption">链上确认后自动入账，可用于购买服务</small></p>
-          <div class="account-payment-chips" id="account-payment-chips"><span>TRX</span><span>USDT TRC-20</span><span>TON</span></div>
-          <p class="account-inline-state" id="account-balance-state" role="status">正在加载账户余额…</p>
-        </div>
-        <div class="account-topup">
-          <h3>账户充值</h3><p>选择充值金额和收款网络，生成专属链上付款信息。</p>
-          <label for="topup-amount">充值金额（USDT）</label>
-          <select id="topup-amount"><option value="1000">10 USDT</option><option value="2500">25 USDT</option><option value="5000">50 USDT</option><option value="10000">100 USDT</option><option value="25000">250 USDT</option><option value="50000">500 USDT</option></select>
-          <label for="topup-method">支付网络</label><select id="topup-method"><option value="">正在加载可用网络…</option></select>
-          <button class="btn btn-primary" id="topup-submit" type="button" disabled>生成充值收款信息</button>
-          <small>仅向页面显示的地址和精确金额转账。不同网络资产不可互转，过期报价请重新生成。</small>
+      <section class="account-balance topup-layout" id="balance">
+        <div class="account-topup topup-main">
+          <div class="topup-heading">
+            <h2>充值余额</h2>
+            <p>一次性加密货币支付 · 交易确认后即时到账 · 订单有效期30分钟</p>
+          </div>
+          <div class="topup-step">
+            <h3><span>1</span>选择金额</h3>
+            <div class="topup-amount-grid" id="topup-amount-options">
+              <button type="button" class="topup-amount-option" data-amount="1000"><strong>$10</strong></button>
+              <button type="button" class="topup-amount-option" data-amount="2500"><strong>$25</strong></button>
+              <button type="button" class="topup-amount-option" data-amount="5000"><strong>$50</strong></button>
+              <button type="button" class="topup-amount-option selected" data-amount="10000" aria-pressed="true"><strong>$100</strong></button>
+              <button type="button" class="topup-amount-option" data-amount="25000"><strong>$250</strong></button>
+              <button type="button" class="topup-amount-option" data-amount="50000"><strong>$500</strong></button>
+            </div>
+            <select id="topup-amount" class="topup-amount-source" aria-label="充值金额">
+              <option value="1000">10 USDT</option><option value="2500">25 USDT</option><option value="5000">50 USDT</option><option value="10000" selected>100 USDT</option><option value="25000">250 USDT</option><option value="50000">500 USDT</option>
+            </select>
+          </div>
+          <div class="topup-step topup-payment-step">
+            <h3><span>2</span>支付方式</h3>
+            <select id="topup-method" aria-label="选择加密货币支付网络"><option value="">正在加载可用网络…</option></select>
+          </div>
+          <button class="btn btn-primary topup-continue" id="topup-submit" type="button" disabled>继续 · $100 <span aria-hidden="true">→</span></button>
+          <small class="topup-note">请选择支持的收款网络，并按生成订单显示的精确金额付款。超时订单将自动关闭。</small>
           <div id="topup-invoice" class="topup-invoice" role="status" aria-live="polite" hidden></div>
         </div>
+        <aside class="topup-preview" aria-live="polite">
+          <h3>余额预览</h3>
+          <div><span>当前</span><strong id="topup-preview-current">$0.00</strong></div>
+          <div><span>＋充值</span><strong class="topup-preview-add" id="topup-preview-add">$100</strong></div>
+          <div><span>＋奖励</span><strong id="topup-preview-bonus">$0.00</strong></div>
+          <div class="topup-preview-total"><span>充值后</span><strong id="topup-preview-total">$100.00</strong></div>
+          <p>奖励金额以实际生效的活动规则为准；当前未配置充值奖励。</p>
+        </aside>
       </section>
       <section class="account-transactions"><div class="topup-history-heading"><h3>最近充值记录</h3><button class="btn btn-ghost" id="topup-refresh" type="button">刷新状态</button></div><div id="topup-history" class="topup-history"><div class="account-notice">正在加载充值记录…</div></div></section>
       <section class="account-profile">
