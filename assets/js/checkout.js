@@ -51,6 +51,7 @@
   }
 
   function renderPlans(products, mappings) {
+    const storageClient = window.AH_SUPABASE_CLIENT || supabaseClient;
     availableMappings = mappings || [];
     const sellablePlanIds = new Set(availableMappings.map((mapping) => mapping.plan_id));
     const plans = products.flatMap((product) => (product.ah_plans || [])
@@ -69,6 +70,7 @@
       const card = document.createElement("article");
       card.className = "plan";
       card.dataset.type = categoryMap[plan.product.category] || "vps";
+      if(plan.product.image_path){const image=document.createElement("img");image.className="plan-product-image";image.src=storageClient.storage.from("product-images").getPublicUrl(plan.product.image_path).data.publicUrl;image.alt=plan.product.name;image.loading="lazy";card.append(image);}
       const top = appendText(card, "div", "plan-topline", plan.code || plan.product.name);
       top.title = plan.product.name;
       appendText(card, "h3", "", plan.name);
@@ -326,7 +328,7 @@
 
       const [productsResult, mappingsResult] = await Promise.all([
         supabaseClient.from("ah_products")
-          .select("id,name,category,description,sort_order,ah_plans(id,code,name,description,price_minor,currency,billing_period,specs,is_active,sort_order)")
+          .select("id,name,category,category_id,image_path,description,sort_order,ah_plans(id,code,name,description,price_minor,currency,billing_period,specs,is_active,sort_order)")
           .eq("is_active", true)
           .order("sort_order", { ascending: true }),
         supabaseClient.from("ah_plan_regions")
