@@ -4,10 +4,14 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const PUBLISHABLE_KEYS_RAW = Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}";
-const allowedOrigins = new Set(
-  (Deno.env.get("ALLOWED_ORIGINS") ?? "https://haoyunlaileha-max.github.io")
-    .split(",").map((value) => value.trim()).filter(Boolean),
-);
+const configuredOrigins = (Deno.env.get("ALLOWED_ORIGINS") ?? "")
+  .split(",").map((value) => value.trim()).filter(Boolean);
+const allowedOrigins = new Set([
+  ...configuredOrigins,
+  "https://haoyunlaileha-max.github.io",
+  "https://anonport.com",
+  "https://www.anonport.com",
+]);
 const encoder = new TextEncoder();
 const tokenPattern = /^[A-Fa-f0-9]{4}(?:-[A-Fa-f0-9]{4}){15}$/;
 
