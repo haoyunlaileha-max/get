@@ -217,7 +217,7 @@ async function handleRefreshClick(){
     window.setTimeout(()=>{if(refreshButton&&!refreshInProgress)refreshButton.textContent=originalLabel;},1800);
   }
 }
-function invoiceCard(invoice,amountMinor,bonusMinor){
+async function invoiceCard(invoice,amountMinor,bonusMinor){
   invoicePanel.replaceChildren();invoicePanel.hidden=false;
   const title=document.createElement("strong");title.textContent="充值订单已创建，请按以下信息付款";
   const amount=document.createElement("p");amount.textContent="精确应付："+invoice.expected_amount+" "+invoice.ticker;
