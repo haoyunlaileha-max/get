@@ -35,7 +35,7 @@ Crypto wallet payments are monitored on-chain and settled automatically after ex
 
 ### Important operational limits
 
-- The live catalog tables `ah_products`, `ah_plans`, and `ah_regions` are empty. The storefront is deployed, but it is not ready to accept real hosting orders until genuine products, prices, specifications, and data-center availability are entered.
+- The live catalog currently has one inactive Linux VPS product, one active plan attached to an unavailable region mapping, and no sellable inventory. The storefront correctly hides these records from customers. It is not ready to accept real hosting orders until genuine products, prices, specifications, and data-center availability are verified and published.
 - Nine crypto assets are configured and currently report `listener_status = ready`: BTC, ETH, USDT ERC-20, USDT TRC-20, LTC, TRX, SOL, BNB BEP-20, and native Toncoin (TON). XMR and GRAM Jetton are not accepted.
 - Mainnet scanner adapters are implemented for BTC, LTC, ETH, ERC-20 USDT, BNB, SOL, TRX, TRC-20 USDT, and native TON. Solana history uses bounded cursor pagination (up to 1,000 signatures per scan) and fails closed if the saved cursor falls outside the bounded catch-up window. The production `TRONGRID_API_KEY` is configured. Listener readiness is checked before every new invoice; provider failures mark affected assets degraded and block new invoices.
 - Telegram notification delivery is deployed and its test message was verified. A Vault-authenticated Cron job runs the dispatcher every minute, but it only processes notification events already written to the outbox; it does not scan blockchains.
