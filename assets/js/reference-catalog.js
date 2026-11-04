@@ -40,8 +40,8 @@ const money=n=>"$"+Number(n).toFixed(2)+"/月";
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function table(title,headers,rows){return '<section class="reference-region"><h3>'+esc(title)+'</h3><div class="reference-scroll"><table class="reference-table"><thead><tr>'+headers.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(row=>'<tr>'+row.map(x=>'<td>'+esc(x)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div></section>';}
 function render(){
-const root=document.getElementById("reference-catalog-content");if(!root)return;
-const type=document.body.dataset.productCategory;let html='<div class="reference-heading"><div><span class="kicker">ANONPORT PRODUCT CATALOG</span><h2>完整套餐与价格目录</h2><p>按原站公开页面整理；价格为美元/月。此处为参考目录，不代表当前供应商库存或可下单状态。</p></div><span class="reference-source">来源：anonport.com 产品公开目录</span></div>';
+const root=document.getElementById("plan-list");if(!root)return;
+const type=document.body.dataset.productCategory;let html='<div class="reference-heading"><div><span class="kicker">ANONPORT PRODUCT CATALOG</span><h2>全部地区套餐与价格</h2><p>原站公开套餐价格目录 · 美元/月。目录价格仅供展示，未接入供应商实时库存。</p></div><span class="reference-source">PUBLIC PRICING CATALOG</span></div>';
 if(type==="vps"){
 html+='<p class="reference-note">每个地区提供 S / M / L / XL / XXL / PRO 六档。AMD EPYC、KVM、NVMe；带宽不限，具体上行见表。</p>';
 for(const [name,code,cpu,prices] of vpsRegions){const rows=prices.map((p,i)=>[code+"-"+["S","M","L","XL","XXL","PRO"][i],vpsSpecs[i][0]+" · EPYC "+(i<3?cpu.split("/")[0]:cpu.split("/")[1]),vpsSpecs[i][1],vpsSpecs[i][2],vpsSpecs[i][3],vpsSpecs[i][4],money(p)]);html+=table(name+" · VPS 套餐",["方案","CPU","内存","NVMe","流量","上行链路","价格"],rows);}
