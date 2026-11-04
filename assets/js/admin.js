@@ -286,6 +286,7 @@ function renderOrders(rows) {
     };
     addLine("完整订单编号", order.id);
     addLine("更新时间", date(order.updated_at));
+    if (order.expires_at) addLine("订单有效期至", date(order.expires_at));
     if (order.paid_at) addLine("付款确认时间", date(order.paid_at));
     const region = order.ah_regions;
     if (region) addLine("数据中心", [region.name, region.city, region.country_code].filter(Boolean).join(" · "));
