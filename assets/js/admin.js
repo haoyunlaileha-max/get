@@ -290,10 +290,16 @@ function renderRegions(rows) {
   }
   if (!rows.length) root.textContent = tr("empty");
 }
-function renderLaunchReadiness(products, plans, regions, mappings, assets) {
-  const activeProducts = products.filter((row) => row.is_active);
+function renderLaunchReadiness(products, plans, regions, mappings, assets, categories, paidOrders) {
+  const activeCategoryIds = new Set(categories.filter((row) => row.is_active).map((row) => row.id));
+  const activeProducts = products.filter((row) => row.is_active && activeCategoryIds.has(row.category_id));
   const activeProductIds = new Set(activeProducts.map((row) => row.id));
-  const activePlans = plans.filter((row) => row.is_active && activeProductIds.has(row.product_id));
+  const activePlans = plans.filter((row) =>
+    row.is_active &&
+    activeProductIds.has(row.product_id) &&
+    row.currency === "USDT" &&
+    Number(row.price_minor) > 0
+  );
   const activePlanIds = new Set(activePlans.map((row) => row.id));
   const activeRegions = regions.filter((row) => row.status === "active");
   const activeRegionIds = new Set(activeRegions.map((row) => row.id));
@@ -309,21 +315,75 @@ function renderLaunchReadiness(products, plans, regions, mappings, assets) {
   setText("metric-live-regions", String(activeRegions.length));
   setText("metric-sellable-mappings", String(sellableMappings.length));
   setText("metric-ready-assets", String(readyAssets.length) + " / " + String(assets.length));
+  setText("metric-plans", String(activePlans.length));
 
-  const blockers = [];
-  if (!activeProducts.length) blockers.push("没有已发布产品");
-  if (!activePlans.length) blockers.push("没有已发布套餐");
-  if (!activeRegions.length) blockers.push("没有已启用的真实机房");
-  if (!sellableMappings.length) blockers.push("没有仍有容量的套餐 / 机房关联");
-  if (readyAssets.length !== assets.length || !readyAssets.length) blockers.push("部分主网收款监听未就绪");
+  const catalogReady = activeProducts.length > 0 && activePlans.length > 0 &&
+    activeRegions.length > 0 && sellableMappings.length > 0;
+  const paymentReady = assets.length > 0 && readyAssets.length === assets.length;
+  const gates = [
+    {
+      label: "真实商品、套餐与机房库存",
+      ready: catalogReady,
+      detail: `有效商品 ${activeProducts.length} 个、有效套餐 ${activePlans.length} 个、启用机房记录 ${activeRegions.length} 个、当前可售映射 ${sellableMappings.length} 个。机房仍须由管理员依据真实供应商合同和库存记录核验。`,
+    },
+    {
+      label: "加密货币主网收款监听",
+      ready: paymentReady,
+      detail: `${readyAssets.length}/${assets.length} 个已配置资产的监听状态为 ready；该状态只代表监听器就绪，不代表完成真实客户付款验收。`,
+    },
+    {
+      label: "服务器自动开通与交付",
+      ready: false,
+      detail: "生产环境尚未部署 provision-worker，也没有已验证并配置的供应商网关。当前付款后的服务订单仍需管理员人工履约。",
+    },
+    {
+      label: "域名注册商 API",
+      ready: false,
+      detail: "尚未接入供应商实时域名查询、注册、续费和 DNS 管理 API。",
+    },
+    {
+      label: "真实付款至服务交付验收",
+      ready: false,
+      detail: `数据库目前有 ${Number(paidOrders) || 0} 条已付款订单记录；尚无已记录的真实客户付款后自动交付验收。`,
+    },
+    {
+      label: "账户密码泄露防护",
+      ready: false,
+      detail: "Supabase Security Advisor 当前报告 Leaked Password Protection Disabled，账户安全设置仍需处理。",
+    },
+  ];
+  const root = $("launch-gate-list");
+  if (root) {
+    root.replaceChildren();
+    for (const gate of gates) {
+      const item = document.createElement("li");
+      item.className = "admin-launch-gate";
+      const marker = document.createElement("span");
+      marker.className = "admin-gate-marker " + (gate.ready ? "is-ready" : "is-blocked");
+      marker.textContent = gate.ready ? "通过" : "阻塞";
+      const content = document.createElement("div");
+      const title = document.createElement("strong");
+      title.textContent = gate.label;
+      const detail = document.createElement("small");
+      detail.textContent = gate.detail;
+      content.append(title, detail);
+      item.append(marker, content);
+      root.append(item);
+    }
+  }
+  const blocked = gates.filter((gate) => !gate.ready).length;
+  const status = $("launch-gate-status");
+  if (status) {
+    status.textContent = blocked ? "NO-GO · " + blocked + " 项阻塞" : "GO";
+    status.className = "admin-release-status " + (blocked ? "is-blocked" : "is-ready");
+  }
   const note = $("launch-readiness-state");
   if (note) {
-    note.textContent = blockers.length
-      ? "当前状态：主网收款监听 " + readyAssets.length + "/" + assets.length + " 就绪；服务器商品销售尚未开放。待处理：" + blockers.join("；") + "。不要录入演示价格或未确认的供应商库存。"
-      : "目录与库存检查通过：已发布产品、套餐、启用机房及可售关联均存在，且所有配置资产监听就绪。收款后仍由管理员人工履约；本检查不代表供应商 SLA 或真实付款验收。";
+    note.textContent = blocked
+      ? "当前不能开放商业主网销售。系统会继续隐藏无可售库存的套餐；请勿把演示数据或未核实的机房记录作为真实供货。"
+      : "所有已配置的上线门槛均已通过。仍需按实际业务流程持续监控。";
   }
 }
-
 async function saveRegion(form) {
   if (busy) return;
   const values = formValues(form);
@@ -462,7 +522,7 @@ async function loadDashboard() {
       ordersQuery = ordersQuery.or(`id.eq.${orderSearch},user_id.eq.${orderSearch}`);
     }
     ordersQuery = ordersQuery.range(orderPage * orderPageSize, (orderPage + 1) * orderPageSize - 1);
-    const [orders, jobs, reconciliationJobs, payments, products, plans, regions, categories, ordersCount, paidCount, queuedCount, activePlansCount, mappings, cryptoAssets] = await Promise.all([
+    const [orders, jobs, reconciliationJobs, payments, products, plans, regions, categories, ordersCount, paidCount, queuedCount, mappings, cryptoAssets] = await Promise.all([
       ordersQuery,
       supabase.from("ah_provisioning_jobs").select("id,order_id,status,attempts,max_attempts,provider_reference,requires_reconciliation,last_error_code,created_at").order("created_at", { ascending: false }).limit(30),
       supabase.from("ah_provisioning_jobs").select("id,order_id,status,provider_reference,requires_reconciliation,last_error_code,created_at", { count: "exact" }).eq("requires_reconciliation", true).order("created_at", { ascending: false }).limit(100),
@@ -474,20 +534,18 @@ async function loadDashboard() {
       supabase.from("ah_orders").select("*", { count: "exact", head: true }),
       supabase.from("ah_orders").select("*", { count: "exact", head: true }).eq("status", "paid"),
       supabase.from("ah_provisioning_jobs").select("*", { count: "exact", head: true }).in("status", ["queued", "retry_wait", "processing"]),
-      supabase.from("ah_plans").select("*", { count: "exact", head: true }).eq("is_active", true),
       supabase.from("ah_plan_regions").select("id,plan_id,region_id,is_available,capacity_units,allocated_units").order("created_at", { ascending: false }),
       supabase.from("ah_crypto_assets").select("asset_code,listener_enabled,listener_status").order("asset_code"),
     ]);
-    const result = [orders, jobs, reconciliationJobs, payments, products, plans, regions, categories, ordersCount, paidCount, queuedCount, activePlansCount, cryptoAssets];
+    const result = [orders, jobs, reconciliationJobs, payments, products, plans, regions, categories, ordersCount, paidCount, queuedCount, cryptoAssets];
     if (result.some((entry) => entry.error)) throw new Error("query_failed");
     const mappingRows = mappings.error ? null : (mappings.data || []);
     orderTotal = orders.count ?? 0;
     renderOrders(orders.data || []); renderJobs(jobs.data || []); renderReconciliation(reconciliationJobs.data || [], reconciliationJobs.count ?? 0); renderPayments(payments.data || []);
-    categoryRows=categories.data||[];renderCatalog(products.data || [], plans.data || []); renderRegions(regions.data || []); renderPlanRegions(mappingRows, plans.data || [], regions.data || []); renderLaunchReadiness(products.data || [], plans.data || [], regions.data || [], mappingRows || [], cryptoAssets.data || []);
+    categoryRows=categories.data||[];renderCatalog(products.data || [], plans.data || []); renderRegions(regions.data || []); renderPlanRegions(mappingRows, plans.data || [], regions.data || []); renderLaunchReadiness(products.data || [], plans.data || [], regions.data || [], mappingRows || [], cryptoAssets.data || [], categories.data || [], paidCount.count ?? 0);
     setText("metric-orders", String(ordersCount.count ?? 0));
     setText("metric-paid", String(paidCount.count ?? 0));
     setText("metric-queued", String(queuedCount.count ?? 0));
-    setText("metric-plans", String(activePlansCount.count ?? 0));
   } catch {
     show(nodes.error, tr("load_error"));
   } finally {
