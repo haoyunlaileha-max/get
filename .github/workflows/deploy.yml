@@ -1,4 +1,5 @@
 name: Build and deploy AnonPort
+# Re-run deployment after homepage validation compatibility fix
 
 on:
   push:
