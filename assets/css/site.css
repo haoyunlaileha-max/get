@@ -447,3 +447,16 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 .topup-preview p{margin:8px 0 0;color:#98a2b3;font-size:11px;line-height:1.55}
 @media(max-width:760px){.account-balance.topup-layout{grid-template-columns:1fr;padding:20px}.topup-preview{order:2}.topup-amount-grid{gap:7px}.topup-amount-option{min-height:60px}}
 @media(max-width:420px){.topup-amount-option strong{font-size:16px}.topup-heading h2{font-size:20px}}
+
+/* Fixed bonus tiers and custom top-up amount */
+.topup-amount-option{gap:3px}
+.topup-amount-option small{font-size:11px;line-height:1.2;color:#2458d3;font-weight:650}
+.topup-amount-option.selected small{color:#2458d3}
+.topup-custom-wrap{display:grid;gap:7px;margin-top:0}
+.topup-custom-wrap label{font-size:13px;font-weight:650;color:#344054}
+.topup-custom-field{display:flex;align-items:center;gap:8px;min-height:46px;padding:0 12px;border:1px solid #d9dce3;border-radius:9px;background:#fff;color:#667085}
+.topup-custom-field input{width:100%;min-width:0;border:0!important;outline:0!important;background:transparent!important;color:#101828!important;font-size:15px}
+.topup-custom-field:focus-within{border-color:#2458df;box-shadow:0 0 0 3px #b2ccff}
+.topup-custom-wrap>small{font-size:11px;line-height:1.5;color:#667085}
+.topup-custom-wrap.active .topup-custom-field{border-color:#2458df;background:#eef2ff}
+@media(max-width:420px){.topup-amount-option small{font-size:10px}}
