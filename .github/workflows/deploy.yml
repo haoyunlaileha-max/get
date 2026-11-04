@@ -1,4 +1,4 @@
-name: Build and deploy Anonymous Hosting
+name: Build and deploy AnonPort
 
 on:
   push:
