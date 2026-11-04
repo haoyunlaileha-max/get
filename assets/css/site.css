@@ -565,3 +565,6 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 .topup-checkout-view .topup-payment-card{min-width:0}
 .topup-checkout-view .topup-payment-copy-row code{overflow-wrap:anywhere;word-break:break-all}
 @media(max-width:760px){.topup-checkout-header{flex-direction:column}.topup-checkout-view .topup-payment-page{grid-template-columns:1fr}}
+
+/* Account order cancellation status: neutral white pill with dark text */
+.account-page .order-status.status-cancelled{display:inline-block;padding:5px 9px;border:1px solid #d0d5dd;border-radius:6px;background:#fff!important;color:#101828!important;font-weight:600}
