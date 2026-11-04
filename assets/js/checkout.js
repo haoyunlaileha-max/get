@@ -93,6 +93,7 @@
       button.dataset.planId = plan.id;
       button.dataset.order = plan.name;
       button.dataset.price = money(plan.price_minor, plan.currency) + " / " + period(plan.billing_period);
+      button.dataset.osOptions = JSON.stringify(Array.isArray(plan.specs?.os_options) ? plan.specs.os_options : []);
       button.textContent = "选择套餐";
       card.append(button);
       fragment.append(card);
@@ -147,6 +148,27 @@
     regionSelect.disabled = regionSelect.options.length === 0;
     document.getElementById("config-title").textContent = planButton.dataset.order;
     document.getElementById("config-price").textContent = planButton.dataset.price;
+    const osSelect = document.getElementById("config-os");
+    if (osSelect) {
+      osSelect.replaceChildren();
+      let osOptions = [];
+      try { osOptions = JSON.parse(planButton.dataset.osOptions || "[]"); } catch { osOptions = []; }
+      if (!Array.isArray(osOptions) || !osOptions.length) {
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "以已发布套餐规格为准";
+        osSelect.append(option);
+        osSelect.disabled = true;
+      } else {
+        for (const value of osOptions.slice(0, 20)) {
+          const option = document.createElement("option");
+          option.value = String(value);
+          option.textContent = String(value);
+          osSelect.append(option);
+        }
+        osSelect.disabled = false;
+      }
+    }
     document.querySelector(".config-head .kicker").textContent = "SECURE CHECKOUT / 安全下单";
     summary.hidden = true;
     summary.replaceChildren();
@@ -199,7 +221,7 @@
           plan_id: selectedPlan,
           region_id: regionSelect.value,
           quantity: 1,
-          customer_note: "操作系统偏好：" + document.getElementById("config-os").value
+          customer_note: document.getElementById("config-os").disabled ? null : "操作系统偏好：" + document.getElementById("config-os").value
         })
       });
       const result = await response.json().catch(() => ({}));
