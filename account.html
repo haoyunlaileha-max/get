@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#ffffff"><meta name="description" content="Sign in to your Anonymous Hosting customer account.">
 <title>账户中心 — Anonymous Hosting</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/css/site.css?v=20261104-activity-layout-final-2">
+<link rel="stylesheet" href="assets/css/site.css?v=20261104-payment-action-row-1">
 </head>
 <body class="account-page">
 <header><div class="wrap nav"><a class="brand" href="index.html"><img class="brand-mark" src="assets/brand-mark.svg" alt=""><span>ANONYMOUS <b>HOSTING</b></span></a><div class="account-nav"><label class="sr-only" for="account-language" data-i="language_label">Language</label><select id="account-language" class="account-language" aria-label="选择语言"><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option></select><a class="btn btn-ghost" href="index.html" data-i="back_store">← Back to storefront</a></div></div></header>
@@ -87,9 +87,11 @@
           </div>
           <div class="topup-step topup-payment-step">
             <h3><span>2</span>支付方式</h3>
-            <select id="topup-method" aria-label="选择加密货币支付网络"><option value="">正在加载可用网络…</option></select>
+            <div class="topup-payment-action-row">
+              <select id="topup-method" aria-label="选择加密货币支付网络"><option value="">正在加载可用网络…</option></select>
+              <button class="btn btn-primary topup-continue" id="topup-submit" type="button" disabled>继续 · $100 <span aria-hidden="true">→</span></button>
+            </div>
           </div>
-          <button class="btn btn-primary topup-continue" id="topup-submit" type="button" disabled>继续 · $100 <span aria-hidden="true">→</span></button>
           <small class="topup-note">请选择支持的收款网络，并按生成订单显示的精确金额付款。超时订单将自动关闭。</small>
           
         </div>
