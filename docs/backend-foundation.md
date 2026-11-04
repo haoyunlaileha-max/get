@@ -151,3 +151,14 @@ The `token-auth` Edge Function applies database-backed per-IP limits: at most fi
 - Refunds, disputes, chargebacks, provider API integration, audit monitoring, and order-creation abuse throttling remain future work. Token registration and login have separate database-backed per-IP limits.
 - The owner-scoped unpaid-order cancellation migration and `cancel-order` Edge Function are deployed to the configured Supabase project. The payment webhook and provisioning worker remain source-only until provider-specific credentials and adapters are configured. No secrets or project credentials are stored in this repository.
 - The admin console is committed and Pages-deployable, but it requires migrations 0001–0005, a configured public Supabase client, and a trusted admin role before operational data is visible.
+
+
+## Production catalog and sale-readiness gate
+
+The storefront does not publish sample prices, sample data-center lists, or plans without inventory. Its public catalog reads only active products and plans plus rows from `ah_plan_regions` that are explicitly available, have remaining capacity, and point to an active region. Migration `20261104003500_public_catalog_sellable_inventory_read.sql` grants public read access only to those sellable mappings; admin write policies remain unchanged. The checkout UI derives the region selector and operating-system choices from the selected live plan and its published specifications.
+
+The admin console includes a launch-readiness panel and a data-center creation form. Newly created regions default to `inactive`; an operator should activate a region only after confirming the real supplier, city, country, network, support boundary, and available capacity. A product/plan must also be explicitly published and mapped to a region with capacity before it appears in public checkout. Empty catalog tables intentionally mean that server sales are closed, not that demo products should be substituted.
+
+Domain registration remains unavailable until a registrar integration provides live availability, wholesale/retail pricing, registration, renewal, and DNS operations. The domain page therefore disables search and order submission and does not show reference prices.
+
+The current order-fulfilment model is manual: exact on-chain payment confirmation updates the order and notifies the administrator through Telegram. The administrator fulfils the service manually. No automatic VPS provisioning, withdrawals, or fund sweeping are enabled.
