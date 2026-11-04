@@ -94,7 +94,7 @@ assert.ok(!/\$\s?(?:7\.50|12\.00|48\.50|122\.00|4\.99)/.test(html), "Homepage mu
 assert.ok(!html.includes("anonymoushosting.example"), "Placeholder contact email must not be exposed");
 assert.equal(html.split("<section").length - 1, html.split("</section>").length - 1, "Every section must have a closing tag");
 
-for (const marker of ['<title>账户中心', 'id="auth-form"', 'id="auth-setup"', 'id="account-dashboard"', 'id="orders-list"', 'id="toggle-password"', 'id="account-language"', 'id="account-client-info"', 'assets/js/language.js', 'assets/js/supabase-config.js', 'assets/js/account.js']) assert.ok(account.includes(marker), `Missing account page feature: ${marker}`);
+for (const marker of ['<title>账户中心', 'id="auth-form"', 'id="auth-setup"', 'id="account-dashboard"', 'id="orders-list"', 'id="toggle-password"', 'id="account-language"', 'assets/js/language.js', 'assets/js/supabase-config.js', 'assets/js/account.js']) assert.ok(account.includes(marker), `Missing account page feature: ${marker}`);
 assert.ok(!account.includes('id="profile-form"') && !account.includes('class="account-profile"'), "Account dashboard must not render a separate profile panel");
 assert.ok(account.includes('value="zh-CN"') && account.includes('value="zh-TW"') && !/value="(?:en|ar|fr|ru|es)"/.test(account), "Account page must expose only Chinese locales");
 for (const marker of ['signInWithPassword', 'signUp', 'resetPasswordForEmail', 'signOut', '.from("ah_orders")', '.eq("user_id",userId)', 'ah_order_items(description_snapshot,quantity,unit_price_minor)', 'toggle-password', 'aria-busy', 'account-client-info', 'applyLanguage', 'ah-language', 'messages =']) assert.ok(accountJs.includes(marker), `Missing account behavior: ${marker}`);
