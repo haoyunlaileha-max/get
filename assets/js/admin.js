@@ -20,6 +20,7 @@ let orderStartDate = "";
 let orderEndDate = "";
 let orderTotal = 0;
 let categoryRows = [];
+let productRows = [];
 
 const t = {
 en:{language:"Language",storefront:"Storefront",eyebrow:"OPERATIONS / CONTROL PLANE",title:"Operations console",subtitle:"Monitor orders, payments, provisioning and catalog availability.",refresh:"Refresh data",login_required:"Administrator sign-in required",login_copy:"Sign in with an account assigned the verified admin role, then return here.",open_account:"Open account sign-in",signed_in_as:"Signed in as",sign_out:"Sign out",orders:"Orders",all_records:"All records",paid:"Paid",paid_orders:"Paid orders",queued:"Provisioning queue",waiting_work:"Waiting / retrying",active:"Active plans",catalog:"Catalog",orders_title:"Recent orders",orders_desc:"Customer orders and their current lifecycle state.",order:"Order",customer:"Customer ID",status:"Status",total:"Total",created:"Created",jobs_title:"Provisioning jobs",jobs_desc:"Queue state, attempts and provider references.",payments_title:"Payment events",payments_desc:"Verified webhook audit records.",catalog_title:"Product catalog",catalog_desc:"Enable or disable products and plans. Price changes are intentionally not exposed here.",regions_title:"Data-center regions",regions_desc:"Control whether a region is available for new orders.",security_note:"Admin access is verified using Supabase app_metadata and enforced again by database RLS. Never share service-role keys with this page.",loading:"Loading operational data…",empty:"No records found.",load_error:"Could not load admin data. Check that migrations 0001–0005 are applied and admin RLS is enabled.",not_admin:"This account is not assigned the verified admin role. Ask an authorized project owner to set app_metadata.role = admin.",setup_error:"Add the Supabase project URL and public anon/publishable key to assets/js/supabase-config.js. Never add a service-role key.",enabled:"Enabled",disabled:"Disabled",activate:"Enable",deactivate:"Disable",region_active:"Active",region_inactive:"Inactive",maintenance:"Maintenance",set_active:"Set active",set_inactive:"Set inactive",set_maintenance:"Set maintenance",updated:"Saved successfully.",update_error:"Could not save this change. Verify database migrations and RLS policies.",reconciliation_required:"Manual reconciliation required",reconciliation_title:"Provisioning reconciliation",reconciliation_desc:"Provider resources created after an order changed state; review and clean up manually.",reconciliation_empty:"No jobs require manual reconciliation.",reconciliation_count:"Flagged jobs",reconciliation_overflow:"Showing the newest 100 flagged jobs. Export or inspect the database for older records.",no_jobs:"No provisioning jobs.",no_payments:"No payment events.",attempts:"Attempts",provider_ref:"Provider ref",event:"Event",amount:"Amount",refreshing:"Refreshing…",signing_out:"Signing out…",no_data:"No data"},
@@ -52,13 +53,58 @@ function fillProductEditor(product) {
   else preview.textContent="尚未上传商品图片";
   form.scrollIntoView({ behavior:"smooth", block:"center" });
 }
+function planSpecDefinition(productId) {
+  const product=productRows.find(row=>row.id===productId);
+  const category=String(product?.category||"").toLowerCase();
+  const definitions={
+    linux_vps:[["cpu","CPU"],["ram","内存"],["nvme","NVMe"],["bandwidth","带宽"],["uplink","上行链路"]],
+    dedicated_server:[["cpu","CPU"],["ram","内存"],["storage","存储"],["bandwidth","带宽"],["uplink","上行链路"]],
+    windows_rdp:[["cpu","CPU"],["ram","内存"],["nvme","NVMe"],["bandwidth","带宽"],["uplink","上行链路"]],
+    gpu:[["gpu","GPU"],["vram","VRAM"],["cpu","CPU"],["ram","内存"],["nvme","NVMe"],["bandwidth","带宽"]]
+  };
+  return {category,fields:definitions[category]||[["cpu","CPU"],["ram","内存"],["storage","存储"],["bandwidth","带宽"],["uplink","上行链路"]]};
+}
+function renderPlanSpecFields(specs={}, productId=$("plan-product").value) {
+  const root=$("plan-spec-fields"); if(!root)return;
+  const definition=planSpecDefinition(productId); root.replaceChildren();
+  const labels={linux_vps:"Linux VPS 规格",dedicated_server:"独立服务器规格",windows_rdp:"Windows RDP 规格",gpu:"GPU 服务器规格"};
+  $("plan-spec-category-hint").textContent=labels[definition.category]||"通用服务器规格";
+  for(const [key,label] of definition.fields){
+    const wrapper=document.createElement("label");wrapper.className="admin-spec-field";
+    const title=document.createElement("span");title.textContent=label+"（必填）";
+    const input=document.createElement("input");input.type="text";input.name="spec_"+key;input.required=true;input.maxLength=120;
+    const legacy=key==="nvme"&&!specs.nvme?specs.storage:key==="storage"&&!specs.storage?specs.disk:undefined;
+    input.value=String(specs[key]??legacy??"");
+    input.placeholder=key==="uplink"?"例如：1 Gbps":key==="bandwidth"?"例如：10 TB/月":key==="vram"?"例如：24 GB":key==="gpu"?"例如：NVIDIA RTX 4090":"请输入"+label;
+    wrapper.append(title,input);root.append(wrapper);
+  }
+}
+function readPlanSpecFields(form) {
+  const product=productRows.find(row=>row.id===form.elements.product_id.value);
+  const definition=planSpecDefinition(product?.id);
+  const specs={};
+  for(const [key,label] of definition.fields){
+    const value=String(form.elements.namedItem("spec_"+key)?.value||"").trim();
+    if(!value){show(nodes.error,"请填写完整的套餐规格："+label);return null;}
+    specs[key]=value;
+  }
+  try{
+    const extra=JSON.parse(form.elements.specs.value||"{}");
+    if(!extra||Array.isArray(extra)||typeof extra!=="object")throw new Error("invalid");
+    return {...extra,...specs};
+  }catch{show(nodes.error,"高级规格必须是有效的 JSON 对象。");return null;}
+}
 function fillPlanEditor(plan) {
   const form = $("plan-editor"); form.reset();
   const productSelect = $("plan-product");
   productSelect.value = plan?.product_id || productSelect.options[0]?.value || "";
   for (const key of ["id","name","code","currency","billing_period","description","sort_order"]) form.elements.namedItem(key).value = plan?.[key] ?? ({currency:"USDT",billing_period:"monthly",sort_order:0}[key] ?? "");
   form.elements.price.value = plan ? (Number(plan.price_minor)/100).toFixed(2) : "0.00";
-  form.elements.specs.value = JSON.stringify(plan?.specs || {cpu:"2 vCPU",ram:"4 GB",storage:"80 GB NVMe",bandwidth:"4 TB",os_options:["Ubuntu 24.04","Debian 12"]},null,2);
+  const specs=plan?.specs||{};
+  const known=["cpu","ram","nvme","storage","bandwidth","uplink","gpu","vram","disk"];
+  const extra=Object.fromEntries(Object.entries(specs).filter(([key])=>!known.includes(key)));
+  form.elements.specs.value=JSON.stringify(extra,null,2);
+  renderPlanSpecFields(specs,productSelect.value);
   form.elements.is_active.checked = Boolean(plan?.is_active);
   form.scrollIntoView({ behavior:"smooth", block:"center" });
 }
@@ -125,9 +171,8 @@ async function saveCatalog(form, table) {
       if(!allowed.includes(file.type)||file.size>5*1024*1024){show(nodes.error,"图片格式不支持或文件超过 5 MB。");return;}
     }
   } else {
-    let specs;
-    try { specs=JSON.parse(values.specs); } catch { show(nodes.error,editorTr("invalid_specs")); return; }
-    if (!specs || Array.isArray(specs) || typeof specs!=="object") { show(nodes.error,editorTr("invalid_specs")); return; }
+    const specs=readPlanSpecFields(form);
+    if(!specs)return;
     const price=Number(values.price); const priceMinor=Math.round(price*100); const currency="USDT";
     if (!Number.isFinite(price)||price<0||priceMinor>Number.MAX_SAFE_INTEGER||currency!=="USDT"||!Number.isSafeInteger(Number(values.sort_order))||Number(values.sort_order)<0) { show(nodes.error,editorTr("save_failed")); return; }
     payload={product_id:values.product_id,name:values.name.trim(),code:values.code.trim(),description:values.description.trim()||null,price_minor:priceMinor,currency,billing_period:values.billing_period,specs,sort_order:Number(values.sort_order||0),is_active:form.elements.is_active.checked};
@@ -346,6 +391,7 @@ function renderPayments(rows) {
   }
 }
 function renderCatalog(products, plans) {
+  productRows=products;
   const root = $("catalog-list"); root.replaceChildren();
   renderProductOptions(products);
   renderProductCategoryOptions(categoryRows);
@@ -621,10 +667,11 @@ $("category-editor").addEventListener("submit",(event)=>{event.preventDefault();
 $("category-editor").addEventListener("reset",()=>{setTimeout(()=>{$("category-editor").elements.sort_order.value="0";$("category-editor").elements.slug.readOnly=false;},0);});
 $("product-editor").addEventListener("submit",(event)=>{event.preventDefault();saveCatalog(event.currentTarget,"ah_products");});
 $("plan-editor").addEventListener("submit",(event)=>{event.preventDefault();saveCatalog(event.currentTarget,"ah_plans");});
+$("plan-product").addEventListener("change",()=>renderPlanSpecFields({},$("plan-product").value));
 $("plan-region-editor").addEventListener("submit",(event)=>{event.preventDefault();saveInventory(event.currentTarget);});
 $("region-editor").addEventListener("submit",(event)=>{event.preventDefault();saveRegion(event.currentTarget);});
 $("product-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("product-editor").elements.sort_order.value="0"; $("product-image-preview").textContent="尚未上传商品图片"; },0);});
-$("plan-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("plan-editor").elements.currency.value="USDT"; $("plan-editor").elements.price.value="0"; $("plan-editor").elements.sort_order.value="0"; },0);});
+$("plan-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("plan-editor").elements.currency.value="USDT"; $("plan-editor").elements.price.value="0"; $("plan-editor").elements.sort_order.value="0"; renderPlanSpecFields({},$("plan-product").value); },0);});
 $("orders-filter").addEventListener("submit", (event) => {
   event.preventDefault();
   orderSearch = $("order-search").value.trim();
