@@ -242,7 +242,7 @@
       showResult(
         "订单已创建，当前状态为待付款。订单编号：" + String(order.order_id || "").toUpperCase() +
         "；应付金额：" + money(order.total_minor, order.currency) +
-        "。选择收款网络后，系统会按 USDT 报价换算币种金额。",
+        "。请在30分钟内完成付款，超时订单将自动关闭。选择收款网络后，系统会按 USDT 报价换算币种金额。",
         true
       );
       const assetPicker = document.createElement("div");
