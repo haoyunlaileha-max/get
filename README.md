@@ -9,7 +9,7 @@ A responsive, Chinese-language storefront and customer portal prototype for the 
 - Product pages support catalog-driven plans, region selection, and a secure checkout handoff.
 - Customer access uses generated private tokens. Registration creates a Supabase Auth identity; the token is shown once and must be stored safely by the customer.
 - The customer portal uses the resulting Supabase session for profile management and user-scoped order history.
-- The operations console supports orders, payment events, provisioning jobs, catalog editing, regions, and per-plan inventory. Access requires a trusted `app_metadata.role = admin` claim and matching database RLS policies.
+- The operations console supports orders, payment events, provisioning jobs, category management, product image uploads, catalog editing, regions, and per-plan inventory. Product media is stored in the public `product-images` bucket; only verified admins can upload, replace, or delete objects. Image files are limited to JPEG, PNG, WebP, and AVIF at 5 MB. Access requires a trusted `app_metadata.role = admin` claim and matching database RLS policies.
 - Static frontend; no bundler is required.
 
 ## Live deployment status
