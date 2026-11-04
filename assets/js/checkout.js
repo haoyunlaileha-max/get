@@ -65,6 +65,72 @@
       return;
     }
 
+    if (pageCategory === "vps") {
+      const regionGroups = new Map();
+      for (const mapping of availableMappings) {
+        const plan = plans.find((item) => item.id === mapping.plan_id);
+        const region = mapping.ah_regions;
+        if (!plan || !region?.id) continue;
+        if (!regionGroups.has(region.id)) regionGroups.set(region.id, { region, plans: [] });
+        const group = regionGroups.get(region.id);
+        if (!group.plans.some((item) => item.id === plan.id)) group.plans.push(plan);
+      }
+      const countryFlags = { US:"🇺🇸", JP:"🇯🇵", DE:"🇩🇪", RO:"🇷🇴", CN:"🇨🇳", NL:"🇳🇱", RU:"🇷🇺", SG:"🇸🇬", GB:"🇬🇧", FR:"🇫🇷", FI:"🇫🇮", HK:"🇭🇰", KR:"🇰🇷" };
+      const specValue = (specs, pattern, fallback = "—") => {
+        const entry = Object.entries(specs || {}).find(([key]) => pattern.test(key.toLowerCase().replace(/[ _-]/g, "")));
+        if (!entry) return fallback;
+        const value = entry[1];
+        return Array.isArray(value) ? value.join(" / ") : String(value ?? fallback);
+      };
+      const fragment = document.createDocumentFragment();
+      for (const { region, plans: regionPlans } of regionGroups.values()) {
+        const block = document.createElement("section");
+        block.className = "vps-region-block";
+        const heading = document.createElement("h3");
+        heading.className = "vps-region-heading";
+        const flag = appendText(heading, "span", "vps-region-flag", countryFlags[String(region.country_code || "").toUpperCase()] || "🌐");
+        flag.setAttribute("aria-hidden", "true");
+        appendText(heading, "span", "", region.name || region.city || "可用地区");
+        appendText(heading, "small", "", [region.city, region.country_code].filter(Boolean).join(" · "));
+        block.append(heading);
+        const scroll = document.createElement("div");
+        scroll.className = "vps-table-scroll";
+        const table = document.createElement("table");
+        table.className = "vps-plan-table";
+        const thead = document.createElement("thead");
+        const headRow = document.createElement("tr");
+        for (const label of ["方案","CPU","内存","NVMe","虚拟化 / 防护","上行带宽","价格",""]) appendText(headRow,"th","",label);
+        thead.append(headRow); table.append(thead);
+        const tbody = document.createElement("tbody");
+        for (const plan of regionPlans.sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0))) {
+          const row = document.createElement("tr");
+          if (/^(?:[A-Z]{1,3}-)?L(?:-|$)/i.test(plan.code || "") || /推荐|热门/.test(plan.name || "")) row.className = "vps-featured-row";
+          const codeCell = appendText(row,"td","vps-plan-code",plan.code || plan.name);
+          appendText(codeCell,"small","",plan.name);
+          appendText(row,"td","",specValue(plan.specs,/(?:^|\b)(?:cpu|processor|vcpu|cores?)(?:$|\b)/));
+          appendText(row,"td","",specValue(plan.specs,/(?:memory|ram|内存)/));
+          appendText(row,"td","",specValue(plan.specs,/(?:nvme|storage|disk|存储)/));
+          appendText(row,"td","",specValue(plan.specs,/(?:virtualization|kvm|ddos|防护)/));
+          appendText(row,"td","",specValue(plan.specs,/(?:bandwidth|network|port|带宽|流量)/));
+          const priceCell = document.createElement("td"); priceCell.className = "vps-price";
+          priceCell.textContent = money(plan.price_minor,plan.currency);
+          appendText(priceCell,"small",""," / "+period(plan.billing_period)); row.append(priceCell);
+          const actionCell = document.createElement("td"); actionCell.className = "vps-order-cell";
+          const button = document.createElement("button"); button.type = "button"; button.className = "vps-order-button";
+          button.dataset.planId = plan.id; button.dataset.order = plan.name;
+          button.dataset.price = money(plan.price_minor,plan.currency)+" / "+period(plan.billing_period);
+          button.dataset.osOptions = JSON.stringify(Array.isArray(plan.specs?.os_options)?plan.specs.os_options:[]);
+          button.textContent = "订购"; actionCell.append(button); row.append(actionCell);
+          tbody.append(row);
+        }
+        table.append(tbody); scroll.append(table); block.append(scroll); fragment.append(block);
+      }
+      if (!fragment.childNodes.length) {
+        appendText(planList,"p","sub","目前没有已发布且具有可售机房库存的 VPS 套餐。请稍后查看实时目录。");
+      } else planList.replaceChildren(fragment);
+      return;
+    }
+
     const fragment = document.createDocumentFragment();
     for (const plan of plans) {
       const card = document.createElement("article");
