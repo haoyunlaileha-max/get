@@ -414,3 +414,5 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 .admin-page .admin-order-details summary{color:#175cd3!important;cursor:pointer}
 .admin-page .admin-order-detail-body{padding:12px;border-radius:8px;margin-top:8px}
 .admin-page :focus-visible{outline:3px solid #84caff!important;outline-offset:2px}
+
+@media(max-width:600px){.crypto-invoice-card{grid-template-columns:1fr!important}.crypto-invoice-card>div:first-child{justify-items:center}.crypto-invoice-card strong{font-size:13px!important}}
