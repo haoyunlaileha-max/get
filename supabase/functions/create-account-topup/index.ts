@@ -63,7 +63,7 @@ Deno.serve(async(request:Request)=>{
     const {data:orderId,error}=await admin.rpc("ah_create_account_topup",{
       p_user_id:userData.user.id,p_amount_minor:amount,p_bonus_eligible:body.bonus_eligible,p_idempotency_key:"topup:"+key
     });
-    if(error||!orderId)return reply(500,{error:error?.message==="topup_idempotency_conflict"?"topup_idempotency_conflict":"topup_creation_failed"},origin);
+    if(error||!orderId){console.error("account_topup_rpc_failed",{code:error?.code,message:error?.message});const reason=error?.message==="topup_idempotency_conflict"?"topup_idempotency_conflict":error?.message==="topup_order_expired"?"topup_order_expired":error?.message==="invalid_topup_request"?"invalid_topup_request":"topup_creation_failed";return reply(reason==="topup_idempotency_conflict"||reason==="topup_order_expired"?409:500,{error:reason},origin);}
     return reply(201,{order_id:orderId,amount_minor:amount,currency:"USDT"},origin);
   } catch {
     return reply(500,{error:"internal_server_error"},origin);
