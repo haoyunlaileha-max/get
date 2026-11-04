@@ -50,8 +50,277 @@ function renderPlanCategoryOptions(rows,selected){const select=$("plan-category"
 function renderPlanSpecFields(specs={},slug){const root=$("plan-spec-fields");if(!root)return;const categorySlug=slug||categoryRows.find(row=>row.id===$("plan-category").value)?.slug;const definition=categorySpecDefinition(categorySlug);root.replaceChildren();$("plan-spec-category-hint").textContent=definition.label+" · 请填写完整规格";for(const [key,label] of definition.fields){const wrapper=document.createElement("label");wrapper.className="admin-spec-field";const title=document.createElement("span");title.textContent=label+"（必填）";const input=document.createElement("input");input.type="text";input.name="spec_"+key;input.required=true;input.maxLength=120;const legacy=key==="nvme"&&!specs.nvme?specs.storage:key==="storage"&&!specs.storage?specs.disk:undefined;input.value=String(specs[key]??legacy??"");input.placeholder=key==="uplink"?"例如：1 Gbps":key==="bandwidth"?"例如：10 TB/月":key==="vram"?"例如：24 GB":key==="gpu"?"例如：NVIDIA RTX 4090":"请输入"+label;wrapper.append(title,input);root.append(wrapper);}}
 function readPlanSpecFields(form,slug){const specs={};for(const [key,label] of categorySpecDefinition(slug).fields){const value=String(form.elements.namedItem("spec_"+key)?.value||"").trim();if(!value){show(nodes.error,"请填写完整的套餐规格："+label);return null;}specs[key]=value;}return specs;}
 function fillPlanEditor(plan){const form=$("plan-editor");form.reset();const product=plan?productRows.find(row=>row.id===plan.product_id):null;const category=plan?categoryRows.find(row=>row.id===product?.category_id):categoryRows.find(row=>PLAN_CATEGORY_SPECS[row.slug]);form.elements.id.value=plan?.id||"";form.elements.product_id.value=plan?.product_id||"";form.elements.code.value=plan?.code||"";form.elements.category_id.value=category?.id||"";form.elements.name.value=plan?.name||"";form.elements.price.value=plan?(Number(plan.price_minor)/100).toFixed(2):"0.00";form.elements.is_active.checked=Boolean(plan?.is_active);$("plan-editor-heading").textContent=plan?"编辑套餐":"新增套餐";renderPlanSpecFields(plan?.specs||{},category?.slug);form.scrollIntoView({behavior:"smooth",block:"center"});}
-function renderCatalog(products,plans){productRows=products;renderPlanCategoryOptions(categoryRows);const tabs=$("catalog-category-tabs");tabs.replaceChildren();const available=categoryRows.filter(row=>PLAN_CATEGORY_SPECS[row.slug]);const tabItems=[{id:"all",label:"全部分类"},...available.map(row=>({id:row.id,label:PLAN_CATEGORY_SPECS[row.slug].label}))];if(selectedCatalogCategory!=="all"&&!available.some(row=>row.id===selectedCatalogCategory))selectedCatalogCategory="all";for(const item of tabItems){const button=document.createElement("button");button.type="button";button.className="admin-category-tab"+(selectedCatalogCategory===item.id?" is-active":"");button.textContent=item.label;button.setAttribute("role","tab");button.setAttribute("aria-selected",String(selectedCatalogCategory===item.id));button.addEventListener("click",()=>{selectedCatalogCategory=item.id;renderCatalog(productRows,plans);});tabs.append(button);}const root=$("catalog-list");root.replaceChildren();const productMap=new Map(products.map(product=>[product.id,product]));const shown=available.filter(category=>selectedCatalogCategory==="all"||category.id===selectedCatalogCategory);for(const category of shown){const definition=categorySpecDefinition(category.slug),categoryPlans=plans.filter(plan=>productMap.get(plan.product_id)?.category_id===category.id);const panel=document.createElement("section");panel.className="admin-category-table-card";const heading=document.createElement("div");heading.className="admin-category-table-heading";const title=document.createElement("strong");title.textContent=definition.label;const count=document.createElement("small");count.textContent=categoryPlans.length+" 个套餐";heading.append(title,count);panel.append(heading);const scroll=document.createElement("div");scroll.className="admin-category-table-scroll";const table=document.createElement("table");table.className="admin-category-plan-table";const thead=document.createElement("thead"),headerRow=document.createElement("tr");for(const label of ["方案",...definition.fields.map(field=>field[1]),"价格","状态","操作"]){const th=document.createElement("th");th.textContent=label;headerRow.append(th);}thead.append(headerRow);table.append(thead);const tbody=document.createElement("tbody");for(const plan of categoryPlans){const row=document.createElement("tr"),scheme=document.createElement("td");scheme.textContent=plan.name;scheme.className="admin-plan-scheme";row.append(scheme);for(const [key] of definition.fields){const cell=document.createElement("td"),legacy=key==="nvme"?plan.specs?.storage:key==="storage"?plan.specs?.disk:undefined;cell.textContent=String(plan.specs?.[key]??legacy??"—");row.append(cell);}const price=document.createElement("td");price.textContent=money(plan.price_minor,plan.currency)+" / 月";price.className="admin-plan-price";row.append(price);const status=document.createElement("td");status.textContent=plan.is_active?"已启用":"未启用";status.className=plan.is_active?"is-enabled":"is-disabled";row.append(status);const actions=document.createElement("td");actions.className="admin-plan-actions";const edit=document.createElement("button");edit.type="button";edit.className="admin-toggle";edit.textContent="编辑";edit.addEventListener("click",()=>fillPlanEditor(plan));const toggle=document.createElement("button");toggle.type="button";toggle.className="admin-toggle";toggle.textContent=plan.is_active?"停用":"启用";toggle.addEventListener("click",()=>updateRow("ah_plans",plan.id,{is_active:!plan.is_active}));actions.append(edit,toggle);row.append(actions);tbody.append(row);}if(!categoryPlans.length){const row=document.createElement("tr"),cell=document.createElement("td");cell.colSpan=definition.fields.length+4;cell.textContent="此分类暂时没有套餐，点击右上角“新增套餐”开始录入。";cell.className="admin-category-empty";row.append(cell);tbody.append(row);}table.append(tbody);scroll.append(table);panel.append(scroll);root.append(panel);}}
-async function saveCatalog(form){if(busy)return;const values=formValues(form),id=values.id||null,category=categoryRows.find(row=>row.id===values.category_id&&PLAN_CATEGORY_SPECS[row.slug]);if(!category){show(nodes.error,"请选择有效的商品分类。");return;}const name=String(values.name||"").trim(),price=Number(values.price),priceMinor=Math.round(price*100),specs=readPlanSpecFields(form,category.slug);if(!specs)return;if(!name||name.length>100||!Number.isFinite(price)||price<0||!Number.isSafeInteger(priceMinor)){show(nodes.error,"请检查方案名称、规格和价格。");return;}busy=true;show(nodes.error,"");show(nodes.success,"");try{let product=productRows.find(row=>row.id===values.product_id&&row.category_id===category.id)||productRows.find(row=>row.category_id===category.id);if(!product){const productPayload={name:category.name,slug:category.slug.replace(/_/g,"-")+"-catalog",category:category.slug,category_id:category.id,description:"套餐分类目录",sort_order:0,is_active:true,image_path:null};const {data,error}=await supabase.from("ah_products").insert(productPayload).select("id,slug,name,category,category_id,image_path,description,is_active,sort_order").single();if(error)throw error;product=data;productRows.push(product);}const code=String(values.code||"").trim()||category.slug.replace(/_/g,"-")+"-"+Date.now().toString(36);const payload={product_id:product.id,name,code,description:null,price_minor:priceMinor,currency:"USDT",billing_period:"monthly",specs,sort_order:0,is_active:form.elements.is_active.checked};const query=id?supabase.from("ah_plans").update(payload).eq("id",id):supabase.from("ah_plans").insert(payload);const {error}=await query;if(error)throw error;show(nodes.success,"套餐已保存。");busy=false;fillPlanEditor(null);await loadDashboard();}catch(error){show(nodes.error,"套餐保存失败，请检查方案编码是否冲突、分类权限及数据库约束。");}finally{busy=false;}}
+function renderProductOptions(products) {
+  const select = $("plan-product"); const previous = select.value;
+  select.replaceChildren();
+  for (const product of products) { const option = document.createElement("option"); option.value = product.id; option.textContent = product.name; select.append(option); }
+  if (products.some((p)=>p.id===previous)) select.value=previous;
+}
+function renderProductCategoryOptions(rows) {
+  const select=$("product-category");const previous=select.value;select.replaceChildren();
+  for(const row of rows){const option=document.createElement("option");option.value=row.id;option.textContent=row.name+(row.is_active?"":"（停用）");select.append(option);}
+  if(rows.some(row=>row.id===previous))select.value=previous;
+}
+function fillCategoryEditor(row){
+  const form=$("category-editor");form.reset();
+  for(const key of ["id","name","slug","description","sort_order"])form.elements.namedItem(key).value=row?.[key]??(key==="sort_order"?0:"");
+  form.elements.is_active.checked=Boolean(row?.is_active);
+  form.elements.slug.readOnly=Boolean(row?.id);
+  form.scrollIntoView({behavior:"smooth",block:"center"});
+}
+function renderCategories(rows){
+  const root=$("category-list");root.replaceChildren();renderProductCategoryOptions(rows);
+  if(!rows.length){root.textContent="暂无分类";return;}
+  for(const row of rows){
+    const line=document.createElement("div");line.className="admin-catalog-line";
+    const label=document.createElement("span");label.textContent=row.name+" · "+row.slug+" · 排序 "+row.sort_order;
+    const state=document.createElement("span");state.className="admin-catalog-state";state.textContent=row.is_active?"已启用":"已停用";
+    const edit=document.createElement("button");edit.type="button";edit.className="admin-toggle";edit.textContent="编辑";edit.addEventListener("click",()=>fillCategoryEditor(row));
+    const toggle=document.createElement("button");toggle.type="button";toggle.className="admin-toggle";toggle.textContent=row.is_active?"停用":"启用";toggle.addEventListener("click",()=>updateRow("ah_product_categories",row.id,{is_active:!row.is_active}));
+    line.append(label,state,edit,toggle);root.append(line);
+  }
+}
+async function saveCategory(form){
+  if(busy)return;
+  const values=formValues(form);const slug=String(values.slug||"").trim().toLowerCase();const sort=Number(values.sort_order||0);
+  if(!values.name?.trim()||values.name.trim().length>80||! /^[a-z0-9]+(?:[_-][a-z0-9]+)*$/.test(slug)||!Number.isSafeInteger(sort)||sort<0||sort>100000){show(nodes.error,"分类名称、slug 或排序不符合要求。");return;}
+  const payload={name:values.name.trim(),slug,description:values.description.trim()||null,sort_order:sort,is_active:form.elements.is_active.checked};
+  busy=true;show(nodes.error,"");show(nodes.success,"");
+  try{const query=values.id?supabase.from("ah_product_categories").update(payload).eq("id",values.id):supabase.from("ah_product_categories").insert(payload);const {error}=await query;if(error)throw error;show(nodes.success,"商品分类已保存。");form.reset();form.elements.sort_order.value="0";form.elements.slug.readOnly=false;busy=false;await loadDashboard();}
+  catch{show(nodes.error,"分类保存失败，请检查 slug 是否重复及管理员权限。");}
+  finally{busy=false;}
+}
+$("product-editor").elements.image_file.addEventListener("change",()=>{
+  const file=$("product-editor").elements.image_file.files?.[0];const preview=$("product-image-preview");preview.replaceChildren();
+  if(!file){preview.textContent="尚未选择新图片";return;}
+  if(!["image/jpeg","image/png","image/webp","image/avif"].includes(file.type)||file.size>5*1024*1024){preview.textContent="图片格式不支持或文件超过 5 MB。";return;}
+  const image=document.createElement("img");image.src=URL.createObjectURL(file);image.alt="商品图片预览";preview.append(image);
+});
+
+async function saveCatalog(form){
+  if(busy)return;const values=formValues(form),id=values.id||null,category=categoryRows.find(row=>row.id===values.category_id&&PLAN_CATEGORY_SPECS[row.slug]);
+  if(!category){show(nodes.error,"请选择有效的商品分类。");return;}
+  const name=String(values.name||"").trim(),price=Number(values.price),priceMinor=Math.round(price*100),specs=readPlanSpecFields(form,category.slug);
+  if(!specs)return;if(!name||name.length>100||!Number.isFinite(price)||price<0||!Number.isSafeInteger(priceMinor)){show(nodes.error,"请检查方案名称、规格和价格。");return;}
+  busy=true;show(nodes.error,"");show(nodes.success,"");
+  try{
+    let product=productRows.find(row=>row.id===values.product_id&&row.category_id===category.id)||productRows.find(row=>row.category_id===category.id);
+    if(!product){const productPayload={name:category.name,slug:category.slug.replace(/_/g,"-")+"-catalog",category:category.slug,category_id:category.id,description:"套餐分类目录",sort_order:0,is_active:true,image_path:null};const {data,error}=await supabase.from("ah_products").insert(productPayload).select("id,slug,name,category,category_id,image_path,description,is_active,sort_order").single();if(error)throw error;product=data;productRows.push(product);}
+    const code=String(values.code||"").trim()||category.slug.replace(/_/g,"-")+"-"+Date.now().toString(36);
+    const payload={product_id:product.id,name,code,description:null,price_minor:priceMinor,currency:"USDT",billing_period:"monthly",specs,sort_order:0,is_active:form.elements.is_active.checked};
+    const query=id?supabase.from("ah_plans").update(payload).eq("id",id):supabase.from("ah_plans").insert(payload);
+    const {error}=await query;if(error)throw error;show(nodes.success,"套餐已保存。");busy=false;fillPlanEditor(null);await loadDashboard();
+  }catch(error){show(nodes.error,"套餐保存失败，请检查方案编码是否冲突、分类权限及数据库约束。");}finally{busy=false;}
+}
+function renderInventoryOptions(plans, regions) {
+  const planSelect=$("inventory-plan"), regionSelect=$("inventory-region");
+  const previousPlan=planSelect.value, previousRegion=regionSelect.value;
+  planSelect.replaceChildren(); regionSelect.replaceChildren();
+  for(const plan of plans){const option=document.createElement("option");option.value=plan.id;option.textContent=plan.name+" · "+plan.code;planSelect.append(option);}
+  for(const region of regions){const option=document.createElement("option");option.value=region.id;option.textContent=region.name+" · "+region.city+" ("+region.code+")";regionSelect.append(option);}
+  if(plans.some(p=>p.id===previousPlan))planSelect.value=previousPlan;
+  if(regions.some(r=>r.id===previousRegion))regionSelect.value=previousRegion;
+}
+function fillInventoryEditor(row) {
+  const form=$("plan-region-editor"); form.reset();
+  form.elements.id.value=row?.id||"";
+  $("inventory-plan").value=row?.plan_id||$("inventory-plan").options[0]?.value||"";
+  $("inventory-region").value=row?.region_id||$("inventory-region").options[0]?.value||"";
+  form.elements.capacity_units.value=row?.capacity_units??"";
+  form.elements.is_available.checked=Boolean(row?.is_available);
+  form.scrollIntoView({behavior:"smooth",block:"center"});
+}
+function renderPlanRegions(rows, plans, regions) {
+  renderInventoryOptions(plans,regions);
+  const root=$("plan-region-list");root.replaceChildren();
+  if(!rows){root.textContent=editorTr("inventory_migration");return;}
+  if(!rows.length){root.textContent=editorTr("inventory_none");return;}
+  const planMap=new Map(plans.map(p=>[p.id,p]));
+  const regionMap=new Map(regions.map(r=>[r.id,r]));
+  for(const row of rows){
+    const plan=planMap.get(row.plan_id),region=regionMap.get(row.region_id);
+    const line=document.createElement("div");line.className="admin-catalog-line";
+    const label=document.createElement("span");label.textContent=(plan?.name||row.plan_id.slice(0,8))+" · "+(region?.name||row.region_id.slice(0,8));
+    const stats=document.createElement("small");
+    const capacity=row.capacity_units===null?editorTr("inventory_unlimited"):String(row.capacity_units);
+    const remaining=row.capacity_units===null?editorTr("inventory_unlimited"):String(Math.max(0,Number(row.capacity_units)-Number(row.allocated_units)));
+    stats.textContent=editorTr("inventory_allocated")+": "+row.allocated_units+" / "+capacity+" · "+editorTr("inventory_remaining")+": "+remaining;
+    const state=document.createElement("span");state.className="admin-catalog-state";state.textContent=row.is_available?tr("enabled"):tr("disabled");
+    const edit=document.createElement("button");edit.className="admin-toggle";edit.type="button";edit.textContent=editorTr("inventory_edit");edit.addEventListener("click",()=>fillInventoryEditor(row));
+    line.append(label,stats,state,edit);root.append(line);
+  }
+}
+async function saveInventory(form) {
+  if(busy)return;
+  const values=formValues(form);
+  const capacityText=values.capacity_units.trim();
+  const capacity=capacityText===""?null:Number(capacityText);
+  if(!values.plan_id||!values.region_id||(capacity!==null&&(!Number.isSafeInteger(capacity)||capacity<0||capacity>2147483647))){show(nodes.error,editorTr("inventory_failed"));return;}
+  const payload={plan_id:values.plan_id,region_id:values.region_id,capacity_units:capacity,is_available:form.elements.is_available.checked};
+  busy=true;show(nodes.error,"");show(nodes.success,"");
+  try{
+    let query;
+    if(values.id)query=supabase.from("ah_plan_regions").update(payload).eq("id",values.id);
+    else query=supabase.from("ah_plan_regions").upsert(payload,{onConflict:"plan_id,region_id"});
+    const {error}=await query;if(error)throw error;
+    show(nodes.success,editorTr("inventory_saved"));form.reset();
+    busy=false;await loadDashboard();
+  }catch{show(nodes.error,editorTr("inventory_failed"));}
+  finally{busy=false;}
+}
+
+function tr(key) { return locale.text(t.zh[key] || t.en[key] || key, language); }
+function setText(id, value) { const node = $(id); if (node) node.textContent = value; }
+function show(node, message) { node.hidden = !message; if (message) node.textContent = message; }
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[char]);
+}
+function money(minor, currency) {
+  const amount = Number(minor);
+  if (!Number.isFinite(amount)) return "—";
+  try { return new Intl.NumberFormat(language, { style: "currency", currency: String(currency || "USD").trim() }).format(amount / 100); }
+  catch { return `${(amount / 100).toFixed(2)} ${currency || "USD"}`; }
+}
+function date(value) {
+  if (!value) return "—";
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? "—" : new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short" }).format(parsed);
+}
+const adminStatusLabels = {
+  draft:"草稿",pending:"待处理",awaiting_payment:"待付款",paid:"已付款",
+  provisioning:"开通中",active:"运行中",suspended:"已暂停",cancelled:"已取消",
+  failed:"失败",refunded:"已退款",queued:"排队中",processing:"处理中",
+  retry_wait:"等待重试",succeeded:"成功",rejected:"已拒绝"
+};
+function statusPill(value) {
+  const status = String(value || "unknown");
+  const label = adminStatusLabels[status] || status.replaceAll("_", " ");
+  return `<span class="admin-status status-${escapeHtml(status)}">${escapeHtml(locale.text(label, language))}</span>`;
+}
+function applyLanguage() {
+  document.documentElement.lang = language;
+  document.documentElement.dir = "ltr";
+  document.querySelectorAll("[data-i]").forEach((node) => { const value = tr(node.dataset.i); node.textContent = value === node.dataset.i ? editorTr(node.dataset.i) : value; });
+  nodes.language.value = language;
+  locale.apply(document.body, language);
+}
+function renderOrderPagination() {
+  const start = orderTotal ? orderPage * orderPageSize + 1 : 0;
+  const end = Math.min((orderPage + 1) * orderPageSize, orderTotal);
+  $("orders-page-label").textContent = `${start}–${end} / ${orderTotal}`;
+  $("orders-prev").disabled = orderPage <= 0 || busy;
+  $("orders-next").disabled = (orderPage + 1) * orderPageSize >= orderTotal || busy;
+}
+function renderOrders(rows) {
+  $("orders-count").textContent = String(orderTotal);
+  $("orders-body").replaceChildren();
+  if (!rows.length) {
+    const row = document.createElement("tr"); const cell = document.createElement("td");
+    cell.colSpan = 6; cell.textContent = tr("empty"); row.append(cell); $("orders-body").append(row); return;
+  }
+  for (const order of rows) {
+    const row = document.createElement("tr");
+    const values = [String(order.id).slice(0, 8).toUpperCase(), String(order.user_id).slice(0, 8), "", money(order.total_minor, order.currency), date(order.created_at)];
+    for (const value of values) { const cell = document.createElement("td"); cell.textContent = value; row.append(cell); }
+    row.children[2].innerHTML = statusPill(order.status);
+    const detailCell = document.createElement("td");
+    const details = document.createElement("details"); details.className = "admin-order-details";
+    const summary = document.createElement("summary"); summary.textContent = locale.text("查看详情", language);
+    details.append(summary);
+    const body = document.createElement("div"); body.className = "admin-order-detail-body";
+    const addLine = (label, value) => {
+      const line = document.createElement("p");
+      const strong = document.createElement("strong"); strong.textContent = locale.text(label, language) + "：";
+      const span = document.createElement("span"); span.textContent = value || "—";
+      line.append(strong, span); body.append(line);
+    };
+    addLine("完整订单编号", order.id);
+    addLine("更新时间", date(order.updated_at));
+    if (order.expires_at) addLine("订单有效期至", date(order.expires_at));
+    if (order.paid_at) addLine("付款确认时间", date(order.paid_at));
+    const region = order.ah_regions;
+    if (region) addLine("数据中心", [region.name, region.city, region.country_code].filter(Boolean).join(" · "));
+    if (order.customer_note) addLine("客户配置备注", order.customer_note);
+    const items = document.createElement("ul"); items.className = "admin-order-items";
+    for (const item of order.ah_order_items || []) {
+      const li = document.createElement("li");
+      const title = document.createElement("strong");
+      title.textContent = item.description_snapshot + " × " + item.quantity;
+      const price = document.createElement("span");
+      price.textContent = money(Number(item.unit_price_minor) * Number(item.quantity), order.currency);
+      li.append(title, price);
+      if (item.configuration && Object.keys(item.configuration).length) {
+        const config = document.createElement("small");
+        config.textContent = JSON.stringify(item.configuration);
+        li.append(config);
+      }
+      items.append(li);
+    }
+    if (items.childElementCount) body.append(items);
+    else addLine("商品明细", "暂无商品明细");
+    details.append(body); detailCell.append(details); row.append(detailCell);
+    $("orders-body").append(row);
+  }
+  renderOrderPagination();
+}
+function renderJobs(rows) {
+  const root = $("jobs-list"); root.replaceChildren();
+  if (!rows.length) { root.textContent = tr("no_jobs"); return; }
+  for (const job of rows) {
+    const item = document.createElement("article"); item.className = "admin-record";
+    item.innerHTML = `<div class="admin-record-top"><strong>${escapeHtml(String(job.order_id).slice(0, 8))}</strong>${statusPill(job.status)}</div><small>${escapeHtml(tr("attempts"))}: ${Number(job.attempts) || 0}/${Number(job.max_attempts) || 0}</small><small>${escapeHtml(tr("provider_ref"))}: ${escapeHtml(job.provider_reference || "—")}</small>${job.requires_reconciliation ? `<strong class="admin-warning">${escapeHtml(tr("reconciliation_required"))}</strong>` : ""}<small>${escapeHtml(job.last_error_code || "")}</small>`;
+    root.append(item);
+  }
+}
+function renderReconciliation(rows, total) {
+  const root = $("reconciliation-list"); root.replaceChildren();
+  setText("reconciliation-count", String(total));
+  if (!rows.length) { root.textContent = tr("reconciliation_empty"); return; }
+  for (const job of rows) {
+    const item = document.createElement("article"); item.className = "admin-record";
+    item.innerHTML = `<div class="admin-record-top"><strong>${escapeHtml(String(job.order_id).slice(0, 8))}</strong>${statusPill(job.status)}</div><small>${escapeHtml(tr("provider_ref"))}: ${escapeHtml(job.provider_reference || "—")}</small><strong class="admin-warning">${escapeHtml(tr("reconciliation_required"))}</strong><small>${escapeHtml(job.last_error_code || "")}</small><small>${escapeHtml(date(job.created_at))}</small>`;
+    root.append(item);
+  }
+  if (total > rows.length) {
+    const note = document.createElement("small"); note.className = "admin-warning";
+    note.textContent = tr("reconciliation_overflow"); root.append(note);
+  }
+}
+function renderPayments(rows) {
+  const root = $("payments-list"); root.replaceChildren();
+  if (!rows.length) { root.textContent = tr("no_payments"); return; }
+  for (const event of rows) {
+    const item = document.createElement("article"); item.className = "admin-record";
+    item.innerHTML = `<div class="admin-record-top"><strong>${escapeHtml(event.provider)} · ${escapeHtml(String(event.event_id).slice(0, 22))}</strong>${statusPill(event.event_type)}</div><small>${escapeHtml(tr("order"))}: ${escapeHtml(String(event.order_id).slice(0, 8))}</small><small>${escapeHtml(tr("amount"))}: ${escapeHtml(money(event.amount_minor, event.currency))}</small><small>${escapeHtml(date(event.received_at))}</small>`;
+    root.append(item);
+  }
+}
+function renderCatalog(products,plans){
+  productRows=products;renderPlanCategoryOptions(categoryRows);
+  const tabs=$("catalog-category-tabs");tabs.replaceChildren();const available=categoryRows.filter(row=>PLAN_CATEGORY_SPECS[row.slug]);
+  const items=[{id:"all",label:"全部分类"},...available.map(row=>({id:row.id,label:PLAN_CATEGORY_SPECS[row.slug].label}))];
+  if(selectedCatalogCategory!=="all"&&!available.some(row=>row.id===selectedCatalogCategory))selectedCatalogCategory="all";
+  for(const item of items){const button=document.createElement("button");button.type="button";button.className="admin-category-tab"+(selectedCatalogCategory===item.id?" is-active":"");button.textContent=item.label;button.setAttribute("role","tab");button.setAttribute("aria-selected",String(selectedCatalogCategory===item.id));button.addEventListener("click",()=>{selectedCatalogCategory=item.id;renderCatalog(productRows,plans);});tabs.append(button);}
+  const root=$("catalog-list");root.replaceChildren();const productMap=new Map(products.map(product=>[product.id,product]));
+  for(const category of available.filter(row=>selectedCatalogCategory==="all"||row.id===selectedCatalogCategory)){
+    const definition=categorySpecDefinition(category.slug),categoryPlans=plans.filter(plan=>productMap.get(plan.product_id)?.category_id===category.id);
+    const panel=document.createElement("section");panel.className="admin-category-table-card";const heading=document.createElement("div");heading.className="admin-category-table-heading";
+    const title=document.createElement("strong");title.textContent=definition.label;const count=document.createElement("small");count.textContent=categoryPlans.length+" 个套餐";heading.append(title,count);panel.append(heading);
+    const scroll=document.createElement("div");scroll.className="admin-category-table-scroll";const table=document.createElement("table");table.className="admin-category-plan-table";
+    const thead=document.createElement("thead"),hr=document.createElement("tr");for(const label of ["方案",...definition.fields.map(field=>field[1]),"价格","状态","操作"]){const th=document.createElement("th");th.textContent=label;hr.append(th);}thead.append(hr);table.append(thead);
+    const tbody=document.createElement("tbody");
+    for(const plan of categoryPlans){const row=document.createElement("tr"),scheme=document.createElement("td");scheme.textContent=plan.name;scheme.className="admin-plan-scheme";row.append(scheme);
+      for(const [key] of definition.fields){const cell=document.createElement("td"),legacy=key==="nvme"?plan.specs?.storage:key==="storage"?plan.specs?.disk:undefined;cell.textContent=String(plan.specs?.[key]??legacy??"—");row.append(cell);}
+      const price=document.createElement("td");price.textContent=money(plan.price_minor,plan.currency);price.className="admin-plan-price";row.append(price);
+      const status=document.createElement("td");status.textContent=plan.is_active?"已启用":"未启用";status.className=plan.is_active?"is-enabled":"is-disabled";row.append(status);
+      const actions=document.createElement("td");actions.className="admin-plan-actions";const edit=document.createElement("button");edit.type="button";edit.className="admin-toggle";edit.textContent="编辑";edit.addEventListener("click",()=>fillPlanEditor(plan));const toggle=document.createElement("button");toggle.type="button";toggle.className="admin-toggle";toggle.textContent=plan.is_active?"停用":"启用";toggle.addEventListener("click",()=>updateRow("ah_plans",plan.id,{is_active:!plan.is_active}));actions.append(edit,toggle);row.append(actions);tbody.append(row);
+    }
+    if(!categoryPlans.length){const row=document.createElement("tr"),cell=document.createElement("td");cell.colSpan=definition.fields.length+4;cell.textContent="此分类暂时没有套餐，点击右上角“新增套餐”开始录入。";cell.className="admin-category-empty";row.append(cell);tbody.append(row);}
+    table.append(tbody);scroll.append(table);panel.append(scroll);root.append(panel);
+  }
+}
 function renderRegions(rows) {
   const root = $("regions-list"); root.replaceChildren();
   for (const region of rows) {
