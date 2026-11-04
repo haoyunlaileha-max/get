@@ -691,3 +691,31 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
   opacity:1!important;
   box-shadow:none!important;
 }
+
+
+/* Keep the continue action aligned to the right of the payment-method selector. */
+.account-page .topup-payment-action-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:stretch;
+  gap:12px;
+  width:100%;
+  min-width:0;
+}
+.account-page .topup-payment-action-row #topup-method{
+  width:100%;
+  min-width:0;
+  height:52px;
+}
+.account-page .topup-payment-action-row .topup-continue{
+  width:auto;
+  min-width:150px;
+  min-height:52px;
+  height:52px;
+  padding:0 20px;
+  white-space:nowrap;
+}
+@media(max-width:420px){
+  .account-page .topup-payment-action-row{grid-template-columns:minmax(0,1fr) auto;gap:8px}
+  .account-page .topup-payment-action-row .topup-continue{min-width:112px;padding:0 12px;font-size:12px}
+}
