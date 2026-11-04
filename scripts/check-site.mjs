@@ -233,8 +233,8 @@ for (const marker of ["ah_create_account_topup", "auth.getUser", "listener_statu
 for (const marker of ["ah_account_ledger", "ah_account_topups", "create-account-topup", "create-crypto-invoice", "crypto.randomUUID", "expected_amount", "wallet_address", "credited", "pendingAmountMinor", "amountSelect.disabled=true", "amountSelect.disabled=Boolean(pendingOrderId)", "BONUS_BY_AMOUNT", "topup-custom-amount", "selectedBonus(amount)"]) assert.ok(topupJs.includes(marker), "Missing account top-up client behavior: " + marker);
 
 
-const bonusMigration = read("supabase/migrations/20261104040000_account_topup_bonus_tiers_and_custom_minimum.sql");
-const bonusEligibilityMigration = read("supabase/migrations/20261104041000_account_topup_bonus_eligibility_flag.sql");
+const bonusMigration = read("supabase/migrations/20261104050817_account_topup_bonus_tiers_and_custom_minimum.sql");
+const bonusEligibilityMigration = read("supabase/migrations/20261104050917_account_topup_bonus_eligibility_flag.sql");
 for (const marker of ["bonus_minor", "p_amount_minor<3000", "v_bonus_minor:=case", "amount_minor+v_topup.bonus_minor"]) assert.ok(bonusMigration.includes(marker), "Missing bonus credit safeguard: " + marker);
 for (const marker of ["p_bonus_eligible boolean", "p_bonus_eligible", "grant execute"]) assert.ok(bonusEligibilityMigration.includes(marker), "Missing explicit bonus eligibility safeguard: " + marker);
 for (const [amount,bonus] of [[3000,0],[10000,2500],[25000,7500],[50000,20000],[100000,50000],[200000,200000]]) assert.ok(topupJs.includes("["+amount+","+bonus+"]"), "Missing top-up reward tier: " + amount);
