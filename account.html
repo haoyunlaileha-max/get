@@ -121,11 +121,10 @@
           </div>
         </div>
       </section>
-      <section class="account-transactions"><div class="topup-history-heading"><h3>最近充值记录</h3><button class="btn btn-ghost" id="topup-refresh" type="button">刷新状态</button></div><div id="topup-history" class="topup-history"><div class="account-notice">正在加载充值记录…</div></div></section>
-      <h2 class="account-section-title" data-i="your_orders">Your orders</h2>
-      <div id="orders-state" class="account-notice" data-i="loading_orders">Loading your orders…</div>
-      <div id="orders-list" class="orders-list"></div>
-      <button class="btn btn-ghost account-submit" id="load-more-orders" type="button" hidden data-i="load_more_orders">加载更多订单</button>
+      <div class="account-activity-grid">
+        <section class="account-transactions account-activity-panel"><div class="topup-history-heading"><h3>最近充值记录</h3><button class="btn btn-ghost" id="topup-refresh" type="button">刷新状态</button></div><div id="topup-history" class="topup-history"><div class="account-notice">正在加载充值记录…</div></div></section>
+        <section class="account-orders account-activity-panel"><h3 class="account-activity-title" data-i="your_orders">我的订单</h3><div id="orders-state" class="account-notice" data-i="loading_orders">Loading your orders…</div><div id="orders-list" class="orders-list"></div><button class="btn btn-ghost account-submit" id="load-more-orders" type="button" hidden data-i="load_more_orders">加载更多订单</button></section>
+      </div>
       <button class="btn btn-ghost account-submit" id="sign-out" type="button" data-i="sign_out">Sign out</button>
     </section>
     <p class="account-footnote">请妥善保管访问令牌。令牌验证服务接入后，账户凭证将由服务器安全处理。</p>
