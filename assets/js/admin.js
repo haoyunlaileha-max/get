@@ -321,6 +321,70 @@ function renderRegions(rows) {
   }
   if (!rows.length) root.textContent = tr("empty");
 }
+function renderLaunchReadiness(products, plans, regions, mappings, assets) {
+  const activeProducts = products.filter((row) => row.is_active);
+  const activeProductIds = new Set(activeProducts.map((row) => row.id));
+  const activePlans = plans.filter((row) => row.is_active && activeProductIds.has(row.product_id));
+  const activePlanIds = new Set(activePlans.map((row) => row.id));
+  const activeRegions = regions.filter((row) => row.status === "active");
+  const activeRegionIds = new Set(activeRegions.map((row) => row.id));
+  const sellableMappings = mappings.filter((row) =>
+    row.is_available &&
+    activePlanIds.has(row.plan_id) &&
+    activeRegionIds.has(row.region_id) &&
+    (row.capacity_units === null || Number(row.allocated_units) < Number(row.capacity_units))
+  );
+  const readyAssets = assets.filter((row) => row.listener_enabled && row.listener_status === "ready");
+  setText("metric-live-products", String(activeProducts.length));
+  setText("metric-live-plans", String(activePlans.length));
+  setText("metric-live-regions", String(activeRegions.length));
+  setText("metric-sellable-mappings", String(sellableMappings.length));
+  setText("metric-ready-assets", String(readyAssets.length) + " / " + String(assets.length));
+
+  const blockers = [];
+  if (!activeProducts.length) blockers.push("没有已发布产品");
+  if (!activePlans.length) blockers.push("没有已发布套餐");
+  if (!activeRegions.length) blockers.push("没有已启用的真实机房");
+  if (!sellableMappings.length) blockers.push("没有仍有容量的套餐 / 机房关联");
+  if (readyAssets.length !== assets.length || !readyAssets.length) blockers.push("部分主网收款监听未就绪");
+  const note = $("launch-readiness-state");
+  if (note) {
+    note.textContent = blockers.length
+      ? "当前状态：主网收款监听 " + readyAssets.length + "/" + assets.length + " 就绪；服务器商品销售尚未开放。待处理：" + blockers.join("；") + "。不要录入演示价格或未确认的供应商库存。"
+      : "目录与库存检查通过：已发布产品、套餐、启用机房及可售关联均存在，且所有配置资产监听就绪。收款后仍由管理员人工履约；本检查不代表供应商 SLA 或真实付款验收。";
+  }
+}
+
+async function saveRegion(form) {
+  if (busy) return;
+  const values = formValues(form);
+  const payload = {
+    code: String(values.code || "").trim().toUpperCase(),
+    name: String(values.name || "").trim(),
+    city: String(values.city || "").trim(),
+    country_code: String(values.country_code || "").trim().toUpperCase(),
+    status: ["inactive", "maintenance", "active"].includes(values.status) ? values.status : "inactive",
+  };
+  if (!/^[A-Z0-9][A-Z0-9_-]{1,31}$/.test(payload.code) ||
+      !payload.name || payload.name.length > 100 ||
+      !payload.city || payload.city.length > 100 ||
+      !/^[A-Z]{2}$/.test(payload.country_code)) {
+    show(nodes.error, "机房代码、名称、城市或 ISO 两位国家代码格式不正确。");
+    return;
+  }
+  busy = true; show(nodes.error, ""); show(nodes.success, "");
+  try {
+    const { error } = await supabase.from("ah_regions").insert(payload);
+    if (error) throw error;
+    show(nodes.success, "机房记录已创建。新机房仅在供应商和实际库存确认后才应启用。");
+    form.reset();
+    busy = false;
+    await loadDashboard();
+  } catch (error) {
+    show(nodes.error, error?.code === "23505" ? "机房代码已存在，请使用唯一代码。" : "机房创建失败，请检查管理员权限和数据库状态。");
+  } finally { busy = false; }
+}
+
 async function updateRow(table, id, values) {
   if (busy) return;
   busy = true; show(nodes.error, "");
@@ -429,7 +493,7 @@ async function loadDashboard() {
       ordersQuery = ordersQuery.or(`id.eq.${orderSearch},user_id.eq.${orderSearch}`);
     }
     ordersQuery = ordersQuery.range(orderPage * orderPageSize, (orderPage + 1) * orderPageSize - 1);
-    const [orders, jobs, reconciliationJobs, payments, products, plans, regions, ordersCount, paidCount, queuedCount, activePlansCount, mappings] = await Promise.all([
+    const [orders, jobs, reconciliationJobs, payments, products, plans, regions, ordersCount, paidCount, queuedCount, activePlansCount, mappings, cryptoAssets] = await Promise.all([
       ordersQuery,
       supabase.from("ah_provisioning_jobs").select("id,order_id,status,attempts,max_attempts,provider_reference,requires_reconciliation,last_error_code,created_at").order("created_at", { ascending: false }).limit(30),
       supabase.from("ah_provisioning_jobs").select("id,order_id,status,provider_reference,requires_reconciliation,last_error_code,created_at", { count: "exact" }).eq("requires_reconciliation", true).order("created_at", { ascending: false }).limit(100),
@@ -442,13 +506,14 @@ async function loadDashboard() {
       supabase.from("ah_provisioning_jobs").select("*", { count: "exact", head: true }).in("status", ["queued", "retry_wait", "processing"]),
       supabase.from("ah_plans").select("*", { count: "exact", head: true }).eq("is_active", true),
       supabase.from("ah_plan_regions").select("id,plan_id,region_id,is_available,capacity_units,allocated_units").order("created_at", { ascending: false }),
+      supabase.from("ah_crypto_assets").select("asset_code,listener_enabled,listener_status").order("asset_code"),
     ]);
-    const result = [orders, jobs, reconciliationJobs, payments, products, plans, regions, ordersCount, paidCount, queuedCount, activePlansCount];
+    const result = [orders, jobs, reconciliationJobs, payments, products, plans, regions, ordersCount, paidCount, queuedCount, activePlansCount, cryptoAssets];
     if (result.some((entry) => entry.error)) throw new Error("query_failed");
     const mappingRows = mappings.error ? null : (mappings.data || []);
     orderTotal = orders.count ?? 0;
     renderOrders(orders.data || []); renderJobs(jobs.data || []); renderReconciliation(reconciliationJobs.data || [], reconciliationJobs.count ?? 0); renderPayments(payments.data || []);
-    renderCatalog(products.data || [], plans.data || []); renderRegions(regions.data || []); renderPlanRegions(mappingRows, plans.data || [], regions.data || []);
+    renderCatalog(products.data || [], plans.data || []); renderRegions(regions.data || []); renderPlanRegions(mappingRows, plans.data || [], regions.data || []); renderLaunchReadiness(products.data || [], plans.data || [], regions.data || [], mappingRows || [], cryptoAssets.data || []);
     setText("metric-orders", String(ordersCount.count ?? 0));
     setText("metric-paid", String(paidCount.count ?? 0));
     setText("metric-queued", String(queuedCount.count ?? 0));
@@ -482,6 +547,7 @@ async function initialize() {
 $("product-editor").addEventListener("submit",(event)=>{event.preventDefault();saveCatalog(event.currentTarget,"ah_products");});
 $("plan-editor").addEventListener("submit",(event)=>{event.preventDefault();saveCatalog(event.currentTarget,"ah_plans");});
 $("plan-region-editor").addEventListener("submit",(event)=>{event.preventDefault();saveInventory(event.currentTarget);});
+$("region-editor").addEventListener("submit",(event)=>{event.preventDefault();saveRegion(event.currentTarget);});
 $("product-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("product-editor").elements.sort_order.value="0"; },0);});
 $("plan-editor").addEventListener("reset",()=>{setTimeout(()=>{ $("plan-editor").elements.currency.value="USDT"; $("plan-editor").elements.price.value="0"; $("plan-editor").elements.sort_order.value="0"; },0);});
 $("orders-filter").addEventListener("submit", (event) => {
