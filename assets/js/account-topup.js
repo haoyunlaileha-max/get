@@ -7,6 +7,8 @@ const balanceValue=document.getElementById("account-balance-value");
 const balanceState=document.getElementById("account-balance-state");
 const historyPanel=document.getElementById("topup-history");
 const refreshButton=document.getElementById("topup-refresh");
+const previewPanel=document.querySelector(".topup-preview");
+if(previewPanel&&invoicePanel)previewPanel.insertBefore(invoicePanel,previewPanel.firstChild);
 let client=null,session=null,assets=[],pendingKey=null,pendingOrderId=null,pendingAmountMinor=null,busy=false,currentBalanceMinor=0n;
 const amountOptions=document.getElementById("topup-amount-options");
 const continueLabel="继续";
@@ -153,6 +155,16 @@ async function refreshBalance(options={}){
     ]);
     if(ledger.error)throw ledger.error;
     if(topups.error)throw topups.error;
+    const orderIds=(topups.data||[]).map(item=>item.order_id).filter(Boolean);
+    const [orders,deposits]=orderIds.length?await Promise.all([
+      client.from("ah_orders").select("id,status,expires_at").in("id",orderIds),
+      client.from("ah_crypto_deposits").select("order_id,status,received_amount_atomic,expected_amount_atomic,expires_at,transaction_hash").in("order_id",orderIds).order("created_at",{ascending:false})
+    ]):[{data:[],error:null},{data:[],error:null}];
+    if(orders.error)throw orders.error;
+    if(deposits.error)throw deposits.error;
+    const orderById=new Map((orders.data||[]).map(row=>[row.id,row]));
+    const depositByOrder=new Map();
+    for(const row of deposits.data||[])if(!depositByOrder.has(row.order_id))depositByOrder.set(row.order_id,row);
     const total=(ledger.data||[]).reduce((sum,row)=>sum+BigInt(String(row.amount_minor)),0n);
     currentBalanceMinor=total;updateTopupPreview();
     text(balanceValue,(total/100n).toString()+"."+(total%100n).toString().padStart(2,"0")+" USDT");
@@ -163,8 +175,15 @@ async function refreshBalance(options={}){
       const row=document.createElement("div");row.className="topup-history-row";
       const left=document.createElement("div"),amount=document.createElement("strong"),meta=document.createElement("small");
       amount.textContent=money(item.amount_minor)+(Number(item.bonus_minor)>0?" + 赠送 "+money(item.bonus_minor):"");meta.textContent="创建时间："+new Date(item.created_at).toLocaleString("zh-CN");left.append(amount,meta);
-      const status=document.createElement("span");status.className="topup-status"+(item.status==="credited"?" credited":"");
-      status.textContent=item.status==="credited"?"已入账":item.status==="manual_review"?"人工核验中":"等待链上确认";
+      const order=orderById.get(item.order_id),deposit=depositByOrder.get(item.order_id);
+      const effectiveStatus=item.status==="credited"?"credited":
+        item.status==="manual_review"||deposit?.status==="manual_review"||deposit?.status==="overpaid"?"manual_review":
+        deposit?.status==="confirmed"?"confirmed":
+        deposit?.status==="confirming"?"confirming":
+        order?.status==="cancelled"||order?.status==="expired"||((order?.expires_at||deposit?.expires_at)&&Date.parse(order?.expires_at||deposit?.expires_at)<=Date.now())?"expired":
+        item.status;
+      const status=document.createElement("span");status.className="topup-status"+(["credited","confirmed"].includes(effectiveStatus)?" credited":"");
+      status.textContent=effectiveStatus==="credited"?"已入账":effectiveStatus==="confirmed"?"链上已确认，入账处理中":effectiveStatus==="confirming"?"链上确认中":effectiveStatus==="manual_review"?"人工核验中":effectiveStatus==="expired"?"订单已关闭":"等待付款";
       if(item.credited_at){const date=document.createElement("small");date.textContent="入账时间："+new Date(item.credited_at).toLocaleString("zh-CN");left.append(date);}
       row.append(left,status);historyPanel.append(row);
     }
@@ -205,13 +224,17 @@ function invoiceCard(invoice,amountMinor,bonusMinor){
   const network=document.createElement("p");network.textContent="网络："+invoice.network;
   const quote=document.createElement("p");quote.textContent="账户入账金额："+money(amountMinor+bonusMinor)+"（充值 "+money(amountMinor)+" + 奖励 "+money(bonusMinor)+"）";
   const addressLabel=document.createElement("p");addressLabel.textContent="收款地址：";
+  const qrWrap=document.createElement("div");qrWrap.className="topup-qr-wrap";
+  const qrLabel=document.createElement("p");qrLabel.textContent="扫描二维码支付";
+  const qrImage=document.createElement("img");qrImage.className="topup-qr-image";qrImage.alt="收款地址二维码";qrImage.width=220;qrImage.height=220;
+  try{const QR=await import("https://esm.sh/qrcode@1.5.4");qrImage.src=await (QR.default||QR).toDataURL(invoice.wallet_address,{width:220,margin:2,errorCorrectionLevel:"M"});qrWrap.append(qrLabel,qrImage);}catch{qrWrap.textContent="二维码暂时无法生成，请复制收款地址支付。";}
   const address=document.createElement("code");address.className="topup-address";address.textContent=invoice.wallet_address;
   const expires=document.createElement("p");expires.textContent="付款报价有效期至："+new Date(invoice.expires_at).toLocaleString("zh-CN");
   const warning=document.createElement("p");warning.textContent="请使用指定网络并支付精确金额。转错网络、少付或过期转账可能需要人工核验。";
-  const copy=document.createElement("button");copy.type="button";copy.className="btn btn-ghost";copy.textContent="复制收款地址";
+  const copy=document.createElement("button");copy.type="button";copy.className="btn btn-ghost topup-copy-address";copy.textContent="一键复制地址";
   copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(invoice.wallet_address);copy.textContent="已复制";}catch{copy.textContent="复制失败，请手动复制地址";}});
   const order=document.createElement("small");order.textContent="充值订单："+invoice.order_id;
-  invoicePanel.append(title,amount,network,quote,addressLabel,address,copy,expires,warning,order);
+  invoicePanel.append(title,amount,network,quote,qrWrap,addressLabel,address,copy,expires,warning,order);
 }
 async function submitTopup(){
   if(busy||!session)return;
@@ -230,11 +253,11 @@ async function submitTopup(){
     if(pendingAmountMinor!==amount)throw new Error("当前充值订单金额已锁定，请完成该订单或刷新充值页面后再创建新订单。");
     submitButton.textContent="正在生成链上收款信息…";
     const result=await api("create-crypto-invoice",{order_id:pendingOrderId,asset_code:assetCode});
-    invoiceCard(result.invoice,amount,customMode?0:selectedBonus(amount));
+    await invoiceCard(result.invoice,amount,customMode?0:selectedBonus(amount));
     pendingKey=null;pendingOrderId=null;pendingAmountMinor=null;amountSelect.disabled=false;
     await refreshBalance();
   }catch(error){
-    showInvoiceError(error.message==="asset_monitoring_unavailable"?"该收款网络暂不可用，系统已阻止生成付款地址。":error.message==="market_rate_unavailable"?"暂时无法取得可靠实时汇率，请稍后重试。":error.message==="asset_contract_unverified"?"该代币合约尚未核验，暂不开放收款。":error.message);
+    showInvoiceError(error.message==="topup_creation_failed"?(error.message+"（服务器创建订单失败，请稍后重试）"):error.message==="topup_order_expired"?"原充值订单已过期，请重新点击继续创建新订单。":error.message==="asset_monitoring_unavailable"?"该收款网络暂不可用，系统已阻止生成付款地址。":error.message==="market_rate_unavailable"?"暂时无法取得可靠实时汇率，请稍后重试。":error.message==="asset_contract_unverified"?"该代币合约尚未核验，暂不开放收款。":error.message);
   }finally{
     busy=false;submitButton.disabled=!assets.length;amountSelect.disabled=Boolean(pendingOrderId);if(customInput)customInput.disabled=Boolean(pendingOrderId);submitButton.textContent=pendingOrderId?"继续生成此金额的收款信息":"继续";
   }
