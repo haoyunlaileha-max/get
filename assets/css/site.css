@@ -693,29 +693,58 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 }
 
 
-/* Keep the continue action aligned to the right of the payment-method selector. */
+/* Align the visible custom payment picker and continue button in one row. */
 .account-page .topup-payment-action-row{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  align-items:stretch;
-  gap:12px;
-  width:100%;
-  min-width:0;
+  display:flex!important;
+  flex-flow:row nowrap!important;
+  align-items:stretch!important;
+  gap:12px!important;
+  width:100%!important;
+  min-width:0!important;
 }
-.account-page .topup-payment-action-row #topup-method{
-  width:100%;
-  min-width:0;
-  height:52px;
+.account-page .topup-payment-action-row > #topup-method.topup-native-select-hidden{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  min-height:0!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;
+  border:0!important;
 }
-.account-page .topup-payment-action-row .topup-continue{
-  width:auto;
-  min-width:150px;
-  min-height:52px;
-  height:52px;
-  padding:0 20px;
-  white-space:nowrap;
+.account-page .topup-payment-action-row > .topup-asset-picker{
+  display:block!important;
+  flex:1 1 0!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+}
+.account-page .topup-payment-action-row > .topup-asset-picker .topup-asset-trigger{
+  width:100%!important;
+  min-width:0!important;
+  height:52px!important;
+  min-height:52px!important;
+}
+.account-page .topup-payment-action-row > .topup-continue{
+  display:flex!important;
+  flex:0 0 auto!important;
+  align-self:stretch!important;
+  width:auto!important;
+  min-width:150px!important;
+  max-width:none!important;
+  height:52px!important;
+  min-height:52px!important;
+  margin:0!important;
+  padding:0 20px!important;
+  white-space:nowrap!important;
 }
 @media(max-width:420px){
-  .account-page .topup-payment-action-row{grid-template-columns:minmax(0,1fr) auto;gap:8px}
-  .account-page .topup-payment-action-row .topup-continue{min-width:112px;padding:0 12px;font-size:12px}
+  .account-page .topup-payment-action-row{gap:8px!important}
+  .account-page .topup-payment-action-row > .topup-continue{
+    min-width:112px!important;
+    padding:0 12px!important;
+    font-size:12px!important;
+  }
 }
