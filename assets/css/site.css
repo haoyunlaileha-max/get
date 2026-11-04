@@ -514,3 +514,36 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 @media(max-width:760px){
   .topup-preview>.topup-invoice{grid-column:1 / -1;order:0}
 }
+
+
+/* Full-page crypto payment layout, matching the reference checkout design */
+.topup-payment-page{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;align-items:start;margin-top:8px;color:#101828}
+.topup-payment-summary{min-width:0}
+.topup-payment-summary>h2{font-size:20px;margin:0 0 20px;color:#101828}
+.topup-payment-summary-card,.topup-payment-grand-total,.topup-payment-card{border:1px solid #e5e7eb;border-radius:10px;background:#fff;overflow:hidden}
+.topup-payment-summary-banner{display:flex;align-items:center;gap:14px;padding:15px 18px;background:#f6f7f9;border-bottom:1px solid #e5e7eb}
+.topup-payment-mark{width:48px;height:48px;display:grid;place-items:center;border-radius:12px;background:#edf2ff;color:#2458df;font-size:26px;flex:none}
+.topup-payment-summary-banner strong,.topup-payment-summary-banner small{display:block}
+.topup-payment-summary-banner strong{font-size:14px;color:#101828}
+.topup-payment-summary-banner small{margin-top:5px;color:#667085;font-size:12px}
+.topup-payment-line{display:flex;justify-content:space-between;gap:16px;padding:11px 18px;border-bottom:1px solid #eaecf0;font-size:13px}
+.topup-payment-line>span{color:#667085}.topup-payment-line>strong{color:#101828;text-align:right}
+.topup-payment-line.bonus>strong{color:#039855}
+.topup-payment-grand-total{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding:18px;font-size:14px}
+.topup-payment-grand-total strong{font-size:21px;color:#101828}
+.topup-payment-order{font-size:12px;color:#667085;margin:14px 0}
+.topup-payment-back{font-size:12px}
+.topup-payment-card{min-width:0}
+.topup-payment-card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:17px 18px;border-bottom:1px solid #e5e7eb;font-size:13px}
+.topup-payment-countdown{white-space:nowrap;font:600 12px ui-monospace,monospace;color:#344054}
+.topup-payment-card .topup-qr-wrap{margin:0;padding:28px 12px;background:#fff;border-bottom:1px solid #e5e7eb;border-radius:0}
+.topup-payment-card .topup-qr-image{width:180px;height:180px;padding:0}
+.topup-payment-field{padding:12px 18px;border-bottom:1px solid #e5e7eb}
+.topup-payment-field>small{display:block;margin-bottom:7px;color:#667085;font-size:11px}
+.topup-payment-copy-row{display:flex;align-items:center;gap:8px;min-width:0;padding:8px 9px;border:1px solid #e5e7eb;border-radius:7px;background:#f8f9fb}
+.topup-payment-copy-row code{flex:1;min-width:0;overflow-wrap:anywhere;font:12px/1.5 ui-monospace,monospace;color:#101828}
+.topup-payment-copy-row button{flex:none;padding:6px 10px;border:1px solid #e5e7eb;border-radius:5px;background:#fff;color:#344054;font-size:11px;cursor:pointer}
+.topup-payment-waiting{padding:15px 18px 5px;text-align:center;color:#9a6700;font-size:13px;font-weight:650}
+.topup-payment-warning{margin:8px 18px 17px;color:#667085;font-size:11px;line-height:1.6}
+@media(max-width:860px){.topup-payment-page{grid-template-columns:minmax(0,1fr) 340px;gap:16px}}
+@media(max-width:700px){.topup-payment-page{grid-template-columns:1fr}.topup-payment-card{width:100%}.topup-payment-summary>h2{margin-bottom:14px}}
