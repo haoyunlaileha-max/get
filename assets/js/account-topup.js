@@ -8,7 +8,7 @@ const balanceState=document.getElementById("account-balance-state");
 const historyPanel=document.getElementById("topup-history");
 const refreshButton=document.getElementById("topup-refresh");
 const previewPanel=document.querySelector(".topup-preview");
-if(previewPanel&&invoicePanel)previewPanel.insertBefore(invoicePanel,previewPanel.firstChild);
+if(previewPanel&&invoicePanel)invoicePanel.hidden=true;
 let client=null,session=null,assets=[],pendingKey=null,pendingOrderId=null,pendingAmountMinor=null,busy=false,currentBalanceMinor=0n;
 const amountOptions=document.getElementById("topup-amount-options");
 const continueLabel="继续";
@@ -217,17 +217,106 @@ async function handleRefreshClick(){
     window.setTimeout(()=>{if(refreshButton&&!refreshInProgress)refreshButton.textContent=originalLabel;},1800);
   }
 }
-function paymentPageUrl(invoice,amountMinor,bonusMinor){
- const params=new URLSearchParams({order:String(invoice.order_id),asset:String(invoice.asset_code),ticker:String(invoice.ticker),network:String(invoice.network),address:String(invoice.wallet_address),amount:String(invoice.expected_amount),decimals:String(invoice.decimals),expires:String(invoice.expires_at),orderExpires:String(invoice.order_expires_at||invoice.expires_at),usdtMinor:String(amountMinor),bonusMinor:String(bonusMinor)});
- return new URL("payment.html?"+params.toString(),window.location.href).toString();
+
+let checkoutPollTimer=null,checkoutCountdownTimer=null,checkoutExpiresAt=0,checkoutOrderId="";
+function checkoutMoney(minor){return "$"+(Number(minor)/100).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function checkoutReturnToSelection(){
+ if(checkoutPollTimer)clearInterval(checkoutPollTimer);if(checkoutCountdownTimer)clearInterval(checkoutCountdownTimer);
+ checkoutPollTimer=null;checkoutCountdownTimer=null;checkoutOrderId="";
+ const view=document.getElementById("topup-checkout-view");
+ if(view)view.hidden=true;
+ document.querySelector(".topup-main")?.removeAttribute("hidden");
+ document.querySelector(".topup-preview")?.removeAttribute("hidden");
+ busy=false;submitButton.disabled=!assets.length;amountSelect.disabled=Boolean(pendingOrderId);if(customInput)customInput.disabled=Boolean(pendingOrderId);
+ refreshBalance();updateTopupPreview();
 }
+async function checkoutCopy(value,button){
+ try{await navigator.clipboard.writeText(value);button.textContent="已复制";}
+ catch{button.textContent="复制失败";}
+ window.setTimeout(()=>button.textContent="复制",1600);
+}
+async function checkoutRefreshStatus(){
+ if(!checkoutOrderId||!session)return;
+ try{
+  const state=await api("create-account-topup",{action:"status",order_id:checkoutOrderId});
+  const status=document.getElementById("checkout-status");
+  if(state.topup_status==="credited"||state.order_status==="paid"){
+   status.textContent="✓ 支付成功，余额正在更新…";status.classList.add("credited");
+   if(checkoutPollTimer)clearInterval(checkoutPollTimer);
+   window.setTimeout(checkoutReturnToSelection,1300);return;
+  }
+  if(state.order_status==="cancelled"||state.order_status==="expired"){
+   status.textContent="订单已关闭，正在返回充值页面…";
+   if(checkoutPollTimer)clearInterval(checkoutPollTimer);
+   window.setTimeout(checkoutReturnToSelection,650);return;
+  }
+  if(["detected","confirming","confirmed"].includes(state.deposit_status))status.textContent="● 已检测到付款，正在等待链上确认…";
+  else if(["manual_review","overpaid"].includes(state.deposit_status))status.textContent="● 付款需要人工核验，请等待处理。";
+ }catch(error){document.getElementById("checkout-status").textContent=error.message||"状态暂时无法获取，系统会继续检查。";}
+}
+function updateCheckoutCountdown(){
+ const seconds=Math.max(0,Math.floor((checkoutExpiresAt-Date.now())/1000));
+ const node=document.getElementById("checkout-countdown");
+ if(node)node.textContent=seconds?"◷ "+String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0"):"订单已过期";
+ if(!seconds){const status=document.getElementById("checkout-status");if(status&&status.textContent.includes("等待付款"))status.textContent="订单已过期，正在确认订单状态…";}
+}
+async function cancelTopupCheckout(){
+ const button=document.getElementById("checkout-cancel");
+ if(!checkoutOrderId||button.disabled)return;
+ if(!window.confirm("确定取消这笔充值订单吗？取消后请勿再向该地址付款。"))return;
+ button.disabled=true;button.textContent="正在取消…";
+ try{
+  await api("create-account-topup",{action:"cancel",order_id:checkoutOrderId});
+  document.getElementById("checkout-status").textContent="订单已取消，正在返回充值金额选择…";
+  if(checkoutPollTimer)clearInterval(checkoutPollTimer);
+  window.setTimeout(checkoutReturnToSelection,500);
+ }catch(error){
+  const messages={order_payment_in_progress:"已检测到付款，暂不能取消订单，请等待链上确认。",order_not_cancellable:"当前订单已进入支付或处理状态，无法取消。",order_not_found:"找不到此订单。"};
+  showInvoiceError(messages[error.message]||error.message||"取消订单失败，请稍后重试。");
+  button.disabled=false;button.textContent="取消订单";
+ }
+}
+async function showTopupCheckout(invoice,amountMinor,bonusMinor){
+ const view=document.getElementById("topup-checkout-view");
+ if(!view)throw new Error("结算界面尚未准备好，请刷新页面重试。");
+ document.querySelector(".topup-main")?.setAttribute("hidden","");
+ document.querySelector(".topup-preview")?.setAttribute("hidden","");
+ view.hidden=false;
+ checkoutOrderId=String(invoice.order_id);checkoutExpiresAt=Date.parse(invoice.expires_at||"");
+ document.getElementById("checkout-summary-title").textContent="向账户充值 "+checkoutMoney(amountMinor);
+ document.getElementById("checkout-amount").textContent=checkoutMoney(amountMinor)+" USDT";
+ document.getElementById("checkout-bonus").textContent="+"+checkoutMoney(bonusMinor);
+ document.getElementById("checkout-total").textContent=checkoutMoney(amountMinor+bonusMinor)+" USDT";
+ document.getElementById("checkout-due").textContent=checkoutMoney(amountMinor)+" USDT";
+ document.getElementById("checkout-order-id").textContent="订单 #"+checkoutOrderId.slice(0,12);
+ document.getElementById("checkout-method").textContent="使用 "+invoice.ticker+" ("+invoice.network+") 付款";
+ document.getElementById("checkout-pay-amount").textContent=invoice.expected_amount+" "+invoice.ticker;
+ document.getElementById("checkout-address").textContent=invoice.wallet_address;
+ document.getElementById("checkout-status").textContent="● 等待付款…";
+ document.getElementById("checkout-status").classList.remove("credited");
+ const cancel=document.getElementById("checkout-cancel");cancel.disabled=false;cancel.textContent="取消订单";
+ document.getElementById("checkout-copy-amount").onclick=()=>checkoutCopy(invoice.expected_amount+" "+invoice.ticker,document.getElementById("checkout-copy-amount"));
+ document.getElementById("checkout-copy-address").onclick=()=>checkoutCopy(invoice.wallet_address,document.getElementById("checkout-copy-address"));
+ cancel.onclick=cancelTopupCheckout;
+ document.getElementById("topup-checkout-back").onclick=checkoutReturnToSelection;
+ const qrWrap=document.getElementById("checkout-qr-wrap");qrWrap.replaceChildren();
+ const qr=document.createElement("img");qr.id="checkout-qr";qr.className="topup-qr-image";qr.alt="收款地址二维码";qr.width=180;qr.height=180;qrWrap.append(qr);
+ try{const QR=await import("https://esm.sh/qrcode@1.5.4");qr.src=await (QR.default||QR).toDataURL(invoice.wallet_address,{width:180,margin:2,errorCorrectionLevel:"M"});}
+ catch{qrWrap.textContent="二维码暂时无法生成，请复制收款地址付款。";}
+ updateCheckoutCountdown();
+ if(checkoutCountdownTimer)clearInterval(checkoutCountdownTimer);
+ checkoutCountdownTimer=window.setInterval(updateCheckoutCountdown,1000);
+ if(checkoutPollTimer)clearInterval(checkoutPollTimer);
+ await checkoutRefreshStatus();
+ checkoutPollTimer=window.setInterval(checkoutRefreshStatus,5000);
+ view.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
 async function submitTopup(){
   if(busy||!session)return;
   if(customMode)applyCustomAmount();
   const amount=Number(amountSelect.value),assetCode=assetSelect.value;
   if(!Number.isSafeInteger(amount)||!assetCode){showInvoiceError("请选择充值金额和可用收款网络。");return;}
-  const paymentWindow=window.open("about:blank","_blank");
-  if(!paymentWindow){showInvoiceError("浏览器阻止了付款页面弹出，请允许此网站打开新窗口后重试。");return;}
   busy=true;submitButton.disabled=true;submitButton.textContent="正在创建充值订单…";
   try{
     if(!pendingOrderId){
@@ -240,11 +329,10 @@ async function submitTopup(){
     if(pendingAmountMinor!==amount)throw new Error("当前充值订单金额已锁定，请完成该订单或刷新充值页面后再创建新订单。");
     submitButton.textContent="正在生成链上收款信息…";
     const result=await api("create-crypto-invoice",{order_id:pendingOrderId,asset_code:assetCode});
-    paymentWindow.location.replace(paymentPageUrl(result.invoice,amount,customMode?0:selectedBonus(amount)));
+    showTopupCheckout(result.invoice,amount,customMode?0:selectedBonus(amount));
     pendingKey=null;pendingOrderId=null;pendingAmountMinor=null;amountSelect.disabled=false;
     await refreshBalance();
   }catch(error){
-    if(paymentWindow&&!paymentWindow.closed)paymentWindow.close();
     showInvoiceError(error.message==="topup_creation_failed"?(error.message+"（服务器创建订单失败，请稍后重试）"):error.message==="topup_order_expired"?"原充值订单已过期，请重新点击继续创建新订单。":error.message==="asset_monitoring_unavailable"?"该收款网络暂不可用，系统已阻止生成付款地址。":error.message==="market_rate_unavailable"?"暂时无法取得可靠实时汇率，请稍后重试。":error.message==="asset_contract_unverified"?"该代币合约尚未核验，暂不开放收款。":error.message);
   }finally{
     busy=false;submitButton.disabled=!assets.length;amountSelect.disabled=Boolean(pendingOrderId);if(customInput)customInput.disabled=Boolean(pendingOrderId);submitButton.textContent=pendingOrderId?"继续生成此金额的收款信息":"继续";
