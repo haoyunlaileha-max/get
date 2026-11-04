@@ -51,7 +51,7 @@
   }
 
   function renderPlans(products, mappings) {
-    const storageClient = window.AH_SUPABASE_CLIENT || supabaseClient;
+    const storageClient = client;
     availableMappings = mappings || [];
     const sellablePlanIds = new Set(availableMappings.map((mapping) => mapping.plan_id));
     const plans = products.flatMap((product) => (product.ah_plans || [])
@@ -338,9 +338,9 @@
 
       if (productsResult.error) throw productsResult.error;
       if (mappingsResult.error) throw mappingsResult.error;
+      client = supabaseClient;
       renderRegions(mappingsResult.data || []);
       renderPlans(productsResult.data || [], mappingsResult.data || []);
-      client = supabaseClient;
       const disclaimer = document.querySelector(".plan-disclaimer");
       if (disclaimer) disclaimer.textContent =
         "仅显示后台已发布、具有有效机房映射且仍有容量的套餐。价格与库存均来自实时目录。付款经链上确认后，管理员通过 Telegram 通知进行人工履约；不会自动开通 VPS。";
