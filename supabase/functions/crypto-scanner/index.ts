@@ -272,7 +272,7 @@ async function scanTon(db: ReturnType<typeof createClient>, asset: Asset, secret
     const message = tx.in_msg;
     if (!message || message.bounced === true || message.bounce === true) continue;
     if (tonRawAddress(String(message.destination ?? "")) !== expected) continue;
-    // Native GRAM only: reject Jetton notifications and other contract opcodes.
+    // Native TON only: reject Jetton notifications and other contract opcodes.
     if (Number(message.opcode ?? 0) !== 0) continue;
     if (message.decoded_opcode && String(message.decoded_opcode).toLowerCase() !== "text_comment") continue;
     if (tx.description?.aborted === true || tx.description?.compute_ph?.success === false) continue;
