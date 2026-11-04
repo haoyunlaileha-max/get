@@ -38,6 +38,7 @@ const cryptoScannerSql = read("supabase/migrations/20261103100000_crypto_mainnet
 const publicCatalogSql = read("supabase/migrations/20261104003500_public_catalog_sellable_inventory_read.sql");
 const toncoinSql = read("supabase/migrations/20261104004000_correct_native_toncoin_metadata.sql");
 const planRegionPolicySql = read("supabase/migrations/20261104005000_merge_plan_region_select_policies.sql");
+const productCategorySql = read("supabase/migrations/20261104006000_product_categories_and_media.sql");
 
 const cryptoSql = read("supabase/migrations/20261103080000_crypto_usdt_pricing_and_invoice_rpc.sql");
 const telegramFn = read("supabase/functions/telegram-dispatch/index.ts");
@@ -62,6 +63,11 @@ for (const marker of ["create-crypto-invoice", "USDT", "asset_monitoring_unavail
 for (const marker of ["SUPABASE_SERVICE_ROLE_KEY", "ah_create_crypto_invoice", "market_rate_unavailable", "asset_monitoring_unavailable", "token_contract", "auth.getUser", "formatAtomic", "BTCUSDT", "TONUSDT"]) assert.ok(cryptoInvoiceFn.includes(marker), `Missing secure crypto invoice behavior: ${marker}`);
 for (const marker of ["alter column currency type varchar(4)", "currency<>'USDT'", "ah_create_crypto_invoice", "unique_violation", "quote_price_usdt", "ticker='TON'", "service_role"]) assert.ok(cryptoSql.includes(marker), `Missing USDT invoice database safeguard: ${marker}`);
 assert.ok(adminHtml.includes('value="USDT" readonly'), "Admin catalog must price plans in USDT only");
+for (const marker of ['id="category-editor"', 'id="category-list"', 'id="product-category"', 'name="image_file"', 'id="product-image-preview"']) assert.ok(adminHtml.includes(marker), "Missing admin category or product media control: " + marker);
+for (const marker of ['ah_product_categories', 'category_id', 'image_path', 'product-images', 'ah_product_images_admin_insert', 'ah_product_images_admin_update', 'ah_product_images_admin_delete', 'file_size_limit', 'allowed_mime_types', 'public.ah_is_admin()']) assert.ok(productCategorySql.includes(marker), "Missing product taxonomy/media safeguard: " + marker);
+for (const marker of ['function renderCategories', 'async function saveCategory', 'async function saveCatalog', 'categoryRows', 'storage.from("product-images").upload', 'file.size>5*1024*1024', 'image_path', 'category_id']) assert.ok(adminJs.includes(marker), "Missing admin catalog management behavior: " + marker);
+for (const marker of ['ah_product_categories!inner(is_active)', 'ah_product_categories.is_active', 'product.image_path', 'plan-product-image']) assert.ok(checkoutJs.includes(marker), "Missing active category/product image storefront behavior: " + marker);
+
 assert.ok(adminJs.includes('const currency="USDT"'), "Admin catalog writes must enforce USDT pricing");
 for (const marker of ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "CRYPTO_LISTENER_INTERNAL_SECRET", "sendMessage", "ah_claim_crypto_telegram_notifications", "ah_finish_crypto_telegram_notification"]) assert.ok(telegramFn.includes(marker), "Missing Telegram delivery behavior: " + marker);
 for (const marker of ["ah_crypto_telegram_outbox", "ah_enqueue_crypto_telegram_event", "ah_claim_crypto_telegram_notifications", "ah_finish_crypto_telegram_notification", "skip locked", "service_role"]) assert.ok(telegramSql.toLowerCase().includes(marker.toLowerCase()), "Missing Telegram outbox safeguard: " + marker);
