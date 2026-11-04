@@ -189,7 +189,7 @@ const anonportLocalizedRoutes = ["vps","dedicated","rdp","gpu","node-hosting","c
 for (const slug of anonportLocalizedRoutes) { const page = read("zh/" + slug + "/index.html"); assert.ok(page.includes("<title>") && page.includes("catalog-nav.js"), "Incomplete AnonPort localized subpage: " + slug); }
 assert.ok(existsSync(new URL("../sitemap.xml", import.meta.url)), "Missing localized sitemap");
 assert.ok(read("assets/js/catalog-nav.js").includes("jurisdiction-selector") && read("assets/js/catalog-nav.js").includes("privacy"), "Incomplete localized navigation");
-assert.ok(["冰岛","巴拿马","摩尔多瓦","罗马尼亚","瑞士","荷兰","德国"].every((name) => html.includes(name)), "Homepage must include all seven reference regions");
+assert.ok(["冰岛","巴拿马","摩尔多瓦","罗马尼亚","瑞士","荷兰","俄罗斯"].every((name) => html.includes(name)), "Homepage must include all seven reference regions");
 for (const path of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html"]) { const page=read(path); assert.ok(!page.includes("region-price-table") && !page.includes("完整地区价格"), "Product page must not show unverified static prices: " + path); assert.ok(page.includes('id="plans"') && page.includes('id="plan-list"'), "Missing live catalog anchor: " + path); }
 const domainPage=read("zh/domains/index.html"); assert.ok(domainPage.includes("域名注册服务尚未开放") && domainPage.includes('id="domain-name"') && domainPage.includes("disabled"), "Domain sales must remain gated until a registrar is integrated");
 for (const marker of ["account-payment-chips", "id=\"topup-submit\"", "id=\"topup-invoice\""]) assert.ok(account.includes(marker), "Missing account top-up interface: " + marker);
