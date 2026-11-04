@@ -3,8 +3,14 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-const allowedOrigins = (Deno.env.get("ALLOWED_ORIGINS")?.trim() || "https://haoyunlaileha-max.github.io")
+const configuredOrigins = (Deno.env.get("ALLOWED_ORIGINS") ?? "")
   .split(",").map((value) => value.trim()).filter(Boolean);
+const allowedOrigins = [...new Set([
+  ...configuredOrigins,
+  "https://haoyunlaileha-max.github.io",
+  "https://anonport.com",
+  "https://www.anonport.com",
+])];
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_BODY_BYTES = 4_096;
 
