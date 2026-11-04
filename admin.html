@@ -60,53 +60,31 @@
       <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="jobs_title">Provisioning jobs</h2><p data-i="jobs_desc">Queue state, attempts and provider references.</p></div></div><div id="jobs-list" class="admin-record-list"></div></section>
       <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="payments_title">Payment events</h2><p data-i="payments_desc">Verified webhook audit records.</p></div></div><div id="payments-list" class="admin-record-list"></div></section>
     </div>
-    <section class="admin-panel" id="catalog-editor">
-      <div class="admin-panel-head"><div><h2 data-i="catalog_manage">Manage products and plans</h2><p data-i="catalog_manage_desc">Create or edit catalog entries. New entries are inactive until explicitly enabled.</p></div></div>
-      <div class="admin-editor-grid">
-        <form id="product-editor" class="admin-editor">
-          <h3 data-i="product_editor_title">Product details</h3>
-          <input type="hidden" name="id">
-          <label><span data-i="product_name">Product name</span><input name="name" required maxlength="100"></label>
-          <label><span data-i="product_slug">Slug</span><input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" maxlength="80"></label>
-          <label><span data-i="product_category">Category</span><select name="category_id" id="product-category" required></select></label>
-          <label><span>商品主图（JPG / PNG / WebP / AVIF，最大 5 MB）</span><input name="image_file" type="file" accept="image/jpeg,image/png,image/webp,image/avif"></label>
-          <input type="hidden" name="image_path"><div id="product-image-preview" class="admin-image-preview" aria-live="polite">尚未上传商品图片</div>
-          <label><span data-i="description">Description</span><textarea name="description" rows="2" maxlength="1000"></textarea></label>
-          <label><span data-i="sort_order">Sort order</span><input name="sort_order" type="number" min="0" max="100000" step="1" value="0"></label>
-          <label class="admin-check"><input name="is_active" type="checkbox"><span data-i="publish_product">Publish product immediately</span></label>
-          <div class="admin-editor-actions"><button class="btn btn-primary" type="submit" data-i="save_product">Save product</button><button class="admin-toggle" type="reset" data-i="clear_form">Clear</button></div>
-        </form>
-        <form id="plan-editor" class="admin-editor">
-          <h3 data-i="plan_editor_title">Plan details</h3>
-          <input type="hidden" name="id">
-          <label><span data-i="plan_product">Product</span><select name="product_id" id="plan-product" required></select></label>
-          <label><span data-i="plan_name">Plan name</span><input name="name" required maxlength="100"></label>
-          <label><span data-i="plan_code">Unique plan code</span><input name="code" required pattern="[A-Za-z0-9_-]+" maxlength="80"></label>
-          <div class="admin-editor-row"><label><span data-i="price">Price (major currency units)</span><input name="price" type="number" required min="0" max="999999999" step="0.01" value="0"></label><label><span data-i="currency">计价币种（固定 USDT）</span><input name="currency" value="USDT" readonly maxlength="4" aria-label="USDT"></label></div>
-          <label><span data-i="billing_period">Billing period</span><select name="billing_period"><option value="hourly">Hourly</option><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="annually">Annually</option><option value="one_time">One time</option></select></label>
-          <label><span data-i="description">Description</span><textarea name="description" rows="2" maxlength="1000"></textarea></label>
-          <div class="admin-spec-editor"><div class="admin-spec-heading"><strong>套餐规格参数</strong><small id="plan-spec-category-hint">根据所属商品分类填写对应规格</small></div><div id="plan-spec-fields" class="admin-spec-fields"></div><details class="admin-spec-advanced"><summary>高级规格（JSON，可选）</summary><label><span data-i="specs_json">其他规格参数（JSON）</span><textarea name="specs" rows="4" spellcheck="false">{}</textarea></label></details></div>
-          <label><span data-i="sort_order">Sort order</span><input name="sort_order" type="number" min="0" max="100000" step="1" value="0"></label>
-          <label class="admin-check"><input name="is_active" type="checkbox"><span data-i="publish_plan">Publish plan immediately</span></label>
-          <div class="admin-editor-actions"><button class="btn btn-primary" type="submit" data-i="save_plan">Save plan</button><button class="admin-toggle" type="reset" data-i="clear_form">Clear</button></div>
-        </form>
-      </div>
-      <p class="admin-editor-note" data-i="catalog_safety">New entries start unpublished by default. Existing prices are never changed unless you edit and save that plan. Validate specifications before publishing.</p>
-    </section>
-    <section class="admin-panel" id="category-editor-panel">
-      <div class="admin-panel-head"><div><h2>商品分类目录</h2><p>管理商品分类名称、网址标识、排序和启用状态。停用分类不会删除已有商品。</p></div></div>
-      <form id="category-editor" class="admin-editor-grid">
+    <section class="admin-panel admin-product-center" id="catalog-editor">
+      <div class="admin-panel-head"><div><h2>商品与套餐管理</h2><p>按商品分类统一录入套餐方案、硬件配置和 USDT 售价。</p></div><button class="btn btn-primary" id="new-plan-button" type="button">＋ 新增套餐</button></div>
+      <div id="catalog-category-tabs" class="admin-category-tabs" role="tablist" aria-label="商品分类"></div>
+      <div id="catalog-list" class="admin-category-tables"></div>
+      <form id="plan-editor" class="admin-unified-plan-editor">
+        <div class="admin-plan-editor-heading"><div><h3 id="plan-editor-heading">新增套餐</h3><p>根据所选分类自动显示对应规格字段。</p></div><span class="admin-plan-currency">USDT 计价</span></div>
         <input type="hidden" name="id">
-        <label><span>分类名称</span><input name="name" required maxlength="80" placeholder="例如：高性能计算"></label>
-        <label><span>分类标识（唯一 slug）</span><input name="slug" required maxlength="64" pattern="[a-z0-9]+(?:[_-][a-z0-9]+)*" placeholder="例如：high-performance"></label>
-        <label><span>排序</span><input name="sort_order" type="number" min="0" max="100000" step="1" value="0"></label>
-        <label><span>分类说明</span><input name="description" maxlength="300"></label>
-        <label class="admin-check"><input name="is_active" type="checkbox"><span>启用分类</span></label>
-        <div class="admin-editor-actions"><button class="btn btn-primary" type="submit">保存分类</button><button class="admin-toggle" type="reset">清空</button></div>
+        <input type="hidden" name="product_id">
+        <input type="hidden" name="code">
+        <input type="hidden" name="currency" value="USDT">
+        <input type="hidden" name="billing_period" value="monthly">
+        <input type="hidden" name="description">
+        <input type="hidden" name="sort_order" value="0">
+        <label><span>商品分类</span><select name="category_id" id="plan-category" required></select></label>
+        <label><span>方案</span><input name="name" required maxlength="100" placeholder="例如：IS-S"></label>
+        <div class="admin-unified-specs">
+          <div class="admin-spec-heading"><strong>套餐规格</strong><small id="plan-spec-category-hint">请选择商品分类</small></div>
+          <div id="plan-spec-fields" class="admin-spec-fields"></div>
+        </div>
+        <label class="admin-unified-price"><span>价格（USDT / 月）</span><input name="price" type="number" required min="0" max="999999999" step="0.01" value="0.00" placeholder="0.00"></label>
+        <label class="admin-check"><input name="is_active" type="checkbox"><span>启用并发布此套餐</span></label>
+        <div class="admin-editor-actions"><button class="btn btn-primary" type="submit">保存套餐</button><button class="admin-toggle" id="cancel-plan-edit" type="button">取消</button></div>
       </form>
-      <div id="category-list" class="admin-catalog"></div>
+      <p class="admin-editor-note">未启用的套餐不会对客户展示。新增或编辑套餐不会删除历史订单、付款记录或库存分配。</p>
     </section>
-    <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="catalog_title">Product catalog</h2><p data-i="catalog_desc">Enable or disable products and plans. Price changes are intentionally not exposed here.</p></div></div><div id="catalog-list" class="admin-catalog"></div></section>
     <section class="admin-panel" id="plan-region-panel">
       <div class="admin-panel-head"><div><h2 data-i="inventory_title">Plan availability by data center</h2><p data-i="inventory_desc">Assign plans to regions and control sale status and capacity.</p></div></div>
       <form id="plan-region-editor" class="admin-inventory-form">
@@ -136,5 +114,5 @@
   </section>
 </main>
 <script src="assets/js/language.js"></script><script src="assets/js/supabase-config.js"></script>
-<script type="module" src="assets/js/admin.js?v=20261104-category-spec-fields-1"></script>
+<script type="module" src="assets/js/admin.js?v=20261104-unified-category-plan-center-1"></script>
 </body></html>
