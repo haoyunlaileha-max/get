@@ -70,15 +70,20 @@
           <div class="topup-step">
             <h3><span>1</span>选择金额</h3>
             <div class="topup-amount-grid" id="topup-amount-options">
-              <button type="button" class="topup-amount-option" data-amount="1000"><strong>$10</strong></button>
-              <button type="button" class="topup-amount-option" data-amount="2500"><strong>$25</strong></button>
-              <button type="button" class="topup-amount-option" data-amount="5000"><strong>$50</strong></button>
-              <button type="button" class="topup-amount-option selected" data-amount="10000" aria-pressed="true"><strong>$100</strong></button>
-              <button type="button" class="topup-amount-option" data-amount="25000"><strong>$250</strong></button>
-              <button type="button" class="topup-amount-option" data-amount="50000"><strong>$500</strong></button>
+              <button type="button" class="topup-amount-option selected" data-amount="3000" data-bonus="0" aria-pressed="true"><strong>$30</strong></button>
+              <button type="button" class="topup-amount-option" data-amount="10000" data-bonus="2500" aria-pressed="false"><strong>$100</strong><small>您将获得 $125</small></button>
+              <button type="button" class="topup-amount-option" data-amount="25000" data-bonus="7500" aria-pressed="false"><strong>$250</strong><small>您将获得 $325</small></button>
+              <button type="button" class="topup-amount-option" data-amount="50000" data-bonus="20000" aria-pressed="false"><strong>$500</strong><small>您将获得 $700</small></button>
+              <button type="button" class="topup-amount-option" data-amount="100000" data-bonus="50000" aria-pressed="false"><strong>$1,000</strong><small>您将获得 $1,500</small></button>
+              <button type="button" class="topup-amount-option" data-amount="200000" data-bonus="200000" aria-pressed="false"><strong>$2,000</strong><small>您将获得 $4,000</small></button>
+            </div>
+            <div class="topup-custom-wrap">
+              <label for="topup-custom-amount">自定义充值金额（最低 $30）</label>
+              <div class="topup-custom-field"><span>$</span><input id="topup-custom-amount" type="number" min="30" step="0.01" inputmode="decimal" placeholder="输入金额，最低 30"></div>
+              <small>自定义金额不参与固定档位赠送活动；低于 $30 将自动调整为 $30。</small>
             </div>
             <select id="topup-amount" class="topup-amount-source" aria-label="充值金额">
-              <option value="1000">10 USDT</option><option value="2500">25 USDT</option><option value="5000">50 USDT</option><option value="10000" selected>100 USDT</option><option value="25000">250 USDT</option><option value="50000">500 USDT</option>
+              <option value="3000" selected>$30 USDT</option><option value="10000">$100 USDT</option><option value="25000">$250 USDT</option><option value="50000">$500 USDT</option><option value="100000">$1,000 USDT</option><option value="200000">$2,000 USDT</option>
             </select>
           </div>
           <div class="topup-step topup-payment-step">
@@ -92,10 +97,10 @@
         <aside class="topup-preview" aria-live="polite"><span class="sr-only">ACCOUNT BALANCE <span id="account-balance-value">0.00 USDT</span></span><div id="account-payment-chips" class="sr-only"><span>当前可用链上网络由服务器实时返回</span></div>
           <h3>余额预览</h3>
           <div><span>当前</span><strong id="topup-preview-current">$0.00</strong></div>
-          <div><span>＋充值</span><strong class="topup-preview-add" id="topup-preview-add">$100</strong></div>
+          <div><span>＋充值</span><strong class="topup-preview-add" id="topup-preview-add">$30</strong></div>
           <div><span>＋奖励</span><strong id="topup-preview-bonus">$0.00</strong></div>
-          <div class="topup-preview-total"><span>充值后</span><strong id="topup-preview-total">$100.00</strong></div>
-          <p>奖励金额以实际生效的活动规则为准；当前未配置充值奖励。</p>
+          <div class="topup-preview-total"><span>充值后</span><strong id="topup-preview-total">$30.00</strong></div>
+          <p>固定档位赠送金额按活动规则自动计入余额；自定义金额不参与赠送。</p>
         </aside>
       </section>
       <section class="account-transactions"><div class="topup-history-heading"><h3>最近充值记录</h3><button class="btn btn-ghost" id="topup-refresh" type="button">刷新状态</button></div><div id="topup-history" class="topup-history"><div class="account-notice">正在加载充值记录…</div></div></section>
