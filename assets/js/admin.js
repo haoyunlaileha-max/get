@@ -555,7 +555,7 @@ async function loadDashboard() {
   show(nodes.error, ""); show(nodes.success, "");
   try {
     const dateBounds = getOrderDateBounds();
-    let ordersQuery = supabase.from("ah_orders").select("id,user_id,region_id,status,currency,total_minor,created_at,updated_at,paid_at,customer_note,ah_order_items(description_snapshot,quantity,unit_price_minor,configuration),ah_regions(name,city,country_code)", { count: "exact" }).order("created_at", { ascending: false });
+    let ordersQuery = supabase.from("ah_orders").select("id,user_id,region_id,status,currency,total_minor,created_at,updated_at,expires_at,paid_at,customer_note,ah_order_items(description_snapshot,quantity,unit_price_minor,configuration),ah_regions(name,city,country_code)", { count: "exact" }).order("created_at", { ascending: false });
     if (orderStatus !== "all") ordersQuery = ordersQuery.eq("status", orderStatus);
     ordersQuery = applyOrderDateFilters(ordersQuery, dateBounds);
     if (orderSearch) {
