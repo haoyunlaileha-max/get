@@ -568,3 +568,47 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 
 /* Account order cancellation status: neutral white pill with dark text */
 .account-page .order-status.status-cancelled{display:inline-block;padding:5px 9px;border:1px solid #d0d5dd;border-radius:6px;background:#fff!important;color:#101828!important;font-weight:600}
+
+
+/* Account activity: recharge history and orders share the row equally */
+.account-page #account-dashboard > .account-activity-grid{
+  grid-column:1 / -1;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:20px;
+  align-items:start;
+  width:100%;
+  min-width:0;
+}
+.account-page .account-activity-panel{
+  min-width:0;
+  padding:18px;
+  margin:0;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  background:#fff;
+  color:#17212b;
+}
+.account-page .account-activity-title{
+  margin:0 0 10px;
+  color:#17212b;
+  font-size:16px;
+  font-weight:700;
+}
+.account-page .account-activity-panel .account-notice{
+  margin:10px 0;
+}
+.account-page .account-activity-panel .order-row{
+  background:#fff;
+  border-color:#e5e7eb;
+  color:#17212b;
+}
+.account-page .account-activity-panel .order-row strong{color:#17212b}
+.account-page .account-activity-panel .order-row small{color:#667085}
+.account-page .account-activity-panel .order-items{color:#667085;border-color:#eaecf0}
+.account-page .account-activity-panel .order-items strong{color:#17212b}
+.account-page .account-activity-panel .order-status{color:#16865f}
+.account-page .account-activity-panel #load-more-orders{margin-top:12px}
+@media(max-width:760px){
+  .account-page #account-dashboard > .account-activity-grid{grid-template-columns:minmax(0,1fr);gap:16px}
+}
