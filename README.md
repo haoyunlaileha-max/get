@@ -55,7 +55,7 @@ Open `index.html` in a modern browser, or serve this directory with any static w
 
 ## Automated checks and deployment
 
-Every push to `main` runs `node scripts/check-site.mjs`. GitHub Pages deployment is handled by `.github/workflows/deploy.yml`.
+Every pull request and push to `main` runs the static site/database checks plus a live Supabase CORS smoke test for customer authentication, order creation, cancellation, top-ups, and crypto invoices from the production domains. GitHub Pages deployment is handled by `.github/workflows/deploy.yml`.
 
 ## Backend architecture and security
 
