@@ -61,7 +61,7 @@ for (const marker of ['<html lang="zh-CN"', 'id="language"', 'id="services"', 'i
 assert.ok(html.includes('value="zh-CN"') && html.includes('value="zh-TW"'), "Storefront must offer Simplified and Traditional Chinese");
 for (const [name, page] of [["root", html], ["/zh", zhHtml]]) {
   for (const marker of ['class="ap-hero"', 'class="hero-terminal ap-terminal"', 'id="services"', 'id="locations"', 'id="solutions"', 'id="plans"', 'id="faq"', 'class="ap-competitors"', 'class="ap-bottom-cta"', 'class="ap-footer"', 'assets/css/site.css?v=20261105-reference-home-2']) assert.ok(page.includes(marker), `Homepage ${name} missing reference section: ${marker}`);
-  assert.equal((page.match(/class="ap-product(?:\\s|")/g) || []).length, 5, `Homepage ${name} must contain five product cards`);
+  assert.equal((page.match(/class="ap-product(?:\s|")/g) || []).length, 5, `Homepage ${name} must contain five product cards`);
   assert.equal((page.match(/class="ap-region"/g) || []).length, 7, `Homepage ${name} must contain seven jurisdiction cards`);
   assert.equal((page.match(/class="ap-solution"/g) || []).length, 6, `Homepage ${name} must contain six solution cards`);
   assert.equal((page.match(/class="ap-faq"/g) || []).length, 7, `Homepage ${name} must contain seven FAQ items`);
