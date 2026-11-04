@@ -477,3 +477,19 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 .topup-asset-option>span:nth-child(2){flex:1}
 .topup-asset-check{color:#2458df;font-weight:800}
 .topup-continue{gap:0}
+
+/* Top-up invoice appears in the right-hand balance/payment panel */
+.topup-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);align-items:start;gap:22px}
+.topup-main{min-width:0}
+.topup-preview{min-width:0}
+.topup-invoice{width:100%;margin:0 0 18px;padding:16px;border:1px solid #d0d5dd;border-radius:14px;background:#fff;color:#17212b;overflow-wrap:anywhere}
+.topup-invoice[hidden]{display:none}
+.topup-invoice>strong{display:block;font-size:16px;margin-bottom:10px}
+.topup-invoice p{margin:8px 0;color:#344054;font-size:13px}
+.topup-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;margin:12px 0;background:#f8fafc;border-radius:12px}
+.topup-qr-wrap p{font-weight:700;margin:0}
+.topup-qr-image{display:block;width:220px;height:220px;max-width:100%;object-fit:contain;background:#fff;padding:8px;border-radius:8px}
+.topup-address{display:block;padding:10px;background:#f2f4f7;border-radius:8px;white-space:normal;word-break:break-all;font-size:12px;line-height:1.6}
+.topup-copy-address{width:100%;margin:10px 0}
+.topup-history-row .topup-status{white-space:nowrap}
+@media(max-width:860px){.topup-layout{grid-template-columns:minmax(0,1fr)}}
