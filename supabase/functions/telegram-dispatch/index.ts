@@ -25,7 +25,7 @@ function amount(atomic:string,decimals:number):string {
   return (raw/unit).toString()+(fraction?"."+fraction:"");
 }
 const ASSET_DECIMALS:Record<string,number>={BTC:8,ETH:18,USDT_ERC20:6,USDT_TRC20:6,LTC:8,TRX:6,SOL:9,BNB_BEP20:18,TON:9};
-const ASSET_LABELS:Record<string,string>={BTC:"BTC · Bitcoin",ETH:"ETH · Ethereum",USDT_ERC20:"USDT · ERC-20",USDT_TRC20:"USDT · TRC-20",LTC:"LTC · Litecoin",TRX:"TRX · TRON",SOL:"SOL · Solana",BNB_BEP20:"BNB · BNB Smart Chain",TON:"GRAM · TON"};
+const ASSET_LABELS:Record<string,string>={BTC:"BTC · Bitcoin",ETH:"ETH · Ethereum",USDT_ERC20:"USDT · ERC-20",USDT_TRC20:"USDT · TRC-20",LTC:"LTC · Litecoin",TRX:"TRX · TRON",SOL:"SOL · Solana",BNB_BEP20:"BNB · BNB Smart Chain",TON:"TON · Toncoin (native TON)"};
 const EVENT_LABELS:Record<string,string>={detected:"检测到链上转账",confirming:"正在等待区块确认",confirmed:"到账已确认",underpaid:"到账金额不足",overpaid:"到账金额超额",manual_review:"需要人工核查",expired:"收款订单已过期"};
 async function telegramSend(text:string):Promise<void> {
   if(!TELEGRAM_BOT_TOKEN||!TELEGRAM_CHAT_ID) throw new Error("telegram_secrets_missing");
