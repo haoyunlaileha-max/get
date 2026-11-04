@@ -92,6 +92,15 @@ function renderOrderCard(order){
   const meta=document.createElement("div");meta.className="order-meta";
   const status=document.createElement("span");
   status.className="order-status status-"+String(order.status||"unknown").replace(/[^a-z_]/g,"");
+  if(order.status==="cancelled"){
+    status.style.setProperty("background-color","#fff","important");
+    status.style.setProperty("background","#fff","important");
+    status.style.setProperty("color","#101828","important");
+    status.style.setProperty("border","1px solid #d0d5dd","important");
+    status.style.setProperty("border-radius","6px","important");
+    status.style.setProperty("padding","5px 9px","important");
+    status.style.setProperty("font-weight","600","important");
+  }
   status.textContent=locale.text(orderStatusLabels[order.status]||"状态未知",language);
   const total=document.createElement("strong");total.textContent=formatMoney(order.total_minor,order.currency);
   meta.append(status,total);
