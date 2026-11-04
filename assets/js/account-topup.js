@@ -263,7 +263,6 @@ function updateCheckoutCountdown(){
 async function cancelTopupCheckout(){
  const button=document.getElementById("checkout-cancel");
  if(!checkoutOrderId||button.disabled)return;
- if(!window.confirm("确定取消这笔充值订单吗？取消后请勿再向该地址付款。"))return;
  button.disabled=true;button.textContent="正在取消…";
  try{
   await api("create-account-topup",{action:"cancel",order_id:checkoutOrderId});
