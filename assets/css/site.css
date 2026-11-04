@@ -554,3 +554,14 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 /* Standalone payment page */
 .topup-payment-wrap{max-width:1080px}.topup-payment-shell{padding:28px}.topup-payment-page{margin:0;grid-template-columns:minmax(0,1fr) 360px;gap:28px}.topup-payment-cancel{display:block;width:calc(100% - 36px);margin:12px 18px 18px;color:#b42318;border-color:#fecdca}.topup-payment-cancel:disabled{opacity:.6;cursor:wait}.topup-payment-waiting.credited{color:#039855}
 @media(max-width:700px){.topup-payment-shell{padding:16px}.topup-payment-page{grid-template-columns:1fr}}
+
+/* In-place checkout replaces only the balance/top-up panel; history below remains untouched */
+.topup-main[hidden],.topup-preview[hidden],.topup-checkout-view[hidden]{display:none!important}
+.topup-checkout-view{grid-column:1/-1;min-width:0;width:100%;padding:4px 0}
+.topup-checkout-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px}
+.topup-checkout-header h2{margin:0 0 6px;font-size:22px;color:#101828}
+.topup-checkout-header p{margin:0;color:#667085;font-size:13px}
+.topup-checkout-view .topup-payment-page{margin:0;grid-template-columns:minmax(0,1fr) 360px}
+.topup-checkout-view .topup-payment-card{min-width:0}
+.topup-checkout-view .topup-payment-copy-row code{overflow-wrap:anywhere;word-break:break-all}
+@media(max-width:760px){.topup-checkout-header{flex-direction:column}.topup-checkout-view .topup-payment-page{grid-template-columns:1fr}}
