@@ -19,6 +19,7 @@ let orderStatus = "all";
 let orderStartDate = "";
 let orderEndDate = "";
 let orderTotal = 0;
+let categoryRows = [];
 
 const t = {
 en:{language:"Language",storefront:"Storefront",eyebrow:"OPERATIONS / CONTROL PLANE",title:"Operations console",subtitle:"Monitor orders, payments, provisioning and catalog availability.",refresh:"Refresh data",login_required:"Administrator sign-in required",login_copy:"Sign in with an account assigned the verified admin role, then return here.",open_account:"Open account sign-in",signed_in_as:"Signed in as",sign_out:"Sign out",orders:"Orders",all_records:"All records",paid:"Paid",paid_orders:"Paid orders",queued:"Provisioning queue",waiting_work:"Waiting / retrying",active:"Active plans",catalog:"Catalog",orders_title:"Recent orders",orders_desc:"Customer orders and their current lifecycle state.",order:"Order",customer:"Customer ID",status:"Status",total:"Total",created:"Created",jobs_title:"Provisioning jobs",jobs_desc:"Queue state, attempts and provider references.",payments_title:"Payment events",payments_desc:"Verified webhook audit records.",catalog_title:"Product catalog",catalog_desc:"Enable or disable products and plans. Price changes are intentionally not exposed here.",regions_title:"Data-center regions",regions_desc:"Control whether a region is available for new orders.",security_note:"Admin access is verified using Supabase app_metadata and enforced again by database RLS. Never share service-role keys with this page.",loading:"Loading operational data…",empty:"No records found.",load_error:"Could not load admin data. Check that migrations 0001–0005 are applied and admin RLS is enabled.",not_admin:"This account is not assigned the verified admin role. Ask an authorized project owner to set app_metadata.role = admin.",setup_error:"Add the Supabase project URL and public anon/publishable key to assets/js/supabase-config.js. Never add a service-role key.",enabled:"Enabled",disabled:"Disabled",activate:"Enable",deactivate:"Disable",region_active:"Active",region_inactive:"Inactive",maintenance:"Maintenance",set_active:"Set active",set_inactive:"Set inactive",set_maintenance:"Set maintenance",updated:"Saved successfully.",update_error:"Could not save this change. Verify database migrations and RLS policies.",reconciliation_required:"Manual reconciliation required",reconciliation_title:"Provisioning reconciliation",reconciliation_desc:"Provider resources created after an order changed state; review and clean up manually.",reconciliation_empty:"No jobs require manual reconciliation.",reconciliation_count:"Flagged jobs",reconciliation_overflow:"Showing the newest 100 flagged jobs. Export or inspect the database for older records.",no_jobs:"No provisioning jobs.",no_payments:"No payment events.",attempts:"Attempts",provider_ref:"Provider ref",event:"Event",amount:"Amount",refreshing:"Refreshing…",signing_out:"Signing out…",no_data:"No data"},
@@ -43,8 +44,11 @@ function editorTr(key) { const value = inventoryText.zh[key] || editorText.zh[ke
 function formValues(form) { return Object.fromEntries(new FormData(form).entries()); }
 function fillProductEditor(product) {
   const form = $("product-editor"); form.reset();
-  for (const key of ["id","name","slug","category","description","sort_order"]) form.elements.namedItem(key).value = product?.[key] ?? (key === "sort_order" ? 0 : "");
+  for (const key of ["id","name","slug","category","description","sort_order","image_path"]) form.elements.namedItem(key).value = product?.[key] ?? (key === "sort_order" ? 0 : "");
   form.elements.is_active.checked = Boolean(product?.is_active);
+  const preview=$("product-image-preview");preview.replaceChildren();
+  if(product?.image_path){const image=document.createElement("img");image.src=supabase.storage.from("product-images").getPublicUrl(product.image_path).data.publicUrl;image.alt=product.name||"商品图片";preview.append(image);const note=document.createElement("span");note.textContent="当前商品图片";preview.append(note);}
+  else preview.textContent="尚未上传商品图片";
   form.scrollIntoView({ behavior:"smooth", block:"center" });
 }
 function fillPlanEditor(plan) {
@@ -63,13 +67,62 @@ function renderProductOptions(products) {
   for (const product of products) { const option = document.createElement("option"); option.value = product.id; option.textContent = product.name; select.append(option); }
   if (products.some((p)=>p.id===previous)) select.value=previous;
 }
+function renderProductCategoryOptions(rows) {
+  const select=$("product-category");const previous=select.value;select.replaceChildren();
+  for(const row of rows){const option=document.createElement("option");option.value=row.id;option.textContent=row.name+(row.is_active?"":"（停用）");select.append(option);}
+  if(rows.some(row=>row.id===previous))select.value=previous;
+}
+function fillCategoryEditor(row){
+  const form=$("category-editor");form.reset();
+  for(const key of ["id","name","slug","description","sort_order"])form.elements.namedItem(key).value=row?.[key]??(key==="sort_order"?0:"");
+  form.elements.is_active.checked=Boolean(row?.is_active);
+  form.elements.slug.readOnly=Boolean(row?.id);
+  form.scrollIntoView({behavior:"smooth",block:"center"});
+}
+function renderCategories(rows){
+  const root=$("category-list");root.replaceChildren();renderProductCategoryOptions(rows);
+  if(!rows.length){root.textContent="暂无分类";return;}
+  for(const row of rows){
+    const line=document.createElement("div");line.className="admin-catalog-line";
+    const label=document.createElement("span");label.textContent=row.name+" · "+row.slug+" · 排序 "+row.sort_order;
+    const state=document.createElement("span");state.className="admin-catalog-state";state.textContent=row.is_active?"已启用":"已停用";
+    const edit=document.createElement("button");edit.type="button";edit.className="admin-toggle";edit.textContent="编辑";edit.addEventListener("click",()=>fillCategoryEditor(row));
+    const toggle=document.createElement("button");toggle.type="button";toggle.className="admin-toggle";toggle.textContent=row.is_active?"停用":"启用";toggle.addEventListener("click",()=>updateRow("ah_product_categories",row.id,{is_active:!row.is_active}));
+    line.append(label,state,edit,toggle);root.append(line);
+  }
+}
+async function saveCategory(form){
+  if(busy)return;
+  const values=formValues(form);const slug=String(values.slug||"").trim().toLowerCase();const sort=Number(values.sort_order||0);
+  if(!values.name?.trim()||values.name.trim().length>80||! /^[a-z0-9]+(?:[_-][a-z0-9]+)*$/.test(slug)||!Number.isSafeInteger(sort)||sort<0||sort>100000){show(nodes.error,"分类名称、slug 或排序不符合要求。");return;}
+  const payload={name:values.name.trim(),slug,description:values.description.trim()||null,sort_order:sort,is_active:form.elements.is_active.checked};
+  busy=true;show(nodes.error,"");show(nodes.success,"");
+  try{const query=values.id?supabase.from("ah_product_categories").update(payload).eq("id",values.id):supabase.from("ah_product_categories").insert(payload);const {error}=await query;if(error)throw error;show(nodes.success,"商品分类已保存。");form.reset();form.elements.sort_order.value="0";form.elements.slug.readOnly=false;busy=false;await loadDashboard();}
+  catch{show(nodes.error,"分类保存失败，请检查 slug 是否重复及管理员权限。");}
+  finally{busy=false;}
+}
+$("product-editor").elements.image_file.addEventListener("change",()=>{
+  const file=$("product-editor").elements.image_file.files?.[0];const preview=$("product-image-preview");preview.replaceChildren();
+  if(!file){preview.textContent="尚未选择新图片";return;}
+  if(!["image/jpeg","image/png","image/webp","image/avif"].includes(file.type)||file.size>5*1024*1024){preview.textContent="图片格式不支持或文件超过 5 MB。";return;}
+  const image=document.createElement("img");image.src=URL.createObjectURL(file);image.alt="商品图片预览";preview.append(image);
+});
+
 async function saveCatalog(form, table) {
   if (busy) return;
   const values = formValues(form); const id = values.id || null;
-  let payload;
+  let payload; let uploadedPath=null; let previousPath=null;
   if (table === "ah_products") {
-    payload = {name:values.name.trim(),slug:values.slug.trim().toLowerCase(),category:values.category,description:values.description.trim()||null,sort_order:Number(values.sort_order||0),is_active:form.elements.is_active.checked};
+    const category=categoryRows.find(row=>row.id===values.category_id);
+    if(!category){show(nodes.error,"请先创建并选择有效商品分类。");return;}
+    payload = {name:values.name.trim(),slug:values.slug.trim().toLowerCase(),category:category.slug,category_id:category.id,description:values.description.trim()||null,sort_order:Number(values.sort_order||0),is_active:form.elements.is_active.checked,image_path:values.image_path||null};
+    previousPath=values.image_path||null;
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(payload.slug) || !Number.isSafeInteger(payload.sort_order) || payload.sort_order<0) { show(nodes.error,editorTr("save_failed")); return; }
+    const file=form.elements.image_file.files?.[0];
+    if(file){
+      const allowed=["image/jpeg","image/png","image/webp","image/avif"];
+      if(!allowed.includes(file.type)||file.size>5*1024*1024){show(nodes.error,"图片格式不支持或文件超过 5 MB。");return;}
+    }
   } else {
     let specs;
     try { specs=JSON.parse(values.specs); } catch { show(nodes.error,editorTr("invalid_specs")); return; }
@@ -81,14 +134,26 @@ async function saveCatalog(form, table) {
   }
   busy=true; show(nodes.error,""); show(nodes.success,"");
   try {
+    if(table==="ah_products"){
+      const file=form.elements.image_file.files?.[0];
+      if(file){
+        const extension=({ "image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/avif":"avif" })[file.type];
+        uploadedPath="products/"+crypto.randomUUID()+"."+extension;
+        const {error:uploadError}=await supabase.storage.from("product-images").upload(uploadedPath,file,{contentType:file.type,cacheControl:"31536000",upsert:false});
+        if(uploadError)throw uploadError;
+        payload.image_path=uploadedPath;
+      }
+    }
     const query=id ? supabase.from(table).update(payload).eq("id",id) : supabase.from(table).insert(payload);
     const {error}=await query;
     if(error) throw error;
+    if(uploadedPath&&previousPath&&previousPath!==uploadedPath)await supabase.storage.from("product-images").remove([previousPath]);
     show(nodes.success,editorTr("saved")); form.reset();
     if(table==="ah_products") form.elements.sort_order.value="0";
     if(table==="ah_plans") { form.elements.currency.value="USDT"; form.elements.price.value="0"; form.elements.sort_order.value="0"; }
     busy=false; await loadDashboard();
   } catch {
+    if(uploadedPath)await supabase.storage.from("product-images").remove([uploadedPath]);
     show(nodes.error,editorTr("save_failed"));
   } finally { busy=false; }
 }
@@ -281,11 +346,16 @@ function renderPayments(rows) {
 function renderCatalog(products, plans) {
   const root = $("catalog-list"); root.replaceChildren();
   renderProductOptions(products);
+  renderProductCategoryOptions(categoryRows);
   const productMap = new Map(products.map((product) => [product.id, product]));
   for (const product of products) {
     const group = document.createElement("div"); group.className = "admin-catalog-group";
     const head = document.createElement("div"); head.className = "admin-catalog-head";
-    const label = document.createElement("div"); label.innerHTML = `<strong>${escapeHtml(product.name)}</strong><small>${escapeHtml(product.category)} · ${escapeHtml(product.slug)}</small>`;
+    const label = document.createElement("div");
+    const title=document.createElement("strong");title.textContent=product.name;
+    const meta=document.createElement("small");meta.textContent=(categoryRows.find(row=>row.id===product.category_id)?.name||product.category)+" · "+product.slug;
+    label.append(title,meta);
+    if(product.image_path){const thumb=document.createElement("img");thumb.className="admin-product-thumb";thumb.src=supabase.storage.from("product-images").getPublicUrl(product.image_path).data.publicUrl;thumb.alt=product.name;head.append(thumb);}
     const toggle = document.createElement("button"); toggle.className = "admin-toggle"; toggle.type = "button";
     toggle.textContent = product.is_active ? tr("deactivate") : tr("activate");
     toggle.addEventListener("click", () => updateRow("ah_products", product.id, { is_active: !product.is_active }));
@@ -493,14 +563,15 @@ async function loadDashboard() {
       ordersQuery = ordersQuery.or(`id.eq.${orderSearch},user_id.eq.${orderSearch}`);
     }
     ordersQuery = ordersQuery.range(orderPage * orderPageSize, (orderPage + 1) * orderPageSize - 1);
-    const [orders, jobs, reconciliationJobs, payments, products, plans, regions, ordersCount, paidCount, queuedCount, activePlansCount, mappings, cryptoAssets] = await Promise.all([
+    const [orders, jobs, reconciliationJobs, payments, products, plans, regions, categories, ordersCount, paidCount, queuedCount, activePlansCount, mappings, cryptoAssets] = await Promise.all([
       ordersQuery,
       supabase.from("ah_provisioning_jobs").select("id,order_id,status,attempts,max_attempts,provider_reference,requires_reconciliation,last_error_code,created_at").order("created_at", { ascending: false }).limit(30),
       supabase.from("ah_provisioning_jobs").select("id,order_id,status,provider_reference,requires_reconciliation,last_error_code,created_at", { count: "exact" }).eq("requires_reconciliation", true).order("created_at", { ascending: false }).limit(100),
       supabase.from("ah_payment_events").select("id,provider,event_id,order_id,event_type,amount_minor,currency,received_at").order("received_at", { ascending: false }).limit(30),
-      supabase.from("ah_products").select("id,slug,name,category,description,is_active,sort_order").order("sort_order"),
+      supabase.from("ah_products").select("id,slug,name,category,category_id,image_path,description,is_active,sort_order").order("sort_order"),
       supabase.from("ah_plans").select("id,product_id,code,name,description,price_minor,currency,billing_period,specs,is_active,sort_order").order("sort_order"),
       supabase.from("ah_regions").select("id,code,name,city,country_code,status").order("name"),
+      supabase.from("ah_product_categories").select("id,slug,name,description,sort_order,is_active").order("sort_order"),
       supabase.from("ah_orders").select("*", { count: "exact", head: true }),
       supabase.from("ah_orders").select("*", { count: "exact", head: true }).eq("status", "paid"),
       supabase.from("ah_provisioning_jobs").select("*", { count: "exact", head: true }).in("status", ["queued", "retry_wait", "processing"]),
@@ -508,12 +579,12 @@ async function loadDashboard() {
       supabase.from("ah_plan_regions").select("id,plan_id,region_id,is_available,capacity_units,allocated_units").order("created_at", { ascending: false }),
       supabase.from("ah_crypto_assets").select("asset_code,listener_enabled,listener_status").order("asset_code"),
     ]);
-    const result = [orders, jobs, reconciliationJobs, payments, products, plans, regions, ordersCount, paidCount, queuedCount, activePlansCount, cryptoAssets];
+    const result = [orders, jobs, reconciliationJobs, payments, products, plans, regions, categories, ordersCount, paidCount, queuedCount, activePlansCount, cryptoAssets];
     if (result.some((entry) => entry.error)) throw new Error("query_failed");
     const mappingRows = mappings.error ? null : (mappings.data || []);
     orderTotal = orders.count ?? 0;
     renderOrders(orders.data || []); renderJobs(jobs.data || []); renderReconciliation(reconciliationJobs.data || [], reconciliationJobs.count ?? 0); renderPayments(payments.data || []);
-    renderCatalog(products.data || [], plans.data || []); renderRegions(regions.data || []); renderPlanRegions(mappingRows, plans.data || [], regions.data || []); renderLaunchReadiness(products.data || [], plans.data || [], regions.data || [], mappingRows || [], cryptoAssets.data || []);
+    categoryRows=categories.data||[];renderCategories(categoryRows);renderCatalog(products.data || [], plans.data || []); renderRegions(regions.data || []); renderPlanRegions(mappingRows, plans.data || [], regions.data || []); renderLaunchReadiness(products.data || [], plans.data || [], regions.data || [], mappingRows || [], cryptoAssets.data || []);
     setText("metric-orders", String(ordersCount.count ?? 0));
     setText("metric-paid", String(paidCount.count ?? 0));
     setText("metric-queued", String(queuedCount.count ?? 0));
@@ -544,6 +615,8 @@ async function initialize() {
     show(nodes.error, tr("load_error"));
   }
 }
+$("category-editor").addEventListener("submit",(event)=>{event.preventDefault();saveCategory(event.currentTarget);});
+$("category-editor").addEventListener("reset",()=>{setTimeout(()=>{$("category-editor").elements.sort_order.value="0";$("category-editor").elements.slug.readOnly=false;},0);});
 $("product-editor").addEventListener("submit",(event)=>{event.preventDefault();saveCatalog(event.currentTarget,"ah_products");});
 $("plan-editor").addEventListener("submit",(event)=>{event.preventDefault();saveCatalog(event.currentTarget,"ah_plans");});
 $("plan-region-editor").addEventListener("submit",(event)=>{event.preventDefault();saveInventory(event.currentTarget);});
