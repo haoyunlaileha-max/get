@@ -269,4 +269,13 @@ for (const [amount,bonus] of [[3000,0],[10000,2500],[25000,7500],[50000,20000],[
 for (const marker of ['id="launch-gate-status"', 'id="launch-gate-list"', '主网上线检查']) assert.ok(adminHtml.includes(marker), "Admin must display a live production release gate");
 for (const marker of ["function renderLaunchReadiness", "自动开通与交付", "域名注册商 API", "真实付款至服务交付验收", "Leaked Password Protection Disabled", "NO-GO", "activeCategoryIds", "metric-plans"]) assert.ok(adminJs.includes(marker), "Missing production launch blocker check: " + marker);
 for (const marker of [".admin-launch-gates", ".admin-launch-gate", ".admin-release-status", ".admin-gate-marker"]) assert.ok(css.includes(marker), "Missing production launch gate styling: " + marker);
+const referenceCatalog = read("assets/js/reference-catalog.js");
+for (const route of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html"]) {
+  const page = read(route);
+  assert.ok(page.includes('id="reference-catalog-content"') && page.includes("assets/js/reference-catalog.js?v=20261105-1"), "Missing cloned reference catalog mount/script: " + route);
+  assert.ok(page.includes("site.css?v=20261105-catalog-1"), "Missing catalog stylesheet cache bust: " + route);
+}
+for (const marker of ["vpsRegions", "dedicatedRegions", "gpuRegions", "rdpPlans", "完整套餐与价格目录", "参考目录"]) assert.ok(referenceCatalog.includes(marker), "Missing source catalog dataset/label: " + marker);
+assert.ok(referenceCatalog.includes('getElementById("reference-catalog-content")'), "Catalog renderer must mount inside the responsive content wrapper");
+
 console.log("Checks passed: storefront, account/admin portals, database/RLS safeguards, crypto invoices, mainnet scanner adapters, Vault-authenticated cron and settlement, Telegram outbox security, and provider fail-closed behavior.");
