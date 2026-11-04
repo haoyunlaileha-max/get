@@ -493,3 +493,24 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 .topup-copy-address{width:100%;margin:10px 0}
 .topup-history-row .topup-status{white-space:nowrap}
 @media(max-width:860px){.topup-layout{grid-template-columns:minmax(0,1fr)}}
+
+
+/* Keep the generated payment invoice out of the balance-summary row styling */
+.topup-preview>.topup-invoice{
+  display:block;
+  width:100%;
+  min-width:0;
+  grid-column:1 / -1;
+  margin:0 0 18px;
+  padding:16px;
+  box-sizing:border-box;
+  align-self:start;
+  justify-self:stretch;
+}
+.topup-preview>.topup-invoice[hidden]{display:none}
+.topup-preview>.topup-invoice .topup-qr-wrap{width:100%;box-sizing:border-box}
+.topup-preview>.topup-invoice .topup-qr-image{width:220px;height:220px;max-width:100%}
+.topup-preview>.topup-invoice .topup-address{width:100%;box-sizing:border-box}
+@media(max-width:760px){
+  .topup-preview>.topup-invoice{grid-column:1 / -1;order:0}
+}
