@@ -1,5 +1,6 @@
 import { readFileSync, existsSync } from "node:fs";
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 
 const root = new URL("../", import.meta.url);
 const read = (path) => readFileSync(new URL(path, root), "utf8");
@@ -48,6 +49,8 @@ const telegramPrivilegeSql = read("supabase/migrations/20261103091000_crypto_tel
 const cryptoCronSecureSql = read("supabase/migrations/20261103093000_crypto_worker_cron_schedule_secure.sql");
 const supabaseConfig = read("supabase/config.toml");
 const backendDocs = read("docs/backend-foundation.md");
+execFileSync(process.execPath, ["--check", "--input-type=module"], { input: read("assets/js/admin.js") });
+execFileSync(process.execPath, ["--check"], { input: read("assets/js/checkout.js") });
 
 for (const marker of ['<html lang="zh-CN"', 'id="language"', 'id="services"', 'id="plans"', 'id="locations"', 'id="why"', 'id="faq"', 'id="plan-list"', 'id="homepage-regions"', 'class="hero-terminal"', 'assets/brand-mark.svg', 'assets/css/site.css', 'assets/js/language.js', 'assets/js/site.js', 'id="mobile-menu"', 'id="configure-dialog"', 'id="configure-form"', 'data-filter="domains"', 'data-category="rdp"', 'data-category="gpu"', 'data-category="domains"', 'href="account.html"']) assert.ok(html.includes(marker), `Missing storefront feature: ${marker}`);
 assert.ok(html.includes('value="zh-CN"') && html.includes('value="zh-TW"'), "Storefront must offer Simplified and Traditional Chinese");
