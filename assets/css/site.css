@@ -1011,7 +1011,7 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 .vps-catalog-page .links a:hover{color:#155eef}
 .vps-catalog-page .brand{color:#101828}
 .vps-catalog-page .account-language{background:#fff;color:#101828}
-.vps-catalog-page .vps-hero{padding:48px 0 42px;background:linear-gradient(110deg,#071629f2,#092443e8),url("../../assets/images/vps-datacenter.jpg") center/cover no-repeat;color:#fff}
+.vps-catalog-page .vps-hero{padding:48px 0 42px;background:radial-gradient(ellipse at 78% 45%,#17456a55,transparent 42%),repeating-linear-gradient(90deg,transparent 0 42px,#ffffff08 43px,#ffffff08 44px),linear-gradient(110deg,#071629,#092443);color:#fff}
 .vps-catalog-page .vps-hero:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 75% 40%,#1674b433,transparent 55%);pointer-events:none}
 .vps-catalog-page .vps-hero .hero-grid{position:relative;grid-template-columns:1.05fr .95fr;gap:38px}
 .vps-catalog-page .vps-hero h1{font-size:clamp(32px,4vw,48px);letter-spacing:-1.7px;line-height:1.2;margin:15px 0}
