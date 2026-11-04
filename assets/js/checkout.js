@@ -19,6 +19,7 @@
   let client = null;
   let selectedPlan = null;
   let activeRegions = [];
+  let availableMappings = [];
 
   function money(minor, currency) {
     try {
@@ -49,15 +50,17 @@
     return node;
   }
 
-  function renderPlans(products) {
+  function renderPlans(products, mappings) {
+    availableMappings = mappings || [];
+    const sellablePlanIds = new Set(availableMappings.map((mapping) => mapping.plan_id));
     const plans = products.flatMap((product) => (product.ah_plans || [])
-      .filter((plan) => plan.is_active !== false && (!pageCategory || categoryMap[product.category] === pageCategory))
+      .filter((plan) => plan.is_active !== false && sellablePlanIds.has(plan.id) && (!pageCategory || categoryMap[product.category] === pageCategory))
       .map((plan) => ({ ...plan, product })))
       .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
 
     if (!plans.length) {
       planList.replaceChildren();
-      appendText(planList, "p", "sub", "后台尚未发布可购买的套餐，请稍后再试。");
+      appendText(planList, "p", "sub", "目前没有已发布且具有可售机房库存的套餐。请稍后查看实时目录。");
       return;
     }
 
@@ -99,20 +102,49 @@
     document.querySelectorAll(".plan").forEach((card) => { card.hidden = false; });
   }
 
-  function renderRegions(regions) {
-    activeRegions = regions;
+  function renderRegions(mappings) {
+    const unique = new Map();
+    for (const mapping of mappings || []) {
+      const region = mapping.ah_regions;
+      if (region?.id) unique.set(region.id, region);
+    }
+    activeRegions = [...unique.values()];
     regionSelect.replaceChildren();
-    for (const region of regions) {
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = activeRegions.length ? "请先选择套餐" : "当前没有可售机房";
+    regionSelect.append(placeholder);
+    regionSelect.disabled = true;
+
+    const regionList = document.getElementById("homepage-regions");
+    if (regionList) {
+      regionList.replaceChildren();
+      if (!activeRegions.length) {
+        appendText(regionList, "p", "sub", "目前没有已发布套餐对应的可售机房。");
+      } else {
+        for (const region of activeRegions) {
+          const item = document.createElement("span");
+          item.className = "region region-card";
+          item.textContent = [region.name, region.city, region.country_code].filter(Boolean).join(" · ");
+          regionList.append(item);
+        }
+      }
+    }
+  }
+
+  function openPlan(planButton) {
+    selectedPlan = planButton.dataset.planId;
+    const planMappings = availableMappings.filter((mapping) => mapping.plan_id === selectedPlan);
+    regionSelect.replaceChildren();
+    for (const mapping of planMappings) {
+      const region = mapping.ah_regions;
+      if (!region?.id) continue;
       const option = document.createElement("option");
       option.value = region.id;
       option.textContent = [region.name, region.city].filter(Boolean).join(" · ");
       regionSelect.append(option);
     }
-    regionSelect.disabled = regions.length === 0;
-  }
-
-  function openPlan(planButton) {
-    selectedPlan = planButton.dataset.planId;
+    regionSelect.disabled = regionSelect.options.length === 0;
     document.getElementById("config-title").textContent = planButton.dataset.order;
     document.getElementById("config-price").textContent = planButton.dataset.price;
     document.querySelector(".config-head .kicker").textContent = "SECURE CHECKOUT / 安全下单";
@@ -199,7 +231,7 @@
       const assets = [
         ["BTC","BTC · Bitcoin"],["ETH","ETH · Ethereum"],["USDT_ERC20","USDT · ERC-20"],["USDT_TRC20","USDT · TRC-20"],
         ["LTC","LTC · Litecoin"],["TRX","TRX · TRON"],["SOL","SOL · Solana"],["BNB_BEP20","BNB · BNB Smart Chain"],
-        ["TON","GRAM · TON Network"]
+        ["TON","TON · Toncoin (native TON)"]
       ];
       for (const [code,label] of assets) { const option=document.createElement("option"); option.value=code; option.textContent=label; assetSelect.append(option); }
       assetLabel.append(assetSelect);
@@ -220,7 +252,7 @@
           if (!response.ok) {
             const messages = {
               asset_monitoring_unavailable:"该网络的自动到账监听尚未启用，系统暂不开放此网络收款，避免转账后无法自动识别。",
-              asset_contract_unverified:"GRAM 的 TON Jetton 合约地址尚未核验，暂不开放收款。",
+              asset_contract_unverified:"该资产的主网合约信息尚未通过核验，暂不开放收款。",
               market_rate_unavailable:"暂时无法取得可靠 USDT 实时汇率，请稍后重试。",
               order_not_payable:"此订单当前不可支付。",
               order_must_be_priced_in_usdt:"订单必须使用 USDT 计价。"
@@ -270,33 +302,34 @@
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
       });
 
-      const [productsResult, regionsResult] = await Promise.all([
+      const [productsResult, mappingsResult] = await Promise.all([
         supabaseClient.from("ah_products")
           .select("id,name,category,description,sort_order,ah_plans(id,code,name,description,price_minor,currency,billing_period,specs,is_active,sort_order)")
           .eq("is_active", true)
           .order("sort_order", { ascending: true }),
-        supabaseClient.from("ah_regions")
-          .select("id,name,city,country_code")
-          .eq("status", "active")
-          .order("name", { ascending: true })
+        supabaseClient.from("ah_plan_regions")
+          .select("plan_id,region_id,capacity_units,allocated_units,ah_regions!inner(id,name,city,country_code,status)")
+          .eq("is_available", true)
       ]);
 
       if (productsResult.error) throw productsResult.error;
-      if (regionsResult.error) throw regionsResult.error;
-      renderRegions(regionsResult.data || []);
-      renderPlans(productsResult.data || []);
+      if (mappingsResult.error) throw mappingsResult.error;
+      renderRegions(mappingsResult.data || []);
+      renderPlans(productsResult.data || [], mappingsResult.data || []);
       client = supabaseClient;
-      document.querySelector(".plan-disclaimer").textContent =
-        "套餐、价格与可选机房来自后台实时目录。提交后仅创建待处理订单，不会立即扣款或自动开通服务器。";
-      document.querySelector(".config-disclaimer").textContent =
-        "订单需要登录账户。当前仅创建待处理订单；支付接入和服务器自动开通尚未启用。";
-      submitButton.textContent = "创建待处理订单";
+      const disclaimer = document.querySelector(".plan-disclaimer");
+      if (disclaimer) disclaimer.textContent =
+        "仅显示后台已发布、具有有效机房映射且仍有容量的套餐。价格与库存均来自实时目录。付款经链上确认后，管理员通过 Telegram 通知进行人工履约；不会自动开通 VPS。";
+      const configDisclaimer = document.querySelector(".config-disclaimer");
+      if (configDisclaimer) configDisclaimer.textContent =
+        "订单使用链上加密货币收款并自动监控确认。付款确认后通知管理员人工交付；本平台不会自动开通服务器或提取资金。";
+      submitButton.textContent = "创建订单并生成链上收款信息";
       document.querySelector(".config-head .kicker").textContent = "SECURE CHECKOUT / 安全下单";
     } catch (error) {
       console.error("Anonymous Hosting catalog could not be loaded:", error);
       const notice = document.createElement("p");
       notice.className = "plan-disclaimer";
-      notice.textContent = "暂时无法连接实时商品目录，当前展示内容仅供参考，请稍后重试。";
+      notice.textContent = "暂时无法连接实时销售目录。为避免错误报价，当前不展示参考价格或接受下单，请稍后重试。";
       planList.before(notice);
     }
   })();
