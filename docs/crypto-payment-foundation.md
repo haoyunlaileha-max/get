@@ -8,7 +8,7 @@ The production scanner is a Supabase Edge Function invoked every minute by pg_cr
 - Litecoin: litecoinspace.org address transaction API and live tip height.
 - Ethereum native ETH and ERC-20 USDT: public Ethereum JSON-RPC; native block transactions and receipt success, ERC-20 Transfer logs filtered by the registered token contract and recipient.
 - BNB native: BNB Smart Chain public JSON-RPC.
-- Solana native SOL: public Solana JSON-RPC parsed System Program transfers; finality is required before credit.
+- Solana native SOL: public Solana JSON-RPC parsed System Program transfers; scans use `before` cursor pagination in bounded pages (up to 1,000 signatures per run), fetch transaction details with bounded concurrency, and refuse to advance the saved cursor if the previous cursor cannot be found or a transaction body is unavailable. This prevents a busy wallet from silently skipping transfers when more than one page arrives between scheduled scans.
 - TRON native TRX and USDT TRC-20: TronGrid confirmed account history, TRC-20 contract allowlist filtering, Base58/hex destination verification, and solidified block heights.
 - TON native Toncoin (TON): TON Center API v3 indexed account transactions, raw/friendly address normalization, successful inbound native-message filtering, and masterchain inclusion. This is not a GRAM Jetton.
 
