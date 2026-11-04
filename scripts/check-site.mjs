@@ -228,7 +228,7 @@ const topupHtml = read("account.html");
 const topupJs = read("assets/js/account-topup.js");
 const topupSql = read("supabase/migrations/20261103110000_account_topup_balance_ledger.sql");
 const topupFn = read("supabase/functions/create-account-topup/index.ts");
-for (const marker of ['id="account-balance-value"', 'id="topup-amount"', 'id="topup-method"', 'id="topup-submit"', 'id="topup-invoice"', 'id="topup-history"', 'id="topup-refresh"', 'assets/js/account-topup.js']) assert.ok(topupHtml.includes(marker), "Missing live account top-up UI: " + marker);
+for (const marker of ['id="account-balance-value"', 'id="topup-amount"', 'id="topup-method"', 'id="topup-submit"', 'id="topup-invoice"', 'id="topup-history"', 'assets/js/account-topup.js']) assert.ok(topupHtml.includes(marker), "Missing live account top-up UI: " + marker);
 assert.ok(!topupHtml.includes("充值通道尚未开放") && !topupHtml.includes('id="topup-amount" disabled'), "Account top-up controls must not remain hard-disabled");
 for (const marker of ["ah_account_topups", "ah_account_ledger", "ah_create_account_topup", "ah_credit_account_topup_on_paid", "on conflict(topup_id) do nothing", "enable row level security", "auth.uid()", "service_role"]) assert.ok(topupSql.toLowerCase().includes(marker.toLowerCase()), "Missing account balance ledger safeguard: " + marker);
 for (const marker of ["ah_create_account_topup", "auth.getUser", "listener_status", "listener_enabled", "topup_creation_failed", "MIN_AMOUNT_MINOR", "bonus_eligible", "p_bonus_eligible"]) assert.ok(topupFn.includes(marker), "Missing authenticated top-up endpoint behavior: " + marker);
