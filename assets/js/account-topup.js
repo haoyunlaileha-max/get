@@ -9,7 +9,7 @@ const historyPanel=document.getElementById("topup-history");
 const refreshButton=document.getElementById("topup-refresh");
 let client=null,session=null,assets=[],pendingKey=null,pendingOrderId=null,pendingAmountMinor=null,busy=false,currentBalanceMinor=0n;
 const amountOptions=document.getElementById("topup-amount-options");
-const continueLabel=submitButton.textContent;
+const continueLabel="继续";
 function dollars(minor){return "$"+(Number(minor)/100).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
 const BONUS_BY_AMOUNT=new Map([[3000,0],[10000,2500],[25000,7500],[50000,20000],[100000,50000],[200000,200000]]);
 const customInput=document.getElementById("topup-custom-amount");
@@ -32,7 +32,7 @@ function updateTopupPreview(){
   text(document.getElementById("topup-preview-add"),dollars(amount));
   text(document.getElementById("topup-preview-bonus"),dollars(bonus));
   text(document.getElementById("topup-preview-total"),dollars(current+BigInt(amount+bonus)));
-  text(submitButton,"继续 · $"+(amount/100).toLocaleString("en-US")+" →");
+  text(submitButton,"继续");
   amountOptions?.querySelectorAll("[data-amount]").forEach(button=>{
     const selected=!customMode&&Number(button.dataset.amount)===amount;
     button.classList.toggle("selected",selected);
@@ -63,6 +63,7 @@ customInput?.addEventListener("change",applyCustomAmount);
 customInput?.addEventListener("blur",()=>{if(customInput.value.trim())applyCustomAmount();});
 customInput?.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();applyCustomAmount();}});
 amountSelect.addEventListener("change",updateTopupPreview);
+assetSelect.addEventListener("change",renderAssetPicker);
 
 function money(minor){return (Number(minor)/100).toFixed(2)+" USDT";}
 function text(node,value){if(node)node.textContent=value;}
@@ -78,22 +79,64 @@ async function api(path,body){
   if(!response.ok)throw new Error(result.error||"充值服务暂时不可用，请稍后重试。");
   return result;
 }
+const ASSET_LOGOS={USDT:"usdt",BTC:"btc",ETH:"eth",BNB:"bnb",LTC:"ltc",SOL:"sol",TON:"ton",TRX:"trx"};
+const ASSET_ORDER=["USDT_TRC20","USDT_ERC20"];
+let assetPicker=null;
+function assetLogo(ticker){
+  const key=ASSET_LOGOS[ticker]||String(ticker||"").toLowerCase();
+  const img=document.createElement("img");
+  img.className="topup-asset-logo";img.alt="";img.loading="lazy";
+  img.src="https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/"+key+".png";
+  img.onerror=()=>{const fallback=document.createElement("span");fallback.className="topup-asset-logo-fallback";fallback.textContent=String(ticker||"?").slice(0,4);img.replaceWith(fallback);};
+  return img;
+}
+function assetLabel(asset){
+  if(asset.asset_code==="TON")return "TON · GRAM";
+  return asset.ticker+" · "+asset.network;
+}
+function renderAssetPicker(){
+  if(!assetPicker){
+    assetPicker=document.createElement("div");assetPicker.className="topup-asset-picker";
+    const trigger=document.createElement("button");trigger.type="button";trigger.className="topup-asset-trigger";trigger.setAttribute("aria-haspopup","listbox");trigger.setAttribute("aria-expanded","false");
+    const menu=document.createElement("div");menu.className="topup-asset-menu";menu.setAttribute("role","listbox");menu.hidden=true;
+    trigger.addEventListener("click",()=>{if(assetSelect.disabled)return;const open=menu.hidden;menu.hidden=!open;trigger.setAttribute("aria-expanded",String(open));});
+    assetPicker.append(trigger,menu);assetSelect.insertAdjacentElement("afterend",assetPicker);
+    assetSelect.classList.add("topup-native-select-hidden");
+  }
+  const trigger=assetPicker.querySelector(".topup-asset-trigger"),menu=assetPicker.querySelector(".topup-asset-menu");
+  trigger.replaceChildren();
+  const selected=assets.find(a=>a.asset_code===assetSelect.value);
+  if(selected){trigger.append(assetLogo(selected.ticker));const label=document.createElement("span");label.textContent=assetLabel(selected);trigger.append(label);}
+  else{const label=document.createElement("span");label.textContent=assets.length?"选择支付方式":"当前没有可用收款网络";trigger.append(label);}
+  const arrow=document.createElement("span");arrow.className="topup-asset-chevron";arrow.textContent="⌄";trigger.append(arrow);
+  trigger.disabled=assetSelect.disabled;
+  menu.replaceChildren();
+  assets.forEach(asset=>{
+    const option=document.createElement("button");option.type="button";option.className="topup-asset-option";option.setAttribute("role","option");option.setAttribute("aria-selected",String(asset.asset_code===assetSelect.value));
+    option.append(assetLogo(asset.ticker));const label=document.createElement("span");label.textContent=assetLabel(asset);option.append(label);
+    if(asset.asset_code===assetSelect.value){const check=document.createElement("span");check.className="topup-asset-check";check.textContent="✓";option.append(check);}
+    option.addEventListener("click",()=>{assetSelect.value=asset.asset_code;assetSelect.dispatchEvent(new Event("change",{bubbles:true}));menu.hidden=true;trigger.setAttribute("aria-expanded","false");renderAssetPicker();});
+    menu.append(option);
+  });
+}
+document.addEventListener("click",event=>{if(assetPicker&&!assetPicker.contains(event.target)){const menu=assetPicker.querySelector(".topup-asset-menu");menu.hidden=true;assetPicker.querySelector(".topup-asset-trigger").setAttribute("aria-expanded","false");}});
 async function loadAssets(){
   assetSelect.disabled=true;submitButton.disabled=true;
   assetSelect.replaceChildren(new Option("正在加载可用收款网络…",""));
+  renderAssetPicker();
   try{
     const result=await api("create-account-topup",{action:"assets"});
-    assets=Array.isArray(result.assets)?result.assets:[];
+    const returned=Array.isArray(result.assets)?result.assets:[];
+    assets=returned.sort((a,b)=>{const ai=ASSET_ORDER.indexOf(a.asset_code),bi=ASSET_ORDER.indexOf(b.asset_code);return (ai<0?999:ai)-(bi<0?999:bi);});
     assetSelect.replaceChildren();
-    for(const asset of assets){
-      const label=asset.ticker+" · "+asset.network;
-      assetSelect.add(new Option(label,asset.asset_code));
-    }
-    if(!assets.length){assetSelect.add(new Option("当前没有可用收款网络",""));}
+    for(const asset of assets)assetSelect.add(new Option(assetLabel(asset),asset.asset_code));
+    if(assets.length)assetSelect.value=assets[0].asset_code;
+    if(!assets.length)assetSelect.add(new Option("当前没有可用收款网络",""));
     assetSelect.disabled=!assets.length;submitButton.disabled=!assets.length;
+    renderAssetPicker();
   }catch(error){
     assetSelect.replaceChildren(new Option("收款网络加载失败，请刷新重试",""));
-    showInvoiceError(error.message);
+    assetSelect.disabled=true;renderAssetPicker();showInvoiceError(error.message);
   }
 }
 async function refreshBalance(){
@@ -164,7 +207,7 @@ async function submitTopup(){
   }catch(error){
     showInvoiceError(error.message==="asset_monitoring_unavailable"?"该收款网络暂不可用，系统已阻止生成付款地址。":error.message==="market_rate_unavailable"?"暂时无法取得可靠实时汇率，请稍后重试。":error.message==="asset_contract_unverified"?"该代币合约尚未核验，暂不开放收款。":error.message);
   }finally{
-    busy=false;submitButton.disabled=!assets.length;amountSelect.disabled=Boolean(pendingOrderId);if(customInput)customInput.disabled=Boolean(pendingOrderId);submitButton.textContent=pendingOrderId?"继续生成此金额的收款信息":"继续 · $"+((Number(amountSelect.value)||0)/100).toLocaleString("en-US")+" →";
+    busy=false;submitButton.disabled=!assets.length;amountSelect.disabled=Boolean(pendingOrderId);if(customInput)customInput.disabled=Boolean(pendingOrderId);submitButton.textContent=pendingOrderId?"继续生成此金额的收款信息":"继续";
   }
 }
 async function start(){
@@ -177,7 +220,7 @@ async function start(){
     client.auth.onAuthStateChange((_event,next)=>{queueMicrotask(async()=>{
       session=next;
       if(session){await loadAssets();await refreshBalance();}
-      else{assets=[];pendingKey=null;pendingOrderId=null;pendingAmountMinor=null;amountSelect.disabled=false;if(customInput)customInput.disabled=false;assetSelect.replaceChildren(new Option("登录后加载可用网络",""));assetSelect.disabled=true;submitButton.disabled=true;text(balanceValue,"0.00 USDT");text(balanceState,"登录后查看账户余额。");historyPanel.replaceChildren();}
+      else{assets=[];pendingKey=null;pendingOrderId=null;pendingAmountMinor=null;amountSelect.disabled=false;if(customInput)customInput.disabled=false;assetSelect.replaceChildren(new Option("登录后加载可用网络",""));assetSelect.disabled=true;renderAssetPicker();submitButton.disabled=true;text(balanceValue,"0.00 USDT");text(balanceState,"登录后查看账户余额。");historyPanel.replaceChildren();}
     });});
     window.setInterval(()=>{if(session&&document.visibilityState==="visible")refreshBalance();},30000);
     document.addEventListener("visibilitychange",()=>{if(session&&document.visibilityState==="visible")refreshBalance();});
