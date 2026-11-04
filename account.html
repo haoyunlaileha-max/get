@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#ffffff"><meta name="description" content="Sign in to your Anonymous Hosting customer account.">
 <title>账户中心 — Anonymous Hosting</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/css/site.css?v=20261104-balance-preview-alignment-2">
+<link rel="stylesheet" href="assets/css/site.css?v=20261104-orders-full-width-1">
 </head>
 <body class="account-page">
 <header><div class="wrap nav"><a class="brand" href="index.html"><img class="brand-mark" src="assets/brand-mark.svg" alt=""><span>ANONYMOUS <b>HOSTING</b></span></a><div class="account-nav"><label class="sr-only" for="account-language" data-i="language_label">Language</label><select id="account-language" class="account-language" aria-label="选择语言"><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option></select><a class="btn btn-ghost" href="index.html" data-i="back_store">← Back to storefront</a></div></div></header>
@@ -60,7 +60,7 @@
       <button id="reset-password" type="button">重置密码</button>
     </section>
     <section id="account-dashboard" hidden>
-      <div class="account-user"><span class="account-avatar" aria-hidden="true">ID</span><div><strong id="account-email"></strong><small id="account-client-info">客户端令牌账户 · 已验证</small></div></div>
+      <div class="account-user"><span class="account-avatar" aria-hidden="true">ID</span><div><strong id="account-email"></strong></div></div>
       <section class="account-balance topup-layout" id="balance">
         <div class="account-topup topup-main">
           <div class="topup-heading">
@@ -124,7 +124,7 @@
         </div>
       </section>
       <div class="account-activity-grid">
-        <section class="account-transactions account-activity-panel"><div class="topup-history-heading"><h3>最近充值记录</h3><button class="btn btn-ghost" id="topup-refresh" type="button">刷新状态</button></div><div id="topup-history" class="topup-history"><div class="account-notice">正在加载充值记录…</div></div></section>
+        <div id="topup-history" hidden aria-hidden="true"></div>
         <section class="account-orders account-activity-panel"><h3 class="account-activity-title" data-i="your_orders">我的订单</h3><div id="orders-state" class="account-notice" data-i="loading_orders">Loading your orders…</div><div id="orders-list" class="orders-list"></div><button class="btn btn-ghost account-submit" id="load-more-orders" type="button" hidden data-i="load_more_orders">加载更多订单</button></section>
       </div>
       <button class="btn btn-ghost account-submit" id="sign-out" type="button" data-i="sign_out">Sign out</button>
@@ -133,5 +133,5 @@
   </section>
 </main>
 <script src="assets/js/language.js"></script><script src="assets/js/supabase-config.js"></script>
-<script src="assets/js/supabase-auth-bootstrap.js"></script><script type="module" src="assets/js/account.js?v=20261104-cancelled-badge-final-2"></script><script src="assets/js/token-auth.js"></script><script type="module" src="assets/js/account-topup.js"></script>
+<script src="assets/js/supabase-auth-bootstrap.js"></script><script type="module" src="assets/js/account.js?v=20261104-mask-client-id-1"></script><script src="assets/js/token-auth.js"></script><script type="module" src="assets/js/account-topup.js"></script>
 </body></html>
