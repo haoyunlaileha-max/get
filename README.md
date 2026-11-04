@@ -24,16 +24,21 @@ The GitHub Pages storefront, account portal, localized product pages, and admin 
 
 | Function | Live version | Purpose |
 | --- | ---: | --- |
-| `token-auth` | 6 | Token-based customer registration and login |
-| `create-order` | 6 | Authenticated, idempotent order creation |
-| `cancel-order` | 5 | Safe cancellation of eligible unpaid orders |
-| `create-crypto-invoice` | 12 | Authenticated crypto invoice quotes and invoice creation |
-| `create-account-topup` | 1 | Authenticated account top-up order creation and ready network discovery |
+| `token-auth` | 7 | Token-based customer registration and login |
+| `create-order` | 7 | Authenticated, idempotent order creation |
+| `cancel-order` | 6 | Safe cancellation of eligible unpaid orders |
+| `create-crypto-invoice` | 14 | Authenticated crypto invoice quotes and invoice creation |
+| `create-account-topup` | 4 | Authenticated account top-up order creation and ready network discovery |
 | `crypto-listener` | 3 | Authenticated chain-transfer verification and idempotent settlement |
 | `crypto-scanner` | 8 | Minute-scheduled mainnet scanning for BTC, LTC, ETH, ERC-20 USDT, BNB, SOL, TRX, TRC-20 USDT and native TON |
 | `telegram-dispatch` | 8 | Private Telegram notification outbox delivery |
+| `payment-webhook` | 1 | Generic HMAC-authenticated normalized payment event receiver; no provider-specific adapter is integrated |
 
 Crypto wallet payments are monitored on-chain and settled automatically after exact amount and confirmation checks. Confirmed orders are sent to the configured Telegram administrator chat for manual fulfilment; no automatic VPS provisioning or fund withdrawal is performed. The generic external payment webhook and hosting-provisioning gateway are not part of this live manual-fulfilment payment flow.
+
+**Release gate: NO-GO.** The live admin console now displays the production blockers from the deployed project. The current catalog has one inactive Linux VPS product, one active plan attached to that inactive product, one active region record, and one unavailable plan-region mapping. There are zero sellable mappings. The region data has not been verified against a real hosting supplier. The `provision-worker` function exists in source control only and is not deployed; no trusted provisioning gateway credentials are configured. Domain registrar search, registration, renewal, and DNS APIs are not integrated. The Supabase Security Advisor reports leaked-password protection disabled. The database currently has no paid service orders and no real customer payment-to-server-delivery acceptance test.
+
+The generic `payment-webhook` endpoint is not a Stripe, PayPal, or other provider integration. Do not send it provider webhooks until a dedicated adapter verifies the provider's native signature and maps its event schema.
 
 ### Important operational limits
 
