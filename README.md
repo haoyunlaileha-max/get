@@ -28,8 +28,8 @@ The GitHub Pages storefront, account portal, localized product pages, and admin 
 | `create-crypto-invoice` | 12 | Authenticated crypto invoice quotes and invoice creation |
 | `create-account-topup` | 1 | Authenticated account top-up order creation and ready network discovery |
 | `crypto-listener` | 3 | Authenticated chain-transfer verification and idempotent settlement |
-| `crypto-scanner` | 6 | Minute-scheduled mainnet scanning for BTC, LTC, ETH, ERC-20 USDT, BNB, SOL, TRX, TRC-20 USDT and native TON |
-| `telegram-dispatch` | 7 | Private Telegram notification outbox delivery |
+| `crypto-scanner` | 7 | Minute-scheduled mainnet scanning for BTC, LTC, ETH, ERC-20 USDT, BNB, SOL, TRX, TRC-20 USDT and native TON |
+| `telegram-dispatch` | 8 | Private Telegram notification outbox delivery |
 
 Crypto wallet payments are monitored on-chain and settled automatically after exact amount and confirmation checks. Confirmed orders are sent to the configured Telegram administrator chat for manual fulfilment; no automatic VPS provisioning or fund withdrawal is performed. The generic external payment webhook and hosting-provisioning gateway are not part of this live manual-fulfilment payment flow.
 
