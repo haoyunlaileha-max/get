@@ -4,7 +4,7 @@ alter table public.ah_plans alter column currency type varchar(4) using btrim(cu
 alter table public.ah_plans alter column currency set default 'USDT';
 alter table public.ah_orders alter column currency type varchar(4) using btrim(currency);
 alter table public.ah_orders alter column currency set default 'USDT';
-update public.ah_crypto_assets set display_name='GRAM',ticker='GRAM',network='TON (GRAM)',updated_at=now() where asset_code='TON';
+update public.ah_crypto_assets set display_name='Toncoin',ticker='TON',network='TON mainnet (native Toncoin)',updated_at=now() where asset_code='TON';
 alter table public.ah_crypto_deposits add column if not exists quoted_usdt_minor bigint, add column if not exists quote_price_usdt numeric(38,18), add column if not exists quote_expires_at timestamptz;
 
 create or replace function public.ah_create_order(p_user_id uuid,p_plan_id uuid,p_region_id uuid,p_quantity integer,p_idempotency_key text,p_customer_note text default null)
