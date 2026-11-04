@@ -1,4 +1,4 @@
--- Activate TRON TRX, TRC-20 USDT and native TON coin (display ticker GRAM).
+-- Activate TRON TRX, TRC-20 USDT and native Toncoin (TON).
 -- Their scanners are implemented in crypto-scanner v4; unhealthy providers fail closed.
 begin;
 update public.ah_crypto_assets
