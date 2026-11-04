@@ -328,8 +328,9 @@
 
       const [productsResult, mappingsResult] = await Promise.all([
         supabaseClient.from("ah_products")
-          .select("id,name,category,category_id,image_path,description,sort_order,ah_plans(id,code,name,description,price_minor,currency,billing_period,specs,is_active,sort_order)")
+          .select("id,name,category,category_id,image_path,description,sort_order,ah_product_categories!inner(is_active),ah_plans(id,code,name,description,price_minor,currency,billing_period,specs,is_active,sort_order)")
           .eq("is_active", true)
+          .eq("ah_product_categories.is_active", true)
           .order("sort_order", { ascending: true }),
         supabaseClient.from("ah_plan_regions")
           .select("plan_id,region_id,capacity_units,allocated_units,ah_regions!inner(id,name,city,country_code,status)")
