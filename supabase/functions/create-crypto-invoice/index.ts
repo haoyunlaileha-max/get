@@ -82,7 +82,7 @@ Deno.serve(async(request:Request)=>{
       p_user_id:userData.user.id,p_order_id:orderId,p_asset_code:assetCode,p_base_amount_atomic:baseAtomic.toString(),
       p_quoted_usdt_minor:order.total_minor,p_quote_price_usdt:priceText,p_expires_at:expiresAt,
     });
-    if(invoiceError||!depositId){if(invoiceError?.message?.includes("order_not_payable"))return reply(409,{error:"order_not_payable"},origin);return reply(500,{error:"invoice_creation_failed"},origin);}
+    if(invoiceError||!depositId){if(invoiceError?.message?.includes("order_not_payable"))return reply(409,{error:"order_not_payable"},origin);if(invoiceError?.message?.includes("order_expired"))return reply(409,{error:"order_expired"},origin);return reply(500,{error:"invoice_creation_failed"},origin);}
     const {data:deposit,error:depositError}=await admin.from("ah_crypto_deposits").select("id,expected_amount_atomic,expires_at,quote_expires_at,quoted_usdt_minor,quote_price_usdt,status").eq("id",depositId).single();
     if(depositError||!deposit)return reply(500,{error:"invoice_lookup_failed"},origin);
     return reply(201,{invoice:{id:deposit.id,order_id:order.id,order_expires_at:order.expires_at,asset_code:asset.asset_code,ticker:asset.ticker,network:asset.network,wallet_address:asset.wallet_address,expected_amount_atomic:deposit.expected_amount_atomic,expected_amount:formatAtomic(String(deposit.expected_amount_atomic),decimals),decimals,quoted_usdt:(Number(deposit.quoted_usdt_minor)/100).toFixed(2),price_usdt:String(deposit.quote_price_usdt),expires_at:deposit.expires_at,quote_expires_at:deposit.quote_expires_at,status:deposit.status}},origin);
