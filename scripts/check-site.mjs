@@ -7,6 +7,8 @@ const read = (path) => readFileSync(new URL(path, root), "utf8");
 const readme = read("README.md");
 const cryptoDocs = read("docs/crypto-payment-foundation.md");
 const html = read("index.html");
+const zhHtml = read("zh/index.html");
+const worldMap = read("assets/images/anonport-world-map.svg");
 const css = read("assets/css/site.css");
 const js = read("assets/js/site.js");
 const checkoutJs = read("assets/js/checkout.js");
@@ -57,6 +59,19 @@ execFileSync(process.execPath, ["--check"], { input: read("assets/js/checkout.js
 
 for (const marker of ['<html lang="zh-CN"', 'id="language"', 'id="services"', 'id="plans"', 'id="locations"', 'id="why"', 'id="faq"', 'id="plan-list"', 'id="homepage-regions"', 'class="hero-terminal ap-terminal"', 'assets/brand-mark.svg', 'assets/css/site.css', 'assets/js/language.js', 'assets/js/site.js', 'id="mobile-menu"', 'id="configure-dialog"', 'id="configure-form"', 'data-category="rdp"', 'data-category="gpu"', 'data-category="domains"', 'href="account.html"']) assert.ok(html.includes(marker), `Missing storefront feature: ${marker}`);
 assert.ok(html.includes('value="zh-CN"') && html.includes('value="zh-TW"'), "Storefront must offer Simplified and Traditional Chinese");
+for (const [name, page] of [["root", html], ["/zh", zhHtml]]) {
+  for (const marker of ['class="ap-hero"', 'class="ap-terminal"', 'id="services"', 'id="locations"', 'id="solutions"', 'id="plans"', 'id="faq"', 'class="ap-competitors"', 'class="ap-bottom-cta"', 'class="ap-footer"', 'assets/css/site.css?v=20261105-reference-home-2']) assert.ok(page.includes(marker), `Homepage ${name} missing reference section: ${marker}`);
+  assert.equal((page.match(/class="ap-product/g) || []).length, 5, `Homepage ${name} must contain five product cards`);
+  assert.equal((page.match(/class="ap-region"/g) || []).length, 7, `Homepage ${name} must contain seven jurisdiction cards`);
+  assert.equal((page.match(/class="ap-solution"/g) || []).length, 6, `Homepage ${name} must contain six solution cards`);
+  assert.equal((page.match(/class="ap-faq"/g) || []).length, 7, `Homepage ${name} must contain seven FAQ items`);
+  for (const location of ["冰岛", "巴拿马", "摩尔多瓦", "罗马尼亚", "瑞士", "荷兰", "俄罗斯"]) assert.ok(page.includes(location), `Homepage ${name} missing jurisdiction ${location}`);
+  for (const competitor of ["Njalla", "FlokiNET", "1984 Hosting", "OrangeWebsite"]) assert.ok(page.includes(competitor), `Homepage ${name} missing comparison card ${competitor}`);
+  assert.ok(!page.includes("德国"), `Homepage ${name} must use Russia, not the unrelated Germany location`);
+}
+assert.ok(worldMap.includes("<svg") && worldMap.includes("viewBox"), "Local world map illustration must be present");
+assert.ok(css.includes("../images/anonport-world-map.svg") && !css.includes("images.unsplash.com/photo-1451187580459-43490279c0fa"), "Homepage hero and CTA must use local map artwork");
+
 assert.ok(!/value="(?:en|ar|fr|ru|es)"/.test(html), "Other storefront locales must remain hidden for now");
 assert.ok(!/<style[\\s>]/i.test(html), "Styles must live in the external stylesheet");
 assert.ok(!/<script>/.test(html), "Application JavaScript must live in the external script");
