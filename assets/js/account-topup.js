@@ -16,7 +16,11 @@ const customInput=document.getElementById("topup-custom-amount");
 let customMode=false;
 function selectedBonus(amount){return BONUS_BY_AMOUNT.get(amount)||0;}
 function setAmount(amount,custom=false){
-  amountSelect.value=String(amount);
+  const amountValue=String(amount);
+  if(!Array.from(amountSelect.options).some(option=>option.value===amountValue)){
+    amountSelect.add(new Option(amountValue+" USDT",amountValue));
+  }
+  amountSelect.value=amountValue;
   customMode=custom;
   updateTopupPreview();
 }
@@ -99,7 +103,7 @@ async function refreshBalance(){
   try{
     const [ledger,topups]=await Promise.all([
       client.from("ah_account_ledger").select("amount_minor").eq("user_id",userId),
-      client.from("ah_account_topups").select("id,order_id,amount_minor,status,created_at,credited_at").eq("user_id",userId).order("created_at",{ascending:false}).limit(12)
+      client.from("ah_account_topups").select("id,order_id,amount_minor,bonus_minor,status,created_at,credited_at").eq("user_id",userId).order("created_at",{ascending:false}).limit(12)
     ]);
     if(ledger.error)throw ledger.error;
     if(topups.error)throw topups.error;
@@ -111,7 +115,7 @@ async function refreshBalance(){
     for(const item of topups.data){
       const row=document.createElement("div");row.className="topup-history-row";
       const left=document.createElement("div"),amount=document.createElement("strong"),meta=document.createElement("small");
-      amount.textContent=money(item.amount_minor);meta.textContent="创建时间："+new Date(item.created_at).toLocaleString("zh-CN");left.append(amount,meta);
+      amount.textContent=money(item.amount_minor)+(Number(item.bonus_minor)>0?" + 赠送 "+money(item.bonus_minor):"");meta.textContent="创建时间："+new Date(item.created_at).toLocaleString("zh-CN");left.append(amount,meta);
       const status=document.createElement("span");status.className="topup-status"+(item.status==="credited"?" credited":"");
       status.textContent=item.status==="credited"?"已入账":item.status==="manual_review"?"人工核验中":"等待链上确认";
       if(item.credited_at){const date=document.createElement("small");date.textContent="入账时间："+new Date(item.credited_at).toLocaleString("zh-CN");left.append(date);}
@@ -121,12 +125,12 @@ async function refreshBalance(){
     text(balanceState,"余额或充值记录暂时无法加载，请稍后刷新。");
   }
 }
-function invoiceCard(invoice){
+function invoiceCard(invoice,amountMinor,bonusMinor){
   invoicePanel.replaceChildren();invoicePanel.hidden=false;
   const title=document.createElement("strong");title.textContent="充值订单已创建，请按以下信息付款";
   const amount=document.createElement("p");amount.textContent="精确应付："+invoice.expected_amount+" "+invoice.ticker;
   const network=document.createElement("p");network.textContent="网络："+invoice.network;
-  const quote=document.createElement("p");quote.textContent="账户入账金额："+invoice.quoted_usdt+" USDT";
+  const quote=document.createElement("p");quote.textContent="账户入账金额："+money(amountMinor+bonusMinor)+"（充值 "+money(amountMinor)+" + 奖励 "+money(bonusMinor)+"）";
   const addressLabel=document.createElement("p");addressLabel.textContent="收款地址：";
   const address=document.createElement("code");address.className="topup-address";address.textContent=invoice.wallet_address;
   const expires=document.createElement("p");expires.textContent="付款报价有效期至："+new Date(invoice.expires_at).toLocaleString("zh-CN");
@@ -145,7 +149,7 @@ async function submitTopup(){
   try{
     if(!pendingOrderId){
       if(!pendingKey)pendingKey=crypto.randomUUID();
-      const created=await api("create-account-topup",{action:"create",amount_minor:amount,idempotency_key:pendingKey});
+      const created=await api("create-account-topup",{action:"create",amount_minor:amount,bonus_eligible:!customMode,idempotency_key:pendingKey});
       pendingOrderId=created.order_id;
       pendingAmountMinor=amount;
       amountSelect.disabled=true;if(customInput)customInput.disabled=true;
@@ -153,7 +157,7 @@ async function submitTopup(){
     if(pendingAmountMinor!==amount)throw new Error("当前充值订单金额已锁定，请完成该订单或刷新充值页面后再创建新订单。");
     submitButton.textContent="正在生成链上收款信息…";
     const result=await api("create-crypto-invoice",{order_id:pendingOrderId,asset_code:assetCode});
-    invoiceCard(result.invoice);
+    invoiceCard(result.invoice,amount,customMode?0:selectedBonus(amount));
     pendingKey=null;pendingOrderId=null;pendingAmountMinor=null;amountSelect.disabled=false;
     await refreshBalance();
   }catch(error){
