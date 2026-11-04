@@ -42,12 +42,28 @@ Deno.serve(async(request:Request)=>{
     if(Object.keys(body).length!==1)return reply(400,{error:"unexpected_request_field"},origin);
   } else if(action==="create") {
     if(Object.keys(body).some(k=>!["action","amount_minor","bonus_eligible","idempotency_key"].includes(k)))return reply(400,{error:"unexpected_request_field"},origin);
+  } else if(action==="cancel" || action==="status") {
+    if(Object.keys(body).some(k=>!["action","order_id"].includes(k)) || typeof body.order_id!=="string" || !UUID.test(body.order_id))return reply(400,{error:"invalid_order_request"},origin);
   } else return reply(400,{error:"invalid_action"},origin);
   try {
     const auth=createClient(URL,ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
     const {data:userData,error:authError}=await auth.auth.getUser(token);
     if(authError||!userData.user)return reply(401,{error:"invalid_or_expired_session"},origin);
     const admin=createClient(URL,SERVICE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
+    if(action==="cancel") {
+      const {data,error}=await admin.rpc("ah_cancel_unpaid_order",{p_order_id:body.order_id,p_user_id:userData.user.id});
+      if(error){const reason=error.message==="order_not_found"?"order_not_found":error.message==="order_payment_in_progress"?"order_payment_in_progress":error.message==="order_requires_payment_or_provider_workflow"?"order_not_cancellable":"order_cancel_failed";return reply(reason==="order_not_cancellable"||reason==="order_payment_in_progress"?409:reason==="order_not_found"?404:500,{error:reason},origin);}
+      return reply(200,{order_id:body.order_id,status:"cancelled",result:data},origin);
+    }
+    if(action==="status") {
+      const {data:order,error:orderError}=await admin.from("ah_orders").select("id,status,expires_at").eq("id",body.order_id).eq("user_id",userData.user.id).maybeSingle();
+      if(orderError||!order)return reply(404,{error:"order_not_found"},origin);
+      const {data:topup,error:topupError}=await admin.from("ah_account_topups").select("status,credited_at").eq("order_id",body.order_id).eq("user_id",userData.user.id).maybeSingle();
+      if(topupError)return reply(500,{error:"topup_status_unavailable"},origin);
+      const {data:deposit,error:depositError}=await admin.from("ah_crypto_deposits").select("status,transaction_hash,received_amount_atomic").eq("order_id",body.order_id).order("created_at",{ascending:false}).limit(1).maybeSingle();
+      if(depositError)return reply(500,{error:"payment_status_unavailable"},origin);
+      return reply(200,{order_status:order.status,topup_status:topup?.status||null,credited_at:topup?.credited_at||null,deposit_status:deposit?.status||null,transaction_hash:deposit?.transaction_hash||null,expires_at:order.expires_at},origin);
+    }
     if(action==="assets") {
       const {data,error}=await admin.from("ah_crypto_assets")
         .select("asset_code,ticker,network,listener_enabled,listener_status")
