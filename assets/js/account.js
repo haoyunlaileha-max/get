@@ -216,8 +216,7 @@ async function renderSession(session){
     if(location.hash==="#balance")document.getElementById("balance").scrollIntoView({behavior:"smooth",block:"start"});
     
     ordersState.hidden=false;ordersState.textContent=tr("loading_orders");ordersList.replaceChildren();loadMoreOrdersButton.hidden=true;
-    document.getElementById("account-email").textContent="客户端 ID："+userId;
-    document.getElementById("account-client-info").textContent="客户端令牌账户 · 已验证登录 · 原始令牌仅创建时显示";
+    document.getElementById("account-email").textContent="客户端 ID：********";
     if(generation!==sessionRenderGeneration||activeUserId!==userId)return;
     await loadMoreOrders();
     if(generation!==sessionRenderGeneration||activeUserId!==userId)return;
