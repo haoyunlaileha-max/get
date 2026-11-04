@@ -1,6 +1,6 @@
-# Anonymous Hosting
+# AnonPort
 
-A responsive, Chinese-language storefront and customer portal prototype for the **Anonymous Hosting** brand.
+A responsive, Chinese-language storefront and customer portal for the **AnonPort** brand.
 
 ## Application
 
