@@ -35,6 +35,8 @@ const cryptoInvoiceFn = read("supabase/functions/create-crypto-invoice/index.ts"
 const cryptoListenerFn = read("supabase/functions/crypto-listener/index.ts");
 const cryptoScannerFn = read("supabase/functions/crypto-scanner/index.ts");
 const cryptoScannerSql = read("supabase/migrations/20261103100000_crypto_mainnet_scanner.sql");
+const publicCatalogSql = read("supabase/migrations/20261104003500_public_catalog_sellable_inventory_read.sql");
+const toncoinSql = read("supabase/migrations/20261104004000_correct_native_toncoin_metadata.sql");
 
 const cryptoSql = read("supabase/migrations/20261103080000_crypto_usdt_pricing_and_invoice_rpc.sql");
 const telegramFn = read("supabase/functions/telegram-dispatch/index.ts");
@@ -54,7 +56,7 @@ for (const marker of ["--bg:", ".config-dialog", ".mobile-menu", ".account-card"
 for (const marker of ["function applyLanguage", "localStorage.setItem", "configureDialog.showModal()", "配置预览", "function filterPlans"]) assert.ok(js.includes(marker), `Missing application behavior: ${marker}`);
 for (const marker of ["window.AH_CHECKOUT?.ready", "window.AH_CHECKOUT.submit"]) assert.ok(js.includes(marker), `Missing checkout handoff: ${marker}`);
 for (const marker of ["functions/v1/create-order", "Idempotency-Key", "ah_products", "ah_regions", "ah_plans", "plan_id", "region_id", "auth.getSession", "选择收款网络后，系统会按 USDT 报价换算币种金额。"]) assert.ok(checkoutJs.includes(marker), `Missing checkout integration: ${marker}`);
-for (const marker of ["productCategory", "categoryMap[product.category] === pageCategory", "data-plan-id"]) assert.ok(checkoutJs.includes(marker), `Missing product page catalog filtering: ${marker}`);
+for (const marker of ["productCategory", "categoryMap[product.category] === pageCategory", "data-plan-id", "ah_plan_regions", "sellablePlanIds", "capacity_units", "data-os-options"]) assert.ok(checkoutJs.includes(marker), `Missing product page catalog filtering: ${marker}`);
 for (const marker of ["create-crypto-invoice", "USDT", "asset_monitoring_unavailable", "wallet_address", "expected_amount"]) assert.ok(checkoutJs.includes(marker), `Missing direct crypto checkout behavior: ${marker}`);
 for (const marker of ["SUPABASE_SERVICE_ROLE_KEY", "ah_create_crypto_invoice", "market_rate_unavailable", "asset_monitoring_unavailable", "token_contract", "auth.getUser", "formatAtomic", "BTCUSDT", "TONUSDT"]) assert.ok(cryptoInvoiceFn.includes(marker), `Missing secure crypto invoice behavior: ${marker}`);
 for (const marker of ["alter column currency type varchar(4)", "currency<>'USDT'", "ah_create_crypto_invoice", "unique_violation", "quote_price_usdt", "ticker='TON'", "service_role"]) assert.ok(cryptoSql.includes(marker), `Missing USDT invoice database safeguard: ${marker}`);
@@ -73,7 +75,8 @@ assert.ok(!/service_role|secret key/i.test(telegramSchedulerSql), "Cron migratio
 for (const marker of ["product-language", "configure-dialog", "AH_LOCALE"]) assert.ok(productPageJs.includes(marker), `Missing product page interaction: ${marker}`);
 for (const marker of ["zh-TW", "zh-CN", "const normalize", "const text", "function apply", "traditional", "simplified"]) assert.ok(localeJs.includes(marker), `Missing Chinese locale behavior: ${marker}`);
 for (const category of ["vps", "dedicated", "rdp", "gpu", "domains"]) assert.ok(html.includes(`data-type="${category}"`), `Missing plan category: ${category}`);
-assert.equal((html.match(/data-type="[^"]+"/g) || []).length, 6, "Expected six demo plan cards");
+assert.ok(html.includes('id="homepage-regions"') && html.includes('id="plan-list"'), "Homepage must render live regions and catalog");
+assert.ok(!/\$\s?(?:7\.50|12\.00|48\.50|122\.00|4\.99)/.test(html), "Homepage must not publish unverified demo prices");
 assert.ok(!html.includes("anonymoushosting.example"), "Placeholder contact email must not be exposed");
 assert.equal(html.split("<section").length - 1, html.split("</section>").length - 1, "Every section must have a closing tag");
 
@@ -129,8 +132,10 @@ for (const marker of ["20261103032419_provisioning_queue.sql", "provision-worker
 for (const marker of ["ah_payment_events_admin_read", "ah_provisioning_jobs_admin_read", "ah_is_admin()", "grant select"]) assert.ok(adminSql.toLowerCase().includes(marker.toLowerCase()), `Missing admin data-access policy: ${marker}`);
 assert.ok(!/drop table|truncate table/i.test(adminSql), "Admin access migration must not drop or truncate data");
 for (const marker of ["ah_plan_regions", "capacity_units", "allocated_units", "plan_region_out_of_stock", "plan_region_unavailable", "plan_region_required", "for update", "ah_release_order_inventory", "inventory_released_at", "for key share of pl", "for update", "grant select, insert, update, delete"]) assert.ok(inventorySql.toLowerCase().includes(marker.toLowerCase()), "Missing plan-region inventory safeguard: " + marker);
+for (const marker of ["grant select on table public.ah_plan_regions to anon, authenticated", "ah_plan_regions_public_available_read", "capacity_units is null or allocated_units < capacity_units", "p.is_active", "r.status = 'active'"]) assert.ok(publicCatalogSql.toLowerCase().includes(marker.toLowerCase()), "Missing public sellable-inventory read policy: " + marker);
+for (const marker of ["display_name = 'Toncoin'", "ticker = 'TON'", "TON mainnet (native Toncoin)", "token_contract = null"]) assert.ok(toncoinSql.includes(marker), "Missing native Toncoin metadata correction: " + marker);
 assert.ok(!/drop table|truncate table/i.test(inventorySql), "Inventory migration must not drop or truncate data");
-for (const marker of ['<title>运营管理后台', 'id="admin-login"', 'id="admin-app"', 'id="admin-metrics"', 'id="orders-body"', 'id="jobs-list"', 'id="payments-list"', 'id="catalog-list"', 'id="regions-list"', 'id="catalog-editor"', 'id="product-editor"', 'id="plan-editor"', 'id="plan-product"', 'id="plan-region-panel"', 'id="plan-region-editor"', 'id="inventory-plan"', 'id="inventory-region"', 'id="plan-region-list"', 'assets/js/language.js', 'assets/js/admin.js']) assert.ok(adminHtml.includes(marker), `Missing admin console feature: ${marker}`);
+for (const marker of ['<title>运营管理后台', 'id="admin-login"', 'id="admin-app"', 'id="admin-metrics"', 'id="launch-readiness"', 'id="metric-live-products"', 'id="metric-ready-assets"', 'id="region-editor"', 'id="orders-body"', 'id="jobs-list"', 'id="payments-list"', 'id="catalog-list"', 'id="regions-list"', 'id="catalog-editor"', 'id="product-editor"', 'id="plan-editor"', 'id="plan-product"', 'id="plan-region-panel"', 'id="plan-region-editor"', 'id="inventory-plan"', 'id="inventory-region"', 'id="plan-region-list"', 'assets/js/language.js', 'assets/js/admin.js']) assert.ok(adminHtml.includes(marker), `Missing admin console feature: ${marker}`);
 assert.ok(adminHtml.includes('value="zh-CN"') && adminHtml.includes('value="zh-TW"') && !/value="(?:en|ar|fr|ru|es)"/.test(adminHtml), "Admin page must expose only Chinese locales");
 for (const marker of ['createClient', 'auth.getUser()', 'user.app_metadata?.role !== "admin"', '.from("ah_orders")', '.from("ah_payment_events")', '.from("ah_provisioning_jobs")', '.from("ah_products")', '.from("ah_plans")', '.from("ah_regions")', 'count: "exact"', 'updateRow', 'escapeHtml', 'saveCatalog', 'renderProductOptions', 'price_minor:priceMinor', 'JSON.parse(values.specs)', 'ah_plan_regions', 'saveInventory', 'renderPlanRegions', 'capacity_units', 'allocated_units', 'insert(payload)', 'localStorage.setItem("ah-language"']) assert.ok(adminJs.includes(marker), `Missing admin dashboard behavior: ${marker}`);
 assert.ok(!/service_role|SUPABASE_SERVICE_ROLE_KEY/i.test(adminJs + adminHtml), "Admin browser code must not contain service-role credentials");
@@ -143,7 +148,7 @@ for (const route of ['zh/vps/', 'zh/dedicated/', 'zh/rdp/', 'zh/gpu/', 'zh/domai
 for (const route of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html","zh/domains/index.html","zh/account/index.html"]) assert.ok(existsSync(new URL("../" + route, import.meta.url)), "Missing localized page: " + route);
 for (const route of ["zh/index.html"]) assert.ok(existsSync(new URL("../" + route, import.meta.url)), "Missing localized storefront: " + route);
 for (const marker of ["七个数据中心地区", "$7.50", "$48.50", "$11.00", "$122.00"]) assert.ok(html.includes(marker), "Missing public product starting price: " + marker);
-for (const path of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html"]) { const page=read(path); assert.ok(page.includes("region-price-table"), "Missing regional price matrix: " + path); assert.ok(page.includes("登录下单"), "Missing account order entry: " + path); }
+for (const path of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html"]) { const page=read(path); assert.ok(!page.includes("region-price-table") && !page.includes("完整地区价格"), "Product page must not show unverified static prices: " + path); assert.ok(page.includes('id="plans"') && page.includes('id="plan-list"'), "Missing live catalog anchor: " + path); }
 const domainPage=read("zh/domains/index.html"); assert.ok(domainPage.includes("常见 26 种域名后缀"), "Missing domain TLD catalogue");
 for (const marker of ["account-payment-chips", "最近充值记录", "id=\"topup-submit\"", "id=\"topup-invoice\""]) assert.ok(account.includes(marker), "Missing account top-up interface: " + marker);
 assert.ok(accountJs.includes("authPanel.hidden=false"), "Auth form should remain visible before Supabase is configured");
