@@ -693,10 +693,30 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 }
 
 
-/* Align the visible custom payment picker and continue button in one row. */
+/* Balance preview and recharge controls: equal field widths and vertical alignment. */
+.account-page .account-balance.topup-layout{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr)!important;
+  align-items:stretch!important;
+  gap:22px!important;
+}
+.account-page .topup-main{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  min-width:0!important;
+  min-height:100%!important;
+}
+.account-page .topup-main .topup-step,
+.account-page .topup-main .topup-custom-wrap,
+.account-page .topup-main .topup-custom-field{
+  width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
 .account-page .topup-payment-action-row{
   display:flex!important;
-  flex-flow:row nowrap!important;
+  flex-direction:column!important;
   align-items:stretch!important;
   gap:12px!important;
   width:100%!important;
@@ -716,21 +736,23 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 }
 .account-page .topup-payment-action-row > .topup-asset-picker{
   display:block!important;
-  flex:1 1 0!important;
-  width:auto!important;
+  flex:0 0 auto!important;
+  width:100%!important;
   min-width:0!important;
   max-width:none!important;
 }
 .account-page .topup-payment-action-row > .topup-asset-picker .topup-asset-trigger{
+  display:flex!important;
   width:100%!important;
   min-width:0!important;
   height:52px!important;
   min-height:52px!important;
+  box-sizing:border-box!important;
 }
 .account-page .topup-payment-action-row > .topup-continue{
   display:flex!important;
   flex:0 0 auto!important;
-  align-self:stretch!important;
+  align-self:flex-end!important;
   width:auto!important;
   min-width:150px!important;
   max-width:none!important;
@@ -739,6 +761,27 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
   margin:0!important;
   padding:0 20px!important;
   white-space:nowrap!important;
+}
+.account-page .topup-preview{
+  display:flex!important;
+  flex-direction:column!important;
+  align-self:stretch!important;
+  justify-content:center!important;
+  min-width:0!important;
+  width:100%!important;
+  min-height:100%!important;
+  box-sizing:border-box!important;
+}
+.account-page .topup-preview>p{margin-top:auto!important}
+@media(max-width:860px){
+  .account-page .account-balance.topup-layout{
+    grid-template-columns:minmax(0,1fr)!important;
+    align-items:start!important;
+  }
+  .account-page .topup-preview{min-height:0!important}
+  .account-page .topup-payment-action-row > .topup-continue{
+    align-self:flex-end!important;
+  }
 }
 @media(max-width:420px){
   .account-page .topup-payment-action-row{gap:8px!important}
