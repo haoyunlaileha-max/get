@@ -68,7 +68,9 @@
           <input type="hidden" name="id">
           <label><span data-i="product_name">Product name</span><input name="name" required maxlength="100"></label>
           <label><span data-i="product_slug">Slug</span><input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" maxlength="80"></label>
-          <label><span data-i="product_category">Category</span><select name="category" required><option value="linux_vps">Linux VPS</option><option value="dedicated_server">Dedicated Server</option><option value="windows_rdp">Windows RDP</option><option value="gpu">GPU Compute</option><option value="domain">Domains</option></select></label>
+          <label><span data-i="product_category">Category</span><select name="category" id="product-category" required></select></label>
+          <label><span>商品主图（JPG / PNG / WebP / AVIF，最大 5 MB）</span><input name="image_file" type="file" accept="image/jpeg,image/png,image/webp,image/avif"></label>
+          <input type="hidden" name="image_path"><div id="product-image-preview" class="admin-image-preview" aria-live="polite">尚未上传商品图片</div>
           <label><span data-i="description">Description</span><textarea name="description" rows="2" maxlength="1000"></textarea></label>
           <label><span data-i="sort_order">Sort order</span><input name="sort_order" type="number" min="0" max="100000" step="1" value="0"></label>
           <label class="admin-check"><input name="is_active" type="checkbox"><span data-i="publish_product">Publish product immediately</span></label>
@@ -90,6 +92,19 @@
         </form>
       </div>
       <p class="admin-editor-note" data-i="catalog_safety">New entries start unpublished by default. Existing prices are never changed unless you edit and save that plan. Validate specifications before publishing.</p>
+    </section>
+    <section class="admin-panel" id="category-editor-panel">
+      <div class="admin-panel-head"><div><h2>商品分类目录</h2><p>管理商品分类名称、网址标识、排序和启用状态。停用分类不会删除已有商品。</p></div></div>
+      <form id="category-editor" class="admin-editor-grid">
+        <input type="hidden" name="id">
+        <label><span>分类名称</span><input name="name" required maxlength="80" placeholder="例如：高性能计算"></label>
+        <label><span>分类标识（唯一 slug）</span><input name="slug" required maxlength="64" pattern="[a-z0-9]+(?:[_-][a-z0-9]+)*" placeholder="例如：high-performance"></label>
+        <label><span>排序</span><input name="sort_order" type="number" min="0" max="100000" step="1" value="0"></label>
+        <label><span>分类说明</span><input name="description" maxlength="300"></label>
+        <label class="admin-check"><input name="is_active" type="checkbox"><span>启用分类</span></label>
+        <div class="admin-editor-actions"><button class="btn btn-primary" type="submit">保存分类</button><button class="admin-toggle" type="reset">清空</button></div>
+      </form>
+      <div id="category-list" class="admin-catalog"></div>
     </section>
     <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="catalog_title">Product catalog</h2><p data-i="catalog_desc">Enable or disable products and plans. Price changes are intentionally not exposed here.</p></div></div><div id="catalog-list" class="admin-catalog"></div></section>
     <section class="admin-panel" id="plan-region-panel">
