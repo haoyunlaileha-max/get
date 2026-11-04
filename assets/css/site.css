@@ -287,3 +287,103 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 .topup-history-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}.topup-history-heading h3{margin:0}
 
 .admin-image-preview{display:flex;align-items:center;gap:12px;min-height:64px;padding:10px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:13px}.admin-image-preview img{width:112px;height:72px;object-fit:cover;border-radius:8px}.admin-product-thumb{width:64px;height:48px;object-fit:cover;border-radius:8px;flex:none}.plan-product-image{display:block;width:100%;max-height:180px;aspect-ratio:16/9;object-fit:cover;border-radius:12px;margin:0 0 14px}
+
+
+/* Admin console readability: high-contrast white workspace */
+.admin-page{
+  --admin-ink:#111827;
+  --admin-muted:#475467;
+  --admin-line:#d0d5dd;
+  --admin-surface:#ffffff;
+  --admin-subtle:#f8fafc;
+  background:#ffffff!important;
+  color:var(--admin-ink)!important;
+}
+.admin-page header{background:#ffffff!important;border-bottom:1px solid var(--admin-line)!important}
+.admin-page .admin-wrap{color:var(--admin-ink)}
+.admin-page .admin-heading h1,
+.admin-page .admin-panel h2,
+.admin-page .admin-editor h3,
+.admin-page .admin-metric strong,
+.admin-page .admin-catalog-head strong,
+.admin-page .admin-record-top strong{color:#101828!important}
+.admin-page .admin-heading p,
+.admin-page .admin-panel-head p,
+.admin-page .admin-metric span,
+.admin-page .admin-metric small,
+.admin-page .admin-editor-note,
+.admin-page .admin-footnote,
+.admin-page .admin-catalog-head small,
+.admin-page .admin-catalog-line small,
+.admin-page .admin-record small,
+.admin-page .admin-orders-pagination,
+.admin-page .admin-orders-toolbar label{color:var(--admin-muted)!important}
+.admin-page .admin-panel,
+.admin-page .admin-metric,
+.admin-page .admin-session{
+  background:#ffffff!important;
+  color:var(--admin-ink)!important;
+  border:1px solid var(--admin-line)!important;
+  box-shadow:0 2px 8px rgba(16,24,40,.045)!important;
+}
+.admin-page .admin-metric strong{color:#101828!important}
+.admin-page .admin-table th{background:#f2f4f7!important;color:#344054!important;border-color:#d0d5dd!important}
+.admin-page .admin-table td{background:#ffffff!important;color:#101828!important;border-color:#eaecf0!important}
+.admin-page .admin-record,
+.admin-page .admin-catalog-group,
+.admin-page .admin-editor,
+.admin-page .admin-inventory-form,
+.admin-page .admin-order-detail-body{
+  background:#f8fafc!important;
+  color:#101828!important;
+  border:1px solid #d0d5dd!important;
+}
+.admin-page .admin-catalog-head{border-color:#d0d5dd!important}
+.admin-page .admin-catalog-line,
+.admin-page .admin-catalog-state{color:#344054!important}
+.admin-page .admin-status{background:#eaf2ff!important;color:#1849a9!important}
+.admin-page .admin-status.status-failed,
+.admin-page .admin-status.status-refunded,
+.admin-page .admin-status.status-cancelled{background:#fef3f2!important;color:#b42318!important}
+.admin-page .admin-status.status-processing,
+.admin-page .admin-status.status-provisioning,
+.admin-page .admin-status.status-pending,
+.admin-page .admin-status.status-awaiting_payment,
+.admin-page .admin-status.status-queued,
+.admin-page .admin-status.status-retry_wait{background:#fffaeb!important;color:#93370d!important}
+.admin-page .admin-editor label,
+.admin-page .admin-inventory-form label{color:#344054!important}
+.admin-page .admin-editor input,
+.admin-page .admin-editor select,
+.admin-page .admin-editor textarea,
+.admin-page .admin-inventory-form input,
+.admin-page .admin-inventory-form select,
+.admin-page .admin-orders-toolbar input,
+.admin-page .admin-orders-toolbar select{
+  background:#ffffff!important;color:#101828!important;border:1px solid #98a2b3!important;
+}
+.admin-page .admin-editor input::placeholder,
+.admin-page .admin-editor textarea::placeholder,
+.admin-page .admin-orders-toolbar input::placeholder{color:#667085!important}
+.admin-page .admin-editor input:focus,
+.admin-page .admin-editor select:focus,
+.admin-page .admin-editor textarea:focus,
+.admin-page .admin-inventory-form input:focus,
+.admin-page .admin-inventory-form select:focus,
+.admin-page .admin-orders-toolbar input:focus,
+.admin-page .admin-orders-toolbar select:focus{outline:3px solid #84caff!important;border-color:#1570ef!important}
+.admin-page .admin-toggle,
+.admin-page .admin-region-select{background:#ffffff!important;color:#175cd3!important;border:1px solid #84adff!important}
+.admin-page .admin-count{color:#175cd3!important}
+.admin-page .admin-live-dot{background:#12b76a!important}
+.admin-page .admin-brand-tag{color:#175cd3!important;border-color:#84adff!important}
+.admin-page .admin-panel .account-error{color:#b42318!important}
+.admin-page .admin-image-preview{background:#ffffff!important;color:#475467!important;border-color:#98a2b3!important}
+.admin-page .admin-orders-toolbar .btn,
+.admin-page .admin-editor-actions .btn{color:#ffffff!important}
+.admin-page .admin-session strong{color:#101828!important}
+.admin-page .admin-session .account-link-button{color:#175cd3!important}
+@media(prefers-contrast:more){
+  .admin-page .admin-panel,.admin-page .admin-metric,.admin-page .admin-editor,.admin-page .admin-inventory-form{border-color:#667085!important}
+  .admin-page .admin-editor input,.admin-page .admin-editor select,.admin-page .admin-editor textarea{border-color:#475467!important}
+}
