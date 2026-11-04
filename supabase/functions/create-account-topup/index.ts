@@ -5,7 +5,7 @@ const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const configuredOrigins = (Deno.env.get("ALLOWED_ORIGINS") ?? "").split(",").map(v => v.trim()).filter(Boolean);
 const ALLOWED_ORIGINS = new Set([...configuredOrigins,"https://haoyunlaileha-max.github.io","https://anonport.com","https://www.anonport.com"]);
-const AMOUNTS = new Set([1000,2500,5000,10000,25000,50000]);
+const MIN_AMOUNT_MINOR = 3000;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function reply(status:number,body:Record<string,unknown>,origin:string|null) {
@@ -57,7 +57,7 @@ Deno.serve(async(request:Request)=>{
     }
     const amount=body.amount_minor;
     const key=body.idempotency_key;
-    if(typeof amount!=="number"||!Number.isSafeInteger(amount)||!AMOUNTS.has(amount)||typeof key!=="string"||!UUID.test(key)) {
+    if(typeof amount!=="number"||!Number.isSafeInteger(amount)||amount<MIN_AMOUNT_MINOR||typeof key!=="string"||!UUID.test(key)) {
       return reply(400,{error:"invalid_topup_request"},origin);
     }
     const {data:orderId,error}=await admin.rpc("ah_create_account_topup",{
