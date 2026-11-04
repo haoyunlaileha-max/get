@@ -250,4 +250,8 @@ const bonusEligibilityMigration = read("supabase/migrations/20261104050917_accou
 for (const marker of ["bonus_minor", "p_amount_minor<3000", "v_bonus_minor:=case", "amount_minor+v_topup.bonus_minor"]) assert.ok(bonusMigration.includes(marker), "Missing bonus credit safeguard: " + marker);
 for (const marker of ["p_bonus_eligible boolean", "p_bonus_eligible", "grant execute"]) assert.ok(bonusEligibilityMigration.includes(marker), "Missing explicit bonus eligibility safeguard: " + marker);
 for (const [amount,bonus] of [[3000,0],[10000,2500],[25000,7500],[50000,20000],[100000,50000],[200000,200000]]) assert.ok(topupJs.includes("["+amount+","+bonus+"]"), "Missing top-up reward tier: " + amount);
+
+for (const marker of ['id="launch-gate-status"', 'id="launch-gate-list"', '主网上线检查']) assert.ok(adminHtml.includes(marker), "Admin must display a live production release gate");
+for (const marker of ["function renderLaunchReadiness", "自动开通与交付", "域名注册商 API", "真实付款至服务交付验收", "Leaked Password Protection Disabled", "NO-GO", "activeCategoryIds", "metric-plans"]) assert.ok(adminJs.includes(marker), "Missing production launch blocker check: " + marker);
+for (const marker of [".admin-launch-gates", ".admin-launch-gate", ".admin-release-status", ".admin-gate-marker"]) assert.ok(css.includes(marker), "Missing production launch gate styling: " + marker);
 console.log("Checks passed: storefront, account/admin portals, database/RLS safeguards, crypto invoices, mainnet scanner adapters, Vault-authenticated cron and settlement, Telegram outbox security, and provider fail-closed behavior.");
