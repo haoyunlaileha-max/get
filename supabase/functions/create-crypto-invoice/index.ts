@@ -59,7 +59,7 @@ Deno.serve(async(request:Request)=>{
     if(authError||!userData.user) return reply(401,{error:"invalid_or_expired_session"},origin);
     const admin=createClient(SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
     const [{data:order,error:orderError},{data:asset,error:assetError}]=await Promise.all([
-      admin.from("ah_orders").select("id,user_id,status,currency,total_minor").eq("id",orderId).eq("user_id",userData.user.id).maybeSingle(),
+      admin.from("ah_orders").select("id,user_id,status,currency,total_minor,expires_at").eq("id",orderId).eq("user_id",userData.user.id).maybeSingle(),
       admin.from("ah_crypto_assets").select("asset_code,ticker,network,token_contract,decimals,wallet_address,listener_enabled,listener_status").eq("asset_code",assetCode).maybeSingle(),
     ]);
     if(orderError||!order) return reply(404,{error:"order_not_found"},origin);
@@ -75,7 +75,9 @@ Deno.serve(async(request:Request)=>{
     const denominator=100n*priceScaled;
     const baseAtomic=(numerator+denominator-1n)/denominator;
     if(baseAtomic<=0n) return reply(422,{error:"quote_below_asset_precision"},origin);
-    const expiresAt=new Date(Date.now()+10*60*1000).toISOString();
+    const orderExpiry=Date.parse(order.expires_at);
+    if(!Number.isFinite(orderExpiry)||orderExpiry<=Date.now()) return reply(409,{error:"order_expired"},origin);
+    const expiresAt=new Date(Math.min(Date.now()+30*60*1000,orderExpiry)).toISOString();
     const {data:depositId,error:invoiceError}=await admin.rpc("ah_create_crypto_invoice",{
       p_user_id:userData.user.id,p_order_id:orderId,p_asset_code:assetCode,p_base_amount_atomic:baseAtomic.toString(),
       p_quoted_usdt_minor:order.total_minor,p_quote_price_usdt:priceText,p_expires_at:expiresAt,
@@ -83,6 +85,6 @@ Deno.serve(async(request:Request)=>{
     if(invoiceError||!depositId){if(invoiceError?.message?.includes("order_not_payable"))return reply(409,{error:"order_not_payable"},origin);return reply(500,{error:"invoice_creation_failed"},origin);}
     const {data:deposit,error:depositError}=await admin.from("ah_crypto_deposits").select("id,expected_amount_atomic,expires_at,quote_expires_at,quoted_usdt_minor,quote_price_usdt,status").eq("id",depositId).single();
     if(depositError||!deposit)return reply(500,{error:"invoice_lookup_failed"},origin);
-    return reply(201,{invoice:{id:deposit.id,order_id:order.id,asset_code:asset.asset_code,ticker:asset.ticker,network:asset.network,wallet_address:asset.wallet_address,expected_amount_atomic:deposit.expected_amount_atomic,expected_amount:formatAtomic(String(deposit.expected_amount_atomic),decimals),decimals,quoted_usdt:(Number(deposit.quoted_usdt_minor)/100).toFixed(2),price_usdt:String(deposit.quote_price_usdt),expires_at:deposit.expires_at,quote_expires_at:deposit.quote_expires_at,status:deposit.status}},origin);
+    return reply(201,{invoice:{id:deposit.id,order_id:order.id,order_expires_at:order.expires_at,asset_code:asset.asset_code,ticker:asset.ticker,network:asset.network,wallet_address:asset.wallet_address,expected_amount_atomic:deposit.expected_amount_atomic,expected_amount:formatAtomic(String(deposit.expected_amount_atomic),decimals),decimals,quoted_usdt:(Number(deposit.quoted_usdt_minor)/100).toFixed(2),price_usdt:String(deposit.quote_price_usdt),expires_at:deposit.expires_at,quote_expires_at:deposit.quote_expires_at,status:deposit.status}},origin);
   }catch(error){const message=error instanceof Error?error.message:"";if(message==="market_rate_unavailable"||message==="invalid_market_price")return reply(503,{error:"market_rate_unavailable"},origin);return reply(500,{error:"internal_server_error"},origin);}
 });
