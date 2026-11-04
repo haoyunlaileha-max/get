@@ -763,3 +763,25 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
     min-width:112px!important;padding:0 12px!important;font-size:12px!important;
   }
 }
+
+
+/* Account dashboard: show orders as the sole full-width activity panel. */
+.account-page .account-wrap:has(#account-dashboard:not([hidden])){
+  width:min(1440px,calc(100% - 32px))!important;
+}
+.account-page #account-dashboard:not([hidden])>.account-activity-grid{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  width:100%!important;
+  max-width:none!important;
+  gap:0!important;
+}
+.account-page #account-dashboard>.account-activity-grid>.account-orders{
+  grid-column:1 / -1!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+}
+.account-page #account-dashboard>.account-activity-grid>.account-orders #orders-list{
+  width:100%!important;
+}
