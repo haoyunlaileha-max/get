@@ -275,7 +275,7 @@ for (const route of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index
   assert.ok(page.includes('id="reference-catalog-content"') && page.includes("assets/js/reference-catalog.js?v=20261105-1"), "Missing cloned reference catalog mount/script: " + route);
   assert.ok(page.includes("site.css?v=20261105-catalog-1"), "Missing catalog stylesheet cache bust: " + route);
 }
-for (const marker of ["vpsRegions", "dedicatedRegions", "gpuRegions", "rdpRegions", "完整套餐与价格目录", "参考目录"]) assert.ok(referenceCatalog.includes(marker), "Missing source catalog dataset/label: " + marker);
+for (const marker of ["vpsRegions", "dedicatedRegions", "gpuRegions", "rdpRegions", "完整套餐与价格目录", "参考报价"]) assert.ok(referenceCatalog.includes(marker), "Missing source catalog dataset/label: " + marker);
 assert.ok(referenceCatalog.includes('getElementById("reference-catalog-content")'), "Catalog renderer must mount inside the responsive content wrapper");
 
 console.log("Checks passed: storefront, account/admin portals, database/RLS safeguards, crypto invoices, mainnet scanner adapters, Vault-authenticated cron and settlement, Telegram outbox security, and provider fail-closed behavior.");
