@@ -218,23 +218,56 @@ async function handleRefreshClick(){
   }
 }
 async function invoiceCard(invoice,amountMinor,bonusMinor){
-  invoicePanel.replaceChildren();invoicePanel.hidden=false;
-  const title=document.createElement("strong");title.textContent="充值订单已创建，请按以下信息付款";
-  const amount=document.createElement("p");amount.textContent="精确应付："+invoice.expected_amount+" "+invoice.ticker;
-  const network=document.createElement("p");network.textContent="网络："+invoice.network;
-  const quote=document.createElement("p");quote.textContent="账户入账金额："+money(amountMinor+bonusMinor)+"（充值 "+money(amountMinor)+" + 奖励 "+money(bonusMinor)+"）";
-  const addressLabel=document.createElement("p");addressLabel.textContent="收款地址：";
+  const layout=document.querySelector(".topup-layout");
+  if(!layout||!previewPanel)return;
+  let page=document.getElementById("topup-payment-page");
+  if(!page){page=document.createElement("section");page.id="topup-payment-page";page.className="topup-payment-page";layout.insertAdjacentElement("afterend",page);}
+  page.replaceChildren();
+  const summary=document.createElement("div");summary.className="topup-payment-summary";
+  const heading=document.createElement("h2");heading.textContent="充值余额";
+  const details=document.createElement("div");details.className="topup-payment-summary-card";
+  const banner=document.createElement("div");banner.className="topup-payment-summary-banner";
+  const mark=document.createElement("span");mark.className="topup-payment-mark";mark.textContent="+";
+  const bannerText=document.createElement("div");
+  const bannerTitle=document.createElement("strong");bannerTitle.textContent="向您的账户充值 "+dollars(amountMinor);
+  const bannerSub=document.createElement("small");bannerSub.textContent="链上交易确认后，余额即时到账。";
+  bannerText.append(bannerTitle,bannerSub);banner.append(mark,bannerText);
+  const line=(label,value,extra="")=>{const row=document.createElement("div");row.className="topup-payment-line "+extra;const l=document.createElement("span");l.textContent=label;const v=document.createElement("strong");v.textContent=value;row.append(l,v);return row;};
+  details.append(banner,line("您的付款金额",dollars(amountMinor)+" USD"),line("+ 奖励", "+"+dollars(bonusMinor),"bonus"),line("您将获得",dollars(amountMinor+bonusMinor)+" 账户余额"),line("到期时间","余额无有效期"));
+  const total=document.createElement("div");total.className="topup-payment-grand-total";const totalLabel=document.createElement("span");totalLabel.textContent="合计";const totalValue=document.createElement("strong");totalValue.textContent=dollars(amountMinor)+" USD";total.append(totalLabel,totalValue);
+  const order=document.createElement("p");order.className="topup-payment-order";order.textContent="订单 #"+String(invoice.order_id).slice(0,12);
+  const back=document.createElement("button");back.type="button";back.className="btn btn-ghost topup-payment-back";back.textContent="返回充值设置";
+  back.addEventListener("click",()=>{page.hidden=true;layout.hidden=false;});
+  summary.append(heading,details,total,order,back);
+  const payment=document.createElement("aside");payment.className="topup-payment-card";
+  const paymentHead=document.createElement("div");paymentHead.className="topup-payment-card-head";
+  const method=document.createElement("strong");method.textContent="使用 "+invoice.ticker+" ("+invoice.network+") 支付";
+  const countdown=document.createElement("strong");countdown.className="topup-payment-countdown";paymentHead.append(method,countdown);
   const qrWrap=document.createElement("div");qrWrap.className="topup-qr-wrap";
-  const qrLabel=document.createElement("p");qrLabel.textContent="扫描二维码支付";
   const qrImage=document.createElement("img");qrImage.className="topup-qr-image";qrImage.alt="收款地址二维码";qrImage.width=220;qrImage.height=220;
-  try{const QR=await import("https://esm.sh/qrcode@1.5.4");qrImage.src=await (QR.default||QR).toDataURL(invoice.wallet_address,{width:220,margin:2,errorCorrectionLevel:"M"});qrWrap.append(qrLabel,qrImage);}catch{qrWrap.textContent="二维码暂时无法生成，请复制收款地址支付。";}
-  const address=document.createElement("code");address.className="topup-address";address.textContent=invoice.wallet_address;
-  const expires=document.createElement("p");expires.textContent="付款报价有效期至："+new Date(invoice.expires_at).toLocaleString("zh-CN");
-  const warning=document.createElement("p");warning.textContent="请使用指定网络并支付精确金额。转错网络、少付或过期转账可能需要人工核验。";
-  const copy=document.createElement("button");copy.type="button";copy.className="btn btn-ghost topup-copy-address";copy.textContent="一键复制地址";
-  copy.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(invoice.wallet_address);copy.textContent="已复制";}catch{copy.textContent="复制失败，请手动复制地址";}});
-  const order=document.createElement("small");order.textContent="充值订单："+invoice.order_id;
-  invoicePanel.append(title,amount,network,quote,qrWrap,addressLabel,address,copy,expires,warning,order);
+  try{const QR=await import("https://esm.sh/qrcode@1.5.4");qrImage.src=await (QR.default||QR).toDataURL(invoice.wallet_address,{width:220,margin:2,errorCorrectionLevel:"M"});qrWrap.append(qrImage);}catch{const fallback=document.createElement("p");fallback.textContent="二维码暂时无法生成，请复制收款地址支付。";qrWrap.append(fallback);}
+  const amountBlock=document.createElement("div");amountBlock.className="topup-payment-field";
+  const amountLabel=document.createElement("small");amountLabel.textContent="准确发送";
+  const amountValue=document.createElement("div");amountValue.className="topup-payment-copy-row";
+  const exact=document.createElement("code");exact.textContent=invoice.expected_amount+" "+invoice.ticker;
+  const copyAmount=document.createElement("button");copyAmount.type="button";copyAmount.textContent="复制";
+  copyAmount.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(String(invoice.expected_amount));copyAmount.textContent="已复制";}catch{copyAmount.textContent="复制失败";}});
+  amountValue.append(exact,copyAmount);amountBlock.append(amountLabel,amountValue);
+  const addressBlock=document.createElement("div");addressBlock.className="topup-payment-field";
+  const addressLabel=document.createElement("small");addressLabel.textContent="收款地址";
+  const addressValue=document.createElement("div");addressValue.className="topup-payment-copy-row";
+  const address=document.createElement("code");address.textContent=invoice.wallet_address;
+  const copyAddress=document.createElement("button");copyAddress.type="button";copyAddress.textContent="复制";
+  copyAddress.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(invoice.wallet_address);copyAddress.textContent="已复制";}catch{copyAddress.textContent="复制失败";}});
+  addressValue.append(address,copyAddress);addressBlock.append(addressLabel,addressValue);
+  const state=document.createElement("div");state.className="topup-payment-waiting";state.textContent="● 等待付款…";
+  const expiresAt=Date.parse(invoice.expires_at);
+  const updateCountdown=()=>{const seconds=Math.max(0,Math.floor((expiresAt-Date.now())/1000));countdown.textContent=seconds?("◷ "+String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0")):"报价已过期";if(!seconds)state.textContent="● 付款报价已过期，请返回重新创建订单";};
+  updateCountdown();const timer=window.setInterval(()=>{updateCountdown();if(Date.now()>=expiresAt)window.clearInterval(timer);},1000);
+  const warning=document.createElement("p");warning.className="topup-payment-warning";warning.textContent="请务必使用指定网络，并支付上方显示的精确金额。转错网络、少付或过期转账可能需要人工核验。";
+  paymentHead.append(method,countdown);payment.append(paymentHead,qrWrap,amountBlock,addressBlock,state,warning);
+  page.append(summary,payment);layout.hidden=true;page.hidden=false;
+  invoicePanel.hidden=true;
 }
 async function submitTopup(){
   if(busy||!session)return;
