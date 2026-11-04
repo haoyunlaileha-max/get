@@ -20,3 +20,5 @@ jobs:
           node-version: 22
       - name: Validate storefront and database migration
         run: node scripts/check-site.mjs
+      - name: Smoke-test live Supabase customer API CORS
+        run: node scripts/check-live-backend.mjs
