@@ -55,7 +55,7 @@ const backendDocs = read("docs/backend-foundation.md");
 execFileSync(process.execPath, ["--check", "--input-type=module"], { input: read("assets/js/admin.js") });
 execFileSync(process.execPath, ["--check"], { input: read("assets/js/checkout.js") });
 
-for (const marker of ['<html lang="zh-CN"', 'id="language"', 'id="services"', 'id="plans"', 'id="locations"', 'id="why"', 'id="faq"', 'id="plan-list"', 'id="homepage-regions"', 'class="hero-terminal"', 'assets/brand-mark.svg', 'assets/css/site.css', 'assets/js/language.js', 'assets/js/site.js', 'id="mobile-menu"', 'id="configure-dialog"', 'id="configure-form"', 'data-category="rdp"', 'data-category="gpu"', 'data-category="domains"', 'href="account.html"']) assert.ok(html.includes(marker), `Missing storefront feature: ${marker}`);
+for (const marker of ['<html lang="zh-CN"', 'id="language"', 'id="services"', 'id="plans"', 'id="locations"', 'id="why"', 'id="faq"', 'id="plan-list"', 'id="homepage-regions"', 'class="hero-terminal ap-terminal"', 'assets/brand-mark.svg', 'assets/css/site.css', 'assets/js/language.js', 'assets/js/site.js', 'id="mobile-menu"', 'id="configure-dialog"', 'id="configure-form"', 'data-category="rdp"', 'data-category="gpu"', 'data-category="domains"', 'href="account.html"']) assert.ok(html.includes(marker), `Missing storefront feature: ${marker}`);
 assert.ok(html.includes('value="zh-CN"') && html.includes('value="zh-TW"'), "Storefront must offer Simplified and Traditional Chinese");
 assert.ok(!/value="(?:en|ar|fr|ru|es)"/.test(html), "Other storefront locales must remain hidden for now");
 assert.ok(!/<style[\\s>]/i.test(html), "Styles must live in the external stylesheet");
