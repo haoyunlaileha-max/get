@@ -1078,3 +1078,20 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 .vps-cta-banner .btn-primary{background:#fff;color:#155eef}
 @media(max-width:900px){.vps-catalog-page .vps-hero .hero-grid{grid-template-columns:1fr}.vps-hero-panel{max-width:600px}.vps-spec-grid{grid-template-columns:repeat(2,1fr)}.vps-spec-grid article:nth-child(2){border-right:0}.vps-spec-grid article:nth-child(n+3){border-top:1px solid #eaecf0}}
 @media(max-width:640px){.vps-catalog-page .vps-hero{padding:40px 0 34px}.vps-catalog-page .vps-hero h1{font-size:34px}.vps-catalog-page .vps-trust-strip .wrap{justify-content:flex-start;gap:9px 16px}.vps-catalog-page .section{padding:38px 0}.vps-catalog-page .section h2{font-size:23px}.vps-table-legend{font-size:10px}.vps-region-tables{gap:17px}.vps-plan-table{min-width:670px}.vps-spec-grid{grid-template-columns:1fr 1fr}.vps-spec-grid article{padding:12px 9px}.vps-faq-grid{grid-template-columns:1fr}.vps-cta-banner{display:block;padding:22px}.vps-cta-banner .btn{margin-top:15px;width:100%}}
+
+
+/* Category-aware server plan specification editor */
+.admin-spec-editor{grid-column:1/-1;border:1px solid #d0d5dd;border-radius:12px;padding:16px;background:#fff;color:#101828}
+.admin-spec-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+.admin-spec-heading strong{font-size:14px;color:#101828}
+.admin-spec-heading small{font-size:12px;color:#667085}
+.admin-spec-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.admin-spec-field{display:grid;gap:6px;min-width:0}
+.admin-spec-field span{font-size:12px;font-weight:650;color:#344054}
+.admin-spec-field input{width:100%;min-width:0;padding:10px 11px;border:1px solid #d0d5dd;border-radius:8px;background:#fff;color:#101828;font:inherit;font-size:13px}
+.admin-spec-field input:focus{outline:2px solid #84adff;border-color:#528bff}
+.admin-spec-advanced{margin-top:14px;border-top:1px solid #eaecf0;padding-top:12px}
+.admin-spec-advanced summary{cursor:pointer;color:#475467;font-size:12px;font-weight:600}
+.admin-spec-advanced label{display:grid;gap:6px;margin-top:10px}
+.admin-spec-advanced textarea{width:100%;border:1px solid #d0d5dd;border-radius:8px;padding:10px;background:#fff;color:#101828;font:12px/1.5 ui-monospace,monospace}
+@media(max-width:640px){.admin-spec-fields{grid-template-columns:1fr}.admin-spec-heading{display:grid;gap:3px}}
