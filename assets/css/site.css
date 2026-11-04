@@ -612,3 +612,45 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 @media(max-width:760px){
   .account-page #account-dashboard > .account-activity-grid{grid-template-columns:minmax(0,1fr);gap:16px}
 }
+
+
+/* Enforce equal-width account activity columns (desktop) */
+.account-page #account-dashboard:not([hidden]) > .account-activity-grid{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  column-gap:20px!important;
+  row-gap:16px!important;
+  align-items:start!important;
+  width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+.account-page #account-dashboard > .account-activity-grid > .account-activity-panel{
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  box-sizing:border-box!important;
+  justify-self:stretch!important;
+}
+@media(max-width:760px){
+  .account-page #account-dashboard:not([hidden]) > .account-activity-grid{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+}
+
+/* All cancelled labels in the customer account use the same neutral badge. */
+.account-page .status-cancelled,
+.account-page .order-status.status-cancelled,
+.account-page #orders-list .status-cancelled{
+  display:inline-block!important;
+  padding:5px 9px!important;
+  border:1px solid #d0d5dd!important;
+  border-radius:6px!important;
+  background:#fff!important;
+  background-color:#fff!important;
+  color:#101828!important;
+  font-weight:600!important;
+  opacity:1!important;
+  box-shadow:none!important;
+}
