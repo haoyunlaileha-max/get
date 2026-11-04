@@ -11,26 +11,53 @@ let client=null,session=null,assets=[],pendingKey=null,pendingOrderId=null,pendi
 const amountOptions=document.getElementById("topup-amount-options");
 const continueLabel=submitButton.textContent;
 function dollars(minor){return "$"+(Number(minor)/100).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
+const BONUS_BY_AMOUNT=new Map([[3000,0],[10000,2500],[25000,7500],[50000,20000],[100000,50000],[200000,200000]]);
+const customInput=document.getElementById("topup-custom-amount");
+let customMode=false;
+function selectedBonus(amount){return BONUS_BY_AMOUNT.get(amount)||0;}
+function setAmount(amount,custom=false){
+  amountSelect.value=String(amount);
+  customMode=custom;
+  updateTopupPreview();
+}
 function updateTopupPreview(){
-  const amount=Number(amountSelect.value)||0;
+  const amount=Number(amountSelect.value)||3000;
+  const bonus=selectedBonus(amount);
   const current=currentBalanceMinor;
   text(document.getElementById("topup-preview-current"),dollars(current));
   text(document.getElementById("topup-preview-add"),dollars(amount));
-  text(document.getElementById("topup-preview-bonus"),"$0.00");
-  text(document.getElementById("topup-preview-total"),dollars(current+BigInt(amount)));
+  text(document.getElementById("topup-preview-bonus"),dollars(bonus));
+  text(document.getElementById("topup-preview-total"),dollars(current+BigInt(amount+bonus)));
   text(submitButton,"继续 · $"+(amount/100).toLocaleString("en-US")+" →");
   amountOptions?.querySelectorAll("[data-amount]").forEach(button=>{
-    const selected=Number(button.dataset.amount)===amount;
+    const selected=!customMode&&Number(button.dataset.amount)===amount;
     button.classList.toggle("selected",selected);
     button.setAttribute("aria-pressed",String(selected));
   });
+  customInput?.closest(".topup-custom-wrap")?.classList.toggle("active",customMode);
 }
 amountOptions?.addEventListener("click",event=>{
   const button=event.target.closest("[data-amount]");
   if(!button||amountSelect.disabled||busy)return;
-  amountSelect.value=button.dataset.amount;
-  updateTopupPreview();
+  if(customInput)customInput.value="";
+  setAmount(Number(button.dataset.amount),false);
 });
+function applyCustomAmount(){
+  if(!customInput||amountSelect.disabled||busy)return;
+  let value=Number(customInput.value);
+  if(!Number.isFinite(value)||value<=0)value=30;
+  if(value<30)value=30;
+  value=Math.round(value*100)/100;
+  customInput.value=value.toFixed(2);
+  const minor=Math.round(value*100);
+  if(!Number.isSafeInteger(minor)||minor<3000){customInput.value="30.00";setAmount(3000,true);return;}
+  if(![3000,10000,25000,50000,100000,200000].includes(minor))setAmount(minor,true);
+  else setAmount(minor,true);
+}
+customInput?.addEventListener("focus",()=>{if(!customMode)customInput.value="";});
+customInput?.addEventListener("change",applyCustomAmount);
+customInput?.addEventListener("blur",()=>{if(customInput.value.trim())applyCustomAmount();});
+customInput?.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();applyCustomAmount();}});
 amountSelect.addEventListener("change",updateTopupPreview);
 
 function money(minor){return (Number(minor)/100).toFixed(2)+" USDT";}
@@ -111,6 +138,7 @@ function invoiceCard(invoice){
 }
 async function submitTopup(){
   if(busy||!session)return;
+  if(customMode)applyCustomAmount();
   const amount=Number(amountSelect.value),assetCode=assetSelect.value;
   if(!Number.isSafeInteger(amount)||!assetCode){showInvoiceError("请选择充值金额和可用收款网络。");return;}
   busy=true;submitButton.disabled=true;submitButton.textContent="正在创建充值订单…";
@@ -120,7 +148,7 @@ async function submitTopup(){
       const created=await api("create-account-topup",{action:"create",amount_minor:amount,idempotency_key:pendingKey});
       pendingOrderId=created.order_id;
       pendingAmountMinor=amount;
-      amountSelect.disabled=true;
+      amountSelect.disabled=true;if(customInput)customInput.disabled=true;
     }
     if(pendingAmountMinor!==amount)throw new Error("当前充值订单金额已锁定，请完成该订单或刷新充值页面后再创建新订单。");
     submitButton.textContent="正在生成链上收款信息…";
@@ -131,7 +159,7 @@ async function submitTopup(){
   }catch(error){
     showInvoiceError(error.message==="asset_monitoring_unavailable"?"该收款网络暂不可用，系统已阻止生成付款地址。":error.message==="market_rate_unavailable"?"暂时无法取得可靠实时汇率，请稍后重试。":error.message==="asset_contract_unverified"?"该代币合约尚未核验，暂不开放收款。":error.message);
   }finally{
-    busy=false;submitButton.disabled=!assets.length;amountSelect.disabled=Boolean(pendingOrderId);submitButton.textContent=pendingOrderId?"继续生成此金额的收款信息":"继续 · $"+((Number(amountSelect.value)||0)/100).toLocaleString("en-US")+" →";
+    busy=false;submitButton.disabled=!assets.length;amountSelect.disabled=Boolean(pendingOrderId);if(customInput)customInput.disabled=Boolean(pendingOrderId);submitButton.textContent=pendingOrderId?"继续生成此金额的收款信息":"继续 · $"+((Number(amountSelect.value)||0)/100).toLocaleString("en-US")+" →";
   }
 }
 async function start(){
@@ -144,7 +172,7 @@ async function start(){
     client.auth.onAuthStateChange((_event,next)=>{queueMicrotask(async()=>{
       session=next;
       if(session){await loadAssets();await refreshBalance();}
-      else{assets=[];pendingKey=null;pendingOrderId=null;pendingAmountMinor=null;amountSelect.disabled=false;assetSelect.replaceChildren(new Option("登录后加载可用网络",""));assetSelect.disabled=true;submitButton.disabled=true;text(balanceValue,"0.00 USDT");text(balanceState,"登录后查看账户余额。");historyPanel.replaceChildren();}
+      else{assets=[];pendingKey=null;pendingOrderId=null;pendingAmountMinor=null;amountSelect.disabled=false;if(customInput)customInput.disabled=false;assetSelect.replaceChildren(new Option("登录后加载可用网络",""));assetSelect.disabled=true;submitButton.disabled=true;text(balanceValue,"0.00 USDT");text(balanceState,"登录后查看账户余额。");historyPanel.replaceChildren();}
     });});
     window.setInterval(()=>{if(session&&document.visibilityState==="visible")refreshBalance();},30000);
     document.addEventListener("visibilitychange",()=>{if(session&&document.visibilityState==="visible")refreshBalance();});
