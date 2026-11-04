@@ -101,6 +101,25 @@
           <div class="topup-preview-total"><span>充值后</span><strong id="topup-preview-total">$30.00</strong></div>
           <p>固定档位赠送金额按活动规则自动计入余额；自定义金额不参与赠送。</p>
         </aside>
+        <div id="topup-checkout-view" class="topup-checkout-view" hidden aria-live="polite">
+          <div class="topup-checkout-header"><div><h2>充值结算</h2><p>请按以下信息完成转账，系统将自动检测付款状态。</p></div><button id="topup-checkout-back" class="btn btn-ghost" type="button">返回选择金额</button></div>
+          <div class="topup-payment-page">
+            <section class="topup-payment-summary"><h3>充值订单</h3><div class="topup-payment-summary-card">
+              <div class="topup-payment-summary-banner"><span class="topup-payment-mark">＋</span><div><strong id="checkout-summary-title">账户余额充值</strong><small>链上交易确认后，余额自动到账。</small></div></div>
+              <div class="topup-payment-line"><span>充值金额</span><strong id="checkout-amount">—</strong></div>
+              <div class="topup-payment-line bonus"><span>赠送金额</span><strong id="checkout-bonus">—</strong></div>
+              <div class="topup-payment-line"><span>预计到账</span><strong id="checkout-total">—</strong></div>
+            </div><div class="topup-payment-grand-total"><span>本次应付</span><strong id="checkout-due">—</strong></div><p class="topup-payment-order" id="checkout-order-id"></p></section>
+            <aside class="topup-payment-card"><div class="topup-payment-card-head"><strong id="checkout-method">加密货币付款</strong><strong id="checkout-countdown" class="topup-payment-countdown">—</strong></div>
+              <div class="topup-qr-wrap" id="checkout-qr-wrap"><img id="checkout-qr" class="topup-qr-image" alt="收款地址二维码" width="180" height="180"></div>
+              <div class="topup-payment-field"><small>准确付款金额</small><div class="topup-payment-copy-row"><code id="checkout-pay-amount">—</code><button id="checkout-copy-amount" type="button">复制</button></div></div>
+              <div class="topup-payment-field"><small>收款地址</small><div class="topup-payment-copy-row"><code id="checkout-address">—</code><button id="checkout-copy-address" type="button">复制</button></div></div>
+              <div id="checkout-status" class="topup-payment-waiting" role="status">● 等待付款…</div>
+              <p class="topup-payment-warning">请使用指定网络，并支付精确金额。请勿向此地址发送其他币种或使用其他网络。</p>
+              <button id="checkout-cancel" class="btn btn-ghost topup-payment-cancel" type="button">取消订单</button>
+            </aside>
+          </div>
+        </div>
       </section>
       <section class="account-transactions"><div class="topup-history-heading"><h3>最近充值记录</h3><button class="btn btn-ghost" id="topup-refresh" type="button">刷新状态</button></div><div id="topup-history" class="topup-history"><div class="account-notice">正在加载充值记录…</div></div></section>
       <section class="account-profile">
