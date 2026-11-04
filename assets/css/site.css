@@ -654,3 +654,40 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
   opacity:1!important;
   box-shadow:none!important;
 }
+
+
+/* Final account layout override: keep the activity cards in a true 50/50 row. */
+.account-page #account-dashboard:not([hidden]){
+  display:block!important;
+  width:100%!important;
+}
+.account-page #account-dashboard > .account-activity-grid{
+  display:grid!important;
+  width:100%!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:20px!important;
+  align-items:stretch!important;
+  margin:20px 0!important;
+}
+.account-page #account-dashboard > .account-activity-grid > .account-activity-panel{
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  margin:0!important;
+  justify-self:stretch!important;
+}
+@media(max-width:760px){
+  .account-page #account-dashboard > .account-activity-grid{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+}
+.account-page #orders-list .order-status.status-cancelled,
+.account-page .account-activity-panel .order-status.status-cancelled,
+.account-page .status-cancelled{
+  background:#fff!important;
+  background-color:#fff!important;
+  color:#101828!important;
+  border:1px solid #d0d5dd!important;
+  opacity:1!important;
+  box-shadow:none!important;
+}
