@@ -1228,3 +1228,40 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
 .availability-state .state-indicator{grid-row:1/3}.availability-state strong{font-size:14px;color:#273e35}.availability-state small{grid-column:2;color:#72847c;font-size:10px}.availability-state a{grid-column:1/-1;margin-top:12px;padding-top:10px;border-top:1px solid #e8efeb;color:#176d56;font-size:12px;font-weight:750}
 .terminal-demo{color:#f0c66e!important}.terminal-demo i{background:#d39a35!important;box-shadow:0 0 10px #d39a35!important}.terminal-demo-mark{color:#e7b95b;margin-right:5px}
 @media(max-width:700px){.availability-inner{display:block}.availability-state{margin-top:17px;width:100%;max-width:360px}}
+
+/* Admin white workspace: final contrast pass, versioned with admin.html */
+.admin-page{background:#fff!important;color:#101828!important;color-scheme:light}
+.admin-page *{text-shadow:none}
+.admin-page .admin-wrap{background:transparent!important;color:#101828!important}
+.admin-page .admin-heading,.admin-page .admin-heading h1,.admin-page .admin-heading p,
+.admin-page .admin-panel,.admin-page .admin-panel h2,.admin-page .admin-panel h3,
+.admin-page .admin-panel p,.admin-page .admin-panel label,.admin-page .admin-panel small,
+.admin-page .admin-session,.admin-page .admin-session strong,
+.admin-page .admin-metric,.admin-page .admin-metric span,.admin-page .admin-metric strong,
+.admin-page .admin-metric small,.admin-page .admin-editor-note,.admin-page .admin-footnote,
+.admin-page .admin-catalog-line,.admin-page .admin-catalog-state,
+.admin-page .admin-record,.admin-page .admin-record *,
+.admin-page .admin-order-detail-body,.admin-page .admin-order-detail-body *,
+.admin-page .admin-catalog-group,.admin-page .admin-catalog-group *{color:#101828!important}
+.admin-page .admin-heading p,.admin-page .admin-panel-head p,
+.admin-page .admin-metric span,.admin-page .admin-metric small,
+.admin-page .admin-editor-note,.admin-page .admin-footnote,
+.admin-page .admin-record small,.admin-page .admin-catalog-line small{color:#475467!important}
+.admin-page .admin-panel,.admin-page .admin-metric,.admin-page .admin-session,
+.admin-page .admin-record,.admin-page .admin-catalog-group,
+.admin-page .admin-editor,.admin-page .admin-inventory-form,
+.admin-page .admin-order-detail-body{background:#fff!important;border:1px solid #d0d5dd!important}
+.admin-page .admin-editor,.admin-page .admin-inventory-form,
+.admin-page .admin-record,.admin-page .admin-catalog-group,
+.admin-page .admin-order-detail-body{background:#f8fafc!important}
+.admin-page input:not([type=checkbox]):not([type=radio]),
+.admin-page select,.admin-page textarea{background:#fff!important;color:#101828!important;border:1px solid #98a2b3!important;color-scheme:light}
+.admin-page input::placeholder,.admin-page textarea::placeholder{color:#667085!important;opacity:1}
+.admin-page option{background:#fff!important;color:#101828!important}
+.admin-page button.admin-toggle,.admin-page button.admin-region-select{background:#fff!important;color:#175cd3!important;border:1px solid #84adff!important}
+.admin-page a:not(.btn){color:#175cd3}
+.admin-page .btn-primary{background:#175cd3!important;color:#fff!important;border-color:#175cd3!important}
+.admin-page .admin-table{background:#fff!important}
+.admin-page .admin-table th{background:#f2f4f7!important;color:#101828!important}
+.admin-page .admin-table td{background:#fff!important;color:#101828!important}
+.admin-page :focus-visible{outline:3px solid #1570ef!important;outline-offset:2px}
