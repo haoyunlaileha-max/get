@@ -11,6 +11,8 @@ A responsive, Chinese-language storefront and customer portal for the **AnonPort
 - The customer portal uses the resulting Supabase session for profile management and user-scoped order history.
 - The operations console supports orders, payment events, provisioning jobs, category management, product image uploads, catalog editing, regions, and per-plan inventory. Product media is stored in the public `product-images` bucket; only verified admins can upload, replace, or delete objects. Image files are limited to JPEG, PNG, WebP, and AVIF at 5 MB. Access requires a trusted `app_metadata.role = admin` claim and matching database RLS policies.
 - Static frontend; no bundler is required.
+- Complete Chinese navigation and 33 localized page routes covering products, locations, jurisdiction selection, alternatives, guides, use cases, FAQ, solution pages, AI agent API, and company/legal pages.
+- All new localized routes use shared responsive page styling and are included in `sitemap.xml`; live product prices and inventory remain catalog-driven.
 
 ## Live deployment status
 

@@ -35,6 +35,7 @@ jobs:
           cp .nojekyll dist/.nojekyll
           cp favicon.svg dist/favicon.svg
           cp robots.txt dist/robots.txt
+          cp sitemap.xml dist/sitemap.xml
           cp -R assets dist/assets
           cp -R zh dist/zh
           test -f dist/index.html
