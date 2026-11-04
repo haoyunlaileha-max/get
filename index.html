@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="zh-CN" dir="ltr"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#ffffff"><meta name="description" content="Anonymous Hosting 提供 VPS、独立服务器、Windows RDP 与 GPU 计算基础设施。">
-<title>Anonymous Hosting — 全球云基础设施</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/css/site.css">
+<meta name="theme-color" content="#ffffff"><meta name="description" content="AnonPort 提供 Linux VPS、独立服务器、Windows RDP、GPU 计算与域名服务；套餐和地区以实时可售目录为准。">
+<title>AnonPort — 隐私优先的全球服务器基础设施</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/css/site.css">
 </head><body>
 <div class="topbar"><div class="wrap"><span><i class="topbar-live"></i>主网链上收款已部署 <span class="topbar-divider">/</span> 商品仅按实时可售目录开放</span><span>隐私优先 · 灵活部署 · 专业支持</span></div></div>
 <header><div class="wrap nav">
-<a class="brand" href="#" aria-label="Anonymous Hosting 首页"><img class="brand-mark" src="assets/brand-mark.svg" alt=""><span>ANONYMOUS <b>HOSTING</b></span></a>
+<a class="brand" href="#" aria-label="AnonPort 首页"><img class="brand-mark" src="assets/brand-mark.svg" alt=""><span>ANONPORT</span></a>
 <nav class="links" aria-label="主导航"><a href="#services">产品服务</a><a href="zh/vps/">Linux VPS</a><a href="zh/dedicated/">独立服务器</a><a href="zh/rdp/">Windows RDP</a><a href="zh/gpu/">GPU</a><a href="zh/domains/">域名</a><a href="account.html">账户中心</a></nav>
 <div class="navright"><select class="lang" id="language" aria-label="选择语言"><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option></select><a class="btn btn-primary" href="#plans">选择套餐 ↗</a><button class="mobile-menu" id="mobile-menu" aria-label="打开菜单" aria-expanded="false" type="button">☰</button></div>
 </div></header>
@@ -18,10 +18,10 @@
 <div class="trust trust-row"><span>配置清晰透明</span><span>多地区机房选择</span><span>统一账户管理</span></div>
 </div>
 <div class="hero-terminal"><div class="terminal-top"><div class="terminal-window-dots"><i></i><i></i><i></i></div><span>实例预览 · NODE STATUS</span><span class="terminal-live"><i></i> ONLINE</span></div>
-<div class="terminal-body"><div class="terminal-prompt"><span>root@ah-node</span>:~# <b>server status --region global</b></div>
+<div class="terminal-body"><div class="terminal-prompt"><span>root@anonport</span>:~# <b>server status --region global</b></div>
 <div class="terminal-output"><span class="terminal-ok">✓</span> 虚拟化节点已就绪</div><div class="terminal-output"><span class="terminal-ok">✓</span> 网络接口已分配</div><div class="terminal-output"><span class="terminal-ok">✓</span> 存储卷已挂载</div><div class="terminal-output"><span class="terminal-ok">✓</span> 等待部署配置<span class="terminal-cursor">_</span></div>
-<div class="terminal-instance"><div><small>示例实例</small><strong>AH-VPS-M</strong></div><span class="instance-badge">演示配置</span><div class="instance-grid"><div><small>CPU</small><b>4 vCPU</b></div><div><small>内存</small><b>8 GB</b></div><div><small>存储</small><b>120 GB NVMe</b></div><div><small>网络</small><b>1 Gbps</b></div></div></div>
-</div><div class="terminal-foot"><span>SECURE BY DESIGN</span><span>ANONYMOUS HOSTING / 01</span></div></div>
+<div class="terminal-instance"><div><small>示例实例</small><strong>AP-VPS-M</strong></div><span class="instance-badge">演示配置</span><div class="instance-grid"><div><small>CPU</small><b>4 vCPU</b></div><div><small>内存</small><b>8 GB</b></div><div><small>存储</small><b>120 GB NVMe</b></div><div><small>网络</small><b>1 Gbps</b></div></div></div>
+</div><div class="terminal-foot"><span>SECURE BY DESIGN</span><span>ANONPORT / 01</span></div></div>
 </div></section>
 <section class="section product-section" id="services"><div class="wrap">
 <div class="section-head"><div><div class="kicker">PRODUCTS / 产品矩阵</div><h2>为不同需求，提供合适的算力</h2><p class="sub">五类基础设施服务，从轻量应用到高性能计算，按需选择。</p></div><a class="section-more" href="#plans">查看全部套餐 →</a></div>
@@ -47,5 +47,5 @@
 <label for="config-region">首选数据中心</label><select id="config-region"><option value="">请先选择有库存的套餐</option></select>
 <label for="config-os">操作系统 / 选项</label><select id="config-os"><option>Ubuntu</option><option>Debian</option><option>AlmaLinux</option><option>Windows Server（如适用）</option><option>不适用 / 域名</option></select>
 <button class="btn btn-primary config-submit" type="submit">预览配置 / 创建待处理订单</button><div id="config-summary" class="config-summary" hidden aria-live="polite"></div><p class="config-disclaimer">订单通过主网链上收款；到账经自动监听确认后通知管理员人工交付。不会自动开通服务器或提取资金。</p></form></dialog>
-<footer><div class="wrap"><div class="foot"><div class="foot-brand"><a class="brand" href="#"><img class="brand-mark" src="assets/brand-mark.svg" alt=""><span>ANONYMOUS <b>HOSTING</b></span></a><p>为全球项目提供灵活的基础设施。</p></div><div class="foot-meta">© <span id="year"></span> Anonymous Hosting · 仅在存在真实可售库存时开放下单；付款确认后由管理员人工履约。<div><a href="account.html">账户中心</a><span>·</span><a href="admin.html">管理入口</a></div></div></div></div></footer>
+<footer><div class="wrap"><div class="foot"><div class="foot-brand"><a class="brand" href="#"><img class="brand-mark" src="assets/brand-mark.svg" alt=""><span>ANONYMOUS <b>HOSTING</b></span></a><p>为全球项目提供灵活的服务器基础设施。</p></div><div class="foot-meta">© <span id="year"></span> AnonPort · 仅在存在真实可售库存时开放下单；付款确认后由管理员人工履约。<div><a href="account.html">账户中心</a><span>·</span><a href="admin.html">管理入口</a></div></div></div></div></footer>
 <script src="assets/js/language.js"></script><script src="assets/js/supabase-config.js"></script><script src="assets/js/site.js"></script><script src="assets/js/checkout.js"></script></body></html>
