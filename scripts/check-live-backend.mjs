@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const config = readFileSync(new URL("../assets/js/supabase-config.js", import.meta.url), "utf8");
-const projectUrl = config.match(/url:\\s*"([^"]+)"/)?.[1]?.replace(/\\/$/, "");
+const projectUrl = config.match(/url:\s*"([^"]+)"/)?.[1]?.replace(/\/$/, "");
 assert.ok(projectUrl, "Supabase project URL must be configured");
 
 const origins = ["https://anonport.com", "https://www.anonport.com", "https://haoyunlaileha-max.github.io"];
