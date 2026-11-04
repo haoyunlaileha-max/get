@@ -12,9 +12,6 @@ const loadMoreOrdersButton = document.getElementById("load-more-orders");
 const submitButton = document.getElementById("auth-submit");
 const resetButton = document.getElementById("reset-password");
 const signOutButton = document.getElementById("sign-out");
-const profileForm = document.getElementById("profile-form");
-const profileSave = document.getElementById("profile-save");
-const profileState = document.getElementById("profile-state");
 const languageSelect = document.getElementById("account-language");
 let supabase;
 const requestedMode = new URLSearchParams(window.location.search).get("mode");
@@ -144,7 +141,6 @@ function renderOrderItem(row,currency){
 }
 async function cancelOrder(orderId,button){
   if(!supabase||!activeUserId||button.disabled)return;
-  if(!window.confirm(tr("cancel_order_confirm")))return;
   const userId=activeUserId;
   button.disabled=true;
   button.textContent=tr("cancel_order_busy");
@@ -170,14 +166,6 @@ async function cancelOrder(orderId,button){
       button.removeAttribute("aria-busy");
     }
   }
-}
-async function loadProfile(userId){
-  profileState.textContent=tr("profile_loading");
-  const {data,error}=await supabase.from("ah_profiles").select("display_name").eq("id",userId).maybeSingle();
-  if(activeUserId!==userId)return;
-  if(error){profileState.textContent=tr("profile_error");return;}
-  document.getElementById("profile-name").value=data?.display_name||"";
-  profileState.textContent="";
 }
 async function loadMoreOrders(){
   if(!supabase||!activeUserId||ordersLoading)return;
@@ -217,9 +205,10 @@ async function renderSession(session){
   sessionRenderTask=(async()=>{
     authPanel.hidden=true;if(tokenAuthPanel)tokenAuthPanel.hidden=true;dashboard.hidden=false;
     if(location.hash==="#balance")document.getElementById("balance").scrollIntoView({behavior:"smooth",block:"start"});
-    document.getElementById("account-email").textContent=session.user.user_metadata?.display_name||session.user.email||tr("signed_user");
+    
     ordersState.hidden=false;ordersState.textContent=tr("loading_orders");ordersList.replaceChildren();loadMoreOrdersButton.hidden=true;
-    await loadProfile(userId);
+    document.getElementById("account-email").textContent="客户端 ID："+userId;
+    document.getElementById("account-client-info").textContent="客户端令牌账户 · 已验证登录 · 原始令牌仅创建时显示";
     if(generation!==sessionRenderGeneration||activeUserId!==userId)return;
     await loadMoreOrders();
     if(generation!==sessionRenderGeneration||activeUserId!==userId)return;
@@ -279,17 +268,6 @@ resetButton.addEventListener("click",async()=>{
     if(error)throw error;message(authSuccess,tr("reset_sent"));message(authError,"");
   }catch(error){showError(error);}
   finally{setBusy(resetButton,false,"",tr("reset_password"));}
-});
-profileForm.addEventListener("submit",async event=>{
-  event.preventDefault();if(!supabase||!activeUserId)return;
-  const userId=activeUserId;const displayName=document.getElementById("profile-name").value.trim();
-  if(displayName.length>80){profileState.textContent=tr("profile_error");return;}
-  setBusy(profileSave,true,tr("profile_saving"),tr("save_profile"));
-  try{
-    const {error}=await supabase.from("ah_profiles").update({display_name:displayName||null}).eq("id",userId);
-    if(error)throw error;if(activeUserId===userId)profileState.textContent=tr("profile_saved");
-  }catch(error){profileState.textContent=tr("profile_error");}
-  finally{setBusy(profileSave,false,"",tr("save_profile"));}
 });
 signOutButton.addEventListener("click",async()=>{
   if(!supabase)return;setBusy(signOutButton,true,"…",tr("sign_out"));
