@@ -219,7 +219,7 @@ async function handleRefreshClick(){
 }
 function paymentPageUrl(invoice,amountMinor,bonusMinor){
  const params=new URLSearchParams({order:String(invoice.order_id),asset:String(invoice.asset_code),ticker:String(invoice.ticker),network:String(invoice.network),address:String(invoice.wallet_address),amount:String(invoice.expected_amount),decimals:String(invoice.decimals),expires:String(invoice.expires_at),orderExpires:String(invoice.order_expires_at||invoice.expires_at),usdtMinor:String(amountMinor),bonusMinor:String(bonusMinor)});
- return "payment.html?"+params.toString();
+ return new URL("payment.html?"+params.toString(),window.location.href).toString();
 }
 async function submitTopup(){
   if(busy||!session)return;
