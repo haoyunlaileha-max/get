@@ -139,8 +139,11 @@ async function loadAssets(){
     assetSelect.disabled=true;renderAssetPicker();showInvoiceError(error.message);
   }
 }
-async function refreshBalance(){
-  if(!client||!session?.user?.id)return;
+async function refreshBalance(options={}){
+  if(!client||!session?.user?.id){
+    if(options.manual)throw new Error("登录状态已失效，请重新登录后刷新充值记录。");
+    return false;
+  }
   const userId=session.user.id;
   text(balanceState,"正在同步余额与充值状态…");
   try{
@@ -165,8 +168,34 @@ async function refreshBalance(){
       if(item.credited_at){const date=document.createElement("small");date.textContent="入账时间："+new Date(item.credited_at).toLocaleString("zh-CN");left.append(date);}
       row.append(left,status);historyPanel.append(row);
     }
-  }catch{
-    text(balanceState,"余额或充值记录暂时无法加载，请稍后刷新。");
+    return true;
+  }catch(error){
+    text(balanceState,"余额或充值记录暂时无法加载："+(error?.message||"请稍后刷新。"));
+    if(options.manual)throw error;
+    return false;
+  }
+}
+let refreshInProgress=false;
+async function handleRefreshClick(){
+  if(refreshInProgress)return;
+  refreshInProgress=true;
+  const originalLabel=refreshButton?.textContent||"刷新状态";
+  if(refreshButton){refreshButton.disabled=true;refreshButton.textContent="正在刷新…";refreshButton.setAttribute("aria-busy","true");}
+  try{
+    if(!client)throw new Error("账户服务尚未初始化，请刷新页面重试。");
+    const {data,error}=await client.auth.getSession();
+    if(error)throw error;
+    session=data.session;
+    if(!session?.user?.id)throw new Error("登录状态已失效，请重新登录后刷新充值记录。");
+    await refreshBalance({manual:true});
+    if(refreshButton)refreshButton.textContent="已更新";
+  }catch(error){
+    text(balanceState,error?.message||"刷新失败，请稍后重试。");
+    if(refreshButton)refreshButton.textContent="刷新失败";
+  }finally{
+    refreshInProgress=false;
+    if(refreshButton){refreshButton.disabled=false;refreshButton.removeAttribute("aria-busy");}
+    window.setTimeout(()=>{if(refreshButton&&!refreshInProgress)refreshButton.textContent=originalLabel;},1800);
   }
 }
 function invoiceCard(invoice,amountMinor,bonusMinor){
@@ -228,5 +257,5 @@ async function start(){
 }
 updateTopupPreview();
 submitButton.addEventListener("click",submitTopup);
-refreshButton?.addEventListener("click",refreshBalance);
+refreshButton?.addEventListener("click",handleRefreshClick);
 start();
