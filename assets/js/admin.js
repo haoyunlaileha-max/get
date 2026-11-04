@@ -50,53 +50,6 @@ function renderPlanCategoryOptions(rows,selected){const select=$("plan-category"
 function renderPlanSpecFields(specs={},slug){const root=$("plan-spec-fields");if(!root)return;const categorySlug=slug||categoryRows.find(row=>row.id===$("plan-category").value)?.slug;const definition=categorySpecDefinition(categorySlug);root.replaceChildren();$("plan-spec-category-hint").textContent=definition.label+" · 请填写完整规格";for(const [key,label] of definition.fields){const wrapper=document.createElement("label");wrapper.className="admin-spec-field";const title=document.createElement("span");title.textContent=label+"（必填）";const input=document.createElement("input");input.type="text";input.name="spec_"+key;input.required=true;input.maxLength=120;const legacy=key==="nvme"&&!specs.nvme?specs.storage:key==="storage"&&!specs.storage?specs.disk:undefined;input.value=String(specs[key]??legacy??"");input.placeholder=key==="uplink"?"例如：1 Gbps":key==="bandwidth"?"例如：10 TB/月":key==="vram"?"例如：24 GB":key==="gpu"?"例如：NVIDIA RTX 4090":"请输入"+label;wrapper.append(title,input);root.append(wrapper);}}
 function readPlanSpecFields(form,slug){const specs={};for(const [key,label] of categorySpecDefinition(slug).fields){const value=String(form.elements.namedItem("spec_"+key)?.value||"").trim();if(!value){show(nodes.error,"请填写完整的套餐规格："+label);return null;}specs[key]=value;}return specs;}
 function fillPlanEditor(plan){const form=$("plan-editor");form.reset();const product=plan?productRows.find(row=>row.id===plan.product_id):null;const category=plan?categoryRows.find(row=>row.id===product?.category_id):categoryRows.find(row=>PLAN_CATEGORY_SPECS[row.slug]);form.elements.id.value=plan?.id||"";form.elements.product_id.value=plan?.product_id||"";form.elements.code.value=plan?.code||"";form.elements.category_id.value=category?.id||"";form.elements.name.value=plan?.name||"";form.elements.price.value=plan?(Number(plan.price_minor)/100).toFixed(2):"0.00";form.elements.is_active.checked=Boolean(plan?.is_active);$("plan-editor-heading").textContent=plan?"编辑套餐":"新增套餐";renderPlanSpecFields(plan?.specs||{},category?.slug);form.scrollIntoView({behavior:"smooth",block:"center"});}
-function renderProductOptions(products) {
-  const select = $("plan-product"); const previous = select.value;
-  select.replaceChildren();
-  for (const product of products) { const option = document.createElement("option"); option.value = product.id; option.textContent = product.name; select.append(option); }
-  if (products.some((p)=>p.id===previous)) select.value=previous;
-}
-function renderProductCategoryOptions(rows) {
-  const select=$("product-category");const previous=select.value;select.replaceChildren();
-  for(const row of rows){const option=document.createElement("option");option.value=row.id;option.textContent=row.name+(row.is_active?"":"（停用）");select.append(option);}
-  if(rows.some(row=>row.id===previous))select.value=previous;
-}
-function fillCategoryEditor(row){
-  const form=$("category-editor");form.reset();
-  for(const key of ["id","name","slug","description","sort_order"])form.elements.namedItem(key).value=row?.[key]??(key==="sort_order"?0:"");
-  form.elements.is_active.checked=Boolean(row?.is_active);
-  form.elements.slug.readOnly=Boolean(row?.id);
-  form.scrollIntoView({behavior:"smooth",block:"center"});
-}
-function renderCategories(rows){
-  const root=$("category-list");root.replaceChildren();renderProductCategoryOptions(rows);
-  if(!rows.length){root.textContent="暂无分类";return;}
-  for(const row of rows){
-    const line=document.createElement("div");line.className="admin-catalog-line";
-    const label=document.createElement("span");label.textContent=row.name+" · "+row.slug+" · 排序 "+row.sort_order;
-    const state=document.createElement("span");state.className="admin-catalog-state";state.textContent=row.is_active?"已启用":"已停用";
-    const edit=document.createElement("button");edit.type="button";edit.className="admin-toggle";edit.textContent="编辑";edit.addEventListener("click",()=>fillCategoryEditor(row));
-    const toggle=document.createElement("button");toggle.type="button";toggle.className="admin-toggle";toggle.textContent=row.is_active?"停用":"启用";toggle.addEventListener("click",()=>updateRow("ah_product_categories",row.id,{is_active:!row.is_active}));
-    line.append(label,state,edit,toggle);root.append(line);
-  }
-}
-async function saveCategory(form){
-  if(busy)return;
-  const values=formValues(form);const slug=String(values.slug||"").trim().toLowerCase();const sort=Number(values.sort_order||0);
-  if(!values.name?.trim()||values.name.trim().length>80||! /^[a-z0-9]+(?:[_-][a-z0-9]+)*$/.test(slug)||!Number.isSafeInteger(sort)||sort<0||sort>100000){show(nodes.error,"分类名称、slug 或排序不符合要求。");return;}
-  const payload={name:values.name.trim(),slug,description:values.description.trim()||null,sort_order:sort,is_active:form.elements.is_active.checked};
-  busy=true;show(nodes.error,"");show(nodes.success,"");
-  try{const query=values.id?supabase.from("ah_product_categories").update(payload).eq("id",values.id):supabase.from("ah_product_categories").insert(payload);const {error}=await query;if(error)throw error;show(nodes.success,"商品分类已保存。");form.reset();form.elements.sort_order.value="0";form.elements.slug.readOnly=false;busy=false;await loadDashboard();}
-  catch{show(nodes.error,"分类保存失败，请检查 slug 是否重复及管理员权限。");}
-  finally{busy=false;}
-}
-$("product-editor").elements.image_file.addEventListener("change",()=>{
-  const file=$("product-editor").elements.image_file.files?.[0];const preview=$("product-image-preview");preview.replaceChildren();
-  if(!file){preview.textContent="尚未选择新图片";return;}
-  if(!["image/jpeg","image/png","image/webp","image/avif"].includes(file.type)||file.size>5*1024*1024){preview.textContent="图片格式不支持或文件超过 5 MB。";return;}
-  const image=document.createElement("img");image.src=URL.createObjectURL(file);image.alt="商品图片预览";preview.append(image);
-});
-
 async function saveCatalog(form){
   if(busy)return;const values=formValues(form),id=values.id||null,category=categoryRows.find(row=>row.id===values.category_id&&PLAN_CATEGORY_SPECS[row.slug]);
   if(!category){show(nodes.error,"请选择有效的商品分类。");return;}
