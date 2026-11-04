@@ -7,7 +7,31 @@ const balanceValue=document.getElementById("account-balance-value");
 const balanceState=document.getElementById("account-balance-state");
 const historyPanel=document.getElementById("topup-history");
 const refreshButton=document.getElementById("topup-refresh");
-let client=null,session=null,assets=[],pendingKey=null,pendingOrderId=null,pendingAmountMinor=null,busy=false;
+let client=null,session=null,assets=[],pendingKey=null,pendingOrderId=null,pendingAmountMinor=null,busy=false,currentBalanceMinor=0n;
+const amountOptions=document.getElementById("topup-amount-options");
+const continueLabel=submitButton.textContent;
+function dollars(minor){return "$"+(Number(minor)/100).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function updateTopupPreview(){
+  const amount=Number(amountSelect.value)||0;
+  const current=currentBalanceMinor;
+  text(document.getElementById("topup-preview-current"),dollars(current));
+  text(document.getElementById("topup-preview-add"),dollars(amount));
+  text(document.getElementById("topup-preview-bonus"),"$0.00");
+  text(document.getElementById("topup-preview-total"),dollars(current+BigInt(amount)));
+  text(submitButton,"继续 · $"+(amount/100).toLocaleString("en-US")+" →");
+  amountOptions?.querySelectorAll("[data-amount]").forEach(button=>{
+    const selected=Number(button.dataset.amount)===amount;
+    button.classList.toggle("selected",selected);
+    button.setAttribute("aria-pressed",String(selected));
+  });
+}
+amountOptions?.addEventListener("click",event=>{
+  const button=event.target.closest("[data-amount]");
+  if(!button||amountSelect.disabled||busy)return;
+  amountSelect.value=button.dataset.amount;
+  updateTopupPreview();
+});
+amountSelect.addEventListener("change",updateTopupPreview);
 
 function money(minor){return (Number(minor)/100).toFixed(2)+" USDT";}
 function text(node,value){if(node)node.textContent=value;}
@@ -52,7 +76,7 @@ async function refreshBalance(){
     ]);
     if(ledger.error)throw ledger.error;
     if(topups.error)throw topups.error;
-    const total=(ledger.data||[]).reduce((sum,row)=>sum+BigInt(String(row.amount_minor)),0n);
+    const total=(ledger.data||[]).reduce((sum,row)=>sum+BigInt(String(row.amount_minor)),0n);\n    currentBalanceMinor=total;updateTopupPreview();
     text(balanceValue,(total/100n).toString()+"."+(total%100n).toString().padStart(2,"0")+" USDT");
     text(balanceState,"余额仅在链上交易达到所需确认数后自动入账。");
     historyPanel.replaceChildren();
@@ -107,7 +131,7 @@ async function submitTopup(){
   }catch(error){
     showInvoiceError(error.message==="asset_monitoring_unavailable"?"该收款网络暂不可用，系统已阻止生成付款地址。":error.message==="market_rate_unavailable"?"暂时无法取得可靠实时汇率，请稍后重试。":error.message==="asset_contract_unverified"?"该代币合约尚未核验，暂不开放收款。":error.message);
   }finally{
-    busy=false;submitButton.disabled=!assets.length;amountSelect.disabled=Boolean(pendingOrderId);submitButton.textContent=pendingOrderId?"继续生成此金额的收款信息":"生成充值收款信息";
+    busy=false;submitButton.disabled=!assets.length;amountSelect.disabled=Boolean(pendingOrderId);submitButton.textContent=pendingOrderId?"继续生成此金额的收款信息":"继续 · $"+((Number(amountSelect.value)||0)/100).toLocaleString("en-US")+" →";
   }
 }
 async function start(){
@@ -116,7 +140,7 @@ async function start(){
     client=await window.AH_SUPABASE_READY;
     if(!client)return;
     const {data}=await client.auth.getSession();session=data.session;
-    if(session){await loadAssets();await refreshBalance();}
+    if(session){await loadAssets();await refreshBalance();updateTopupPreview();}
     client.auth.onAuthStateChange((_event,next)=>{queueMicrotask(async()=>{
       session=next;
       if(session){await loadAssets();await refreshBalance();}
@@ -126,6 +150,6 @@ async function start(){
     document.addEventListener("visibilitychange",()=>{if(session&&document.visibilityState==="visible")refreshBalance();});
   }catch{ text(balanceState,"账户充值服务初始化失败，请刷新页面重试。"); }
 }
-submitButton.addEventListener("click",submitTopup);
+updateTopupPreview();\nsubmitButton.addEventListener("click",submitTopup);
 refreshButton?.addEventListener("click",refreshBalance);
 start();
