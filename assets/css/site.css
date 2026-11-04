@@ -1001,3 +1001,80 @@ body{background:#fff!important;color:#17212b!important}.topbar{background:#f8faf
   opacity:1!important;
   box-shadow:none!important;
 }
+
+
+/* VPS regional catalogue — reference-inspired layout */
+.vps-catalog-page{background:#fff;color:#101828;--vps-ink:#101828;--vps-muted:#667085;--vps-line:#eaecf0;--vps-blue:#155eef}
+.vps-catalog-page .topbar{background:#fff;color:#667085;border-color:#eaecf0}
+.vps-catalog-page header{background:#fff;border-color:#eaecf0}
+.vps-catalog-page .links{color:#475467}
+.vps-catalog-page .links a:hover{color:#155eef}
+.vps-catalog-page .brand{color:#101828}
+.vps-catalog-page .account-language{background:#fff;color:#101828}
+.vps-catalog-page .vps-hero{padding:48px 0 42px;background:linear-gradient(110deg,#071629f2,#092443e8),url("../../assets/images/vps-datacenter.jpg") center/cover no-repeat;color:#fff}
+.vps-catalog-page .vps-hero:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 75% 40%,#1674b433,transparent 55%);pointer-events:none}
+.vps-catalog-page .vps-hero .hero-grid{position:relative;grid-template-columns:1.05fr .95fr;gap:38px}
+.vps-catalog-page .vps-hero h1{font-size:clamp(32px,4vw,48px);letter-spacing:-1.7px;line-height:1.2;margin:15px 0}
+.vps-catalog-page .vps-hero p{font-size:14px;line-height:1.8;color:#c6d4e3;max-width:590px;margin-bottom:20px}
+.vps-catalog-page .vps-hero .eyebrow{border-color:#315477;background:#102b49;color:#b8d9ff}
+.vps-catalog-page .vps-hero .btn-primary{background:#155eef;color:#fff}
+.vps-catalog-page .vps-hero .btn-ghost{border-color:#5b718b;color:#fff}
+.vps-catalog-page .vps-hero-panel{border:1px solid #3a5573;border-radius:10px;background:#07182bcc;box-shadow:0 18px 50px #0005;transform:none}
+.vps-catalog-page .vps-hero-panel .terminal-top,.vps-catalog-page .vps-hero-panel .terminal-foot{color:#b7c9dc}
+.vps-catalog-page .vps-hero-panel .terminal-body{padding:16px 19px}
+.vps-catalog-page .vps-hero-panel .terminal-output{font-size:12px;color:#d8e4f0;line-height:2}
+.vps-catalog-page .vps-hero-panel .terminal-ok{color:#6ee7b7}
+.vps-catalog-page .vps-trust-strip{background:#fff;border-bottom:1px solid #eaecf0}
+.vps-catalog-page .vps-trust-strip .wrap{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;padding:13px 0;color:#475467;font-size:11px}
+.vps-catalog-page .vps-trust-strip span:before{content:"✓";color:#12a36b;margin-right:7px}
+.vps-catalog-page .section{padding:48px 0}
+.vps-catalog-page .section.alt{background:#f8fafc;border-color:#eaecf0}
+.vps-catalog-page .kicker{color:#155eef}
+.vps-catalog-page .section h2{font-size:26px;letter-spacing:-.7px;color:#101828;margin:5px 0}
+.vps-catalog-page .sub{color:#667085;font-size:12px;line-height:1.7}
+.vps-catalog-page .section-head{margin-bottom:20px}
+.vps-table-legend{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#667085;font-size:11px;margin:0 0 12px}
+.vps-live-dot{display:inline-block;width:7px;height:7px;background:#12b76a;border-radius:50%;margin-right:6px}
+.vps-region-tables{display:grid;gap:22px}
+.vps-region-block{min-width:0}
+.vps-region-heading{display:flex;align-items:center;gap:9px;margin:0 0 7px;color:#101828;font-size:13px;font-weight:700}
+.vps-region-heading .vps-region-flag{font-size:17px}
+.vps-region-heading small{font-size:10px;color:#667085;font-weight:400}
+.vps-table-scroll{width:100%;overflow-x:auto;border:1px solid #eaecf0;border-radius:5px;background:#fff}
+.vps-plan-table{width:100%;border-collapse:collapse;min-width:700px;font-size:11px;text-align:left}
+.vps-plan-table th{padding:9px 10px;background:#f2f4f7;color:#475467;font-size:10px;font-weight:700;white-space:nowrap}
+.vps-plan-table td{padding:8px 10px;border-top:1px solid #f0f2f5;color:#344054;vertical-align:middle}
+.vps-plan-table tbody tr:hover{background:#f8faff}
+.vps-plan-table .vps-plan-code{font-weight:700;color:#101828;white-space:nowrap}
+.vps-plan-table .vps-plan-code small{display:block;color:#667085;font-size:9px;font-weight:400;margin-top:2px}
+.vps-plan-table .vps-price{color:#155eef;font-weight:800;white-space:nowrap}
+.vps-plan-table .vps-price small{font-size:9px;font-weight:500;color:#667085}
+.vps-plan-table .vps-order-cell{text-align:right;width:75px}
+.vps-plan-table .vps-order-button{border:1px solid #d0d5dd;border-radius:4px;background:#fff;color:#344054;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap}
+.vps-plan-table .vps-order-button:hover{background:#155eef;border-color:#155eef;color:#fff}
+.vps-plan-table .vps-featured-row{background:#eef4ff}
+.vps-plan-table .vps-featured-row td:first-child{box-shadow:inset 3px 0 #155eef}
+.vps-plan-table .vps-featured-row .vps-order-button{background:#155eef;color:#fff;border-color:#155eef}
+.vps-catalog-page .plan-disclaimer{margin:16px 0 0;color:#667085;font-size:10px;line-height:1.7}
+.vps-spec-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid #eaecf0;border-radius:8px;background:#fff;overflow:hidden}
+.vps-spec-grid article{display:flex;align-items:center;gap:11px;padding:15px;border-right:1px solid #eaecf0}
+.vps-spec-grid article:last-child{border-right:0}
+.vps-spec-icon{width:30px;height:30px;display:grid;place-items:center;border-radius:7px;background:#eff4ff;color:#155eef;font-size:15px}
+.vps-spec-grid strong,.vps-spec-grid small{display:block}
+.vps-spec-grid strong{font-size:12px;color:#101828}
+.vps-spec-grid small{font-size:10px;color:#667085}
+.vps-spec-note{margin:12px 0 0;text-align:center;color:#667085;font-size:10px}
+.vps-faq-heading{text-align:center;margin-bottom:22px}
+.vps-faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;max-width:900px;margin:auto}
+.vps-faq-grid details{border:1px solid #eaecf0;border-radius:7px;background:#fff;padding:12px 14px}
+.vps-faq-grid summary{cursor:pointer;list-style:none;font-size:11px;font-weight:700;color:#101828}
+.vps-faq-grid summary::-webkit-details-marker{display:none}
+.vps-faq-grid summary:after{content:"＋";float:right;color:#667085}
+.vps-faq-grid details[open] summary:after{content:"－"}
+.vps-faq-grid p{margin:10px 0 0;color:#667085;font-size:11px;line-height:1.8}
+.vps-cta-banner{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:26px 30px;border-radius:9px;background:linear-gradient(110deg,#071629,#0c3156);color:#fff}
+.vps-cta-banner h2{color:#fff!important;margin:5px 0;font-size:23px!important}
+.vps-cta-banner p{margin:0;color:#c6d4e3;font-size:12px}
+.vps-cta-banner .btn-primary{background:#fff;color:#155eef}
+@media(max-width:900px){.vps-catalog-page .vps-hero .hero-grid{grid-template-columns:1fr}.vps-hero-panel{max-width:600px}.vps-spec-grid{grid-template-columns:repeat(2,1fr)}.vps-spec-grid article:nth-child(2){border-right:0}.vps-spec-grid article:nth-child(n+3){border-top:1px solid #eaecf0}}
+@media(max-width:640px){.vps-catalog-page .vps-hero{padding:40px 0 34px}.vps-catalog-page .vps-hero h1{font-size:34px}.vps-catalog-page .vps-trust-strip .wrap{justify-content:flex-start;gap:9px 16px}.vps-catalog-page .section{padding:38px 0}.vps-catalog-page .section h2{font-size:23px}.vps-table-legend{font-size:10px}.vps-region-tables{gap:17px}.vps-plan-table{min-width:670px}.vps-spec-grid{grid-template-columns:1fr 1fr}.vps-spec-grid article{padding:12px 9px}.vps-faq-grid{grid-template-columns:1fr}.vps-cta-banner{display:block;padding:22px}.vps-cta-banner .btn{margin-top:15px;width:100%}}
