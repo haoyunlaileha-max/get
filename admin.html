@@ -25,6 +25,17 @@
       <article class="admin-metric"><span data-i="queued">Provisioning queue</span><strong id="metric-queued">—</strong><small data-i="waiting_work">Waiting / retrying</small></article>
       <article class="admin-metric"><span data-i="active">Active plans</span><strong id="metric-plans">—</strong><small data-i="catalog">Catalog</small></article>
     </div>
+    <section class="admin-panel" id="launch-readiness">
+      <div class="admin-panel-head"><div><h2>主网上线检查</h2><p>根据当前真实目录、机房库存和链上监听配置计算，不使用演示数据。</p></div><span class="admin-count">LIVE</span></div>
+      <div class="admin-metrics">
+        <article class="admin-metric"><span>已发布产品</span><strong id="metric-live-products">—</strong><small>Active products</small></article>
+        <article class="admin-metric"><span>已发布套餐</span><strong id="metric-live-plans">—</strong><small>Active plans</small></article>
+        <article class="admin-metric"><span>启用机房</span><strong id="metric-live-regions">—</strong><small>Active regions</small></article>
+        <article class="admin-metric"><span>可售套餐 / 机房</span><strong id="metric-sellable-mappings">—</strong><small>Available mappings</small></article>
+        <article class="admin-metric"><span>就绪收款网络</span><strong id="metric-ready-assets">—</strong><small>Ready mainnet listeners</small></article>
+      </div>
+      <p id="launch-readiness-state" class="admin-editor-note" role="status">正在检查主网上线条件…</p>
+    </section>
     <section class="admin-panel">
       <div class="admin-panel-head"><div><h2 data-i="orders_title">Recent orders</h2><p data-i="orders_desc">Customer orders and their current lifecycle state.</p></div><span class="admin-count" id="orders-count">0</span></div>
       <form id="orders-filter" class="admin-orders-toolbar">
@@ -93,6 +104,17 @@
       </form>
       <p class="admin-editor-note" data-i="inventory_safety">Allocated units are calculated from non-terminal orders and cannot be edited here. Capacity changes never delete or alter orders. Blank capacity means unlimited.</p>
       <div id="plan-region-list" class="admin-catalog"></div>
+    </section>
+    <section class="admin-panel" id="region-editor-panel">
+      <div class="admin-panel-head"><div><h2>添加数据中心机房</h2><p>只录入已与真实供应商确认的地区。新机房默认停用，必须验证实际供货后再启用。</p></div></div>
+      <form id="region-editor" class="admin-editor-grid">
+        <label><span>机房代码（唯一）</span><input name="code" required maxlength="32" pattern="[A-Z0-9][A-Z0-9_-]{1,31}" placeholder="EU-FRA-1"></label>
+        <label><span>机房名称</span><input name="name" required maxlength="100" placeholder="Frankfurt 1"></label>
+        <label><span>城市</span><input name="city" required maxlength="100" placeholder="Frankfurt"></label>
+        <label><span>国家代码（ISO 3166-1 alpha-2）</span><input name="country_code" required minlength="2" maxlength="2" pattern="[A-Za-z]{2}" placeholder="DE"></label>
+        <label><span>初始状态</span><select name="status"><option value="inactive" selected>停用（安全默认）</option><option value="maintenance">维护中</option><option value="active">启用（仅已确认供货）</option></select></label>
+        <div class="admin-editor-actions"><button class="btn btn-primary" type="submit">添加机房</button><button class="admin-toggle" type="reset">清空</button></div>
+      </form>
     </section>
     <section class="admin-panel"><div class="admin-panel-head"><div><h2 data-i="regions_title">Data-center regions</h2><p data-i="regions_desc">Control whether a region is available for new orders.</p></div></div><div id="regions-list" class="admin-catalog"></div></section>
     <p class="admin-footnote" data-i="security_note">Admin access is verified using Supabase app_metadata and enforced again by database RLS. Never share service-role keys with this page.</p>
