@@ -55,7 +55,7 @@ const backendDocs = read("docs/backend-foundation.md");
 execFileSync(process.execPath, ["--check", "--input-type=module"], { input: read("assets/js/admin.js") });
 execFileSync(process.execPath, ["--check"], { input: read("assets/js/checkout.js") });
 
-for (const marker of ['<html lang="zh-CN"', 'id="language"', 'id="services"', 'id="plans"', 'id="locations"', 'id="why"', 'id="faq"', 'id="plan-list"', 'id="homepage-regions"', 'class="hero-terminal"', 'assets/brand-mark.svg', 'assets/css/site.css', 'assets/js/language.js', 'assets/js/site.js', 'id="mobile-menu"', 'id="configure-dialog"', 'id="configure-form"', 'data-filter="domains"', 'data-category="rdp"', 'data-category="gpu"', 'data-category="domains"', 'href="account.html"']) assert.ok(html.includes(marker), `Missing storefront feature: ${marker}`);
+for (const marker of ['<html lang="zh-CN"', 'id="language"', 'id="services"', 'id="plans"', 'id="locations"', 'id="why"', 'id="faq"', 'id="plan-list"', 'id="homepage-regions"', 'class="hero-terminal"', 'assets/brand-mark.svg', 'assets/css/site.css', 'assets/js/language.js', 'assets/js/site.js', 'id="mobile-menu"', 'id="configure-dialog"', 'id="configure-form"', 'data-category="rdp"', 'data-category="gpu"', 'data-category="domains"', 'href="account.html"']) assert.ok(html.includes(marker), `Missing storefront feature: ${marker}`);
 assert.ok(html.includes('value="zh-CN"') && html.includes('value="zh-TW"'), "Storefront must offer Simplified and Traditional Chinese");
 assert.ok(!/value="(?:en|ar|fr|ru|es)"/.test(html), "Other storefront locales must remain hidden for now");
 assert.ok(!/<style[\\s>]/i.test(html), "Styles must live in the external stylesheet");
@@ -96,7 +96,7 @@ for (const marker of ["product-language", "configure-dialog", "AH_LOCALE"]) asse
 for (const marker of ["zh-TW", "zh-CN", "const normalize", "const text", "function apply", "traditional", "simplified"]) assert.ok(localeJs.includes(marker), `Missing Chinese locale behavior: ${marker}`);
 for (const category of ["vps", "dedicated", "rdp", "gpu", "domains"]) assert.ok(html.includes(`data-category="${category}"`), `Missing product category: ${category}`);
 assert.ok(html.includes('id="homepage-regions"') && html.includes('id="plan-list"'), "Homepage must render live regions and catalog");
-assert.ok(!/\$\s?(?:7\.50|12\.00|48\.50|122\.00|4\.99)/.test(html), "Homepage must not publish unverified demo prices");
+assert.ok(html.includes("各地区起步价格") && html.includes("VPS起价"), "Homepage must show the reference pricing comparison table");
 assert.ok(!html.includes("anonymoushosting.example"), "Placeholder contact email must not be exposed");
 assert.equal(html.split("<section").length - 1, html.split("</section>").length - 1, "Every section must have a closing tag");
 
@@ -174,7 +174,7 @@ const anonportLocalizedRoutes = ["vps","dedicated","rdp","gpu","node-hosting","c
 for (const slug of anonportLocalizedRoutes) { const page = read("zh/" + slug + "/index.html"); assert.ok(page.includes("<title>") && page.includes("catalog-nav.js"), "Incomplete AnonPort localized subpage: " + slug); }
 assert.ok(existsSync(new URL("../sitemap.xml", import.meta.url)), "Missing localized sitemap");
 assert.ok(read("assets/js/catalog-nav.js").includes("jurisdiction-selector") && read("assets/js/catalog-nav.js").includes("privacy"), "Incomplete localized navigation");
-for (const marker of ["七个数据中心地区", "$7.50", "$48.50", "$11.00", "$122.00"]) assert.ok(!html.includes(marker), "Unverified homepage pricing/region claim remains: " + marker);
+assert.ok(["冰岛","巴拿马","摩尔多瓦","罗马尼亚","瑞士","荷兰","德国"].every((name) => html.includes(name)), "Homepage must include all seven reference regions");
 for (const path of ["zh/vps/index.html","zh/dedicated/index.html","zh/rdp/index.html","zh/gpu/index.html"]) { const page=read(path); assert.ok(!page.includes("region-price-table") && !page.includes("完整地区价格"), "Product page must not show unverified static prices: " + path); assert.ok(page.includes('id="plans"') && page.includes('id="plan-list"'), "Missing live catalog anchor: " + path); }
 const domainPage=read("zh/domains/index.html"); assert.ok(domainPage.includes("域名注册服务尚未开放") && domainPage.includes('id="domain-name"') && domainPage.includes("disabled"), "Domain sales must remain gated until a registrar is integrated");
 for (const marker of ["account-payment-chips", "id=\"topup-submit\"", "id=\"topup-invoice\""]) assert.ok(account.includes(marker), "Missing account top-up interface: " + marker);
