@@ -217,63 +217,17 @@ async function handleRefreshClick(){
     window.setTimeout(()=>{if(refreshButton&&!refreshInProgress)refreshButton.textContent=originalLabel;},1800);
   }
 }
-async function invoiceCard(invoice,amountMinor,bonusMinor){
-  const layout=document.querySelector(".topup-layout");
-  if(!layout||!previewPanel)return;
-  let page=document.getElementById("topup-payment-page");
-  if(!page){page=document.createElement("section");page.id="topup-payment-page";page.className="topup-payment-page";layout.insertAdjacentElement("afterend",page);}
-  page.replaceChildren();
-  const summary=document.createElement("div");summary.className="topup-payment-summary";
-  const heading=document.createElement("h2");heading.textContent="充值余额";
-  const details=document.createElement("div");details.className="topup-payment-summary-card";
-  const banner=document.createElement("div");banner.className="topup-payment-summary-banner";
-  const mark=document.createElement("span");mark.className="topup-payment-mark";mark.textContent="+";
-  const bannerText=document.createElement("div");
-  const bannerTitle=document.createElement("strong");bannerTitle.textContent="向您的账户充值 "+dollars(amountMinor);
-  const bannerSub=document.createElement("small");bannerSub.textContent="链上交易确认后，余额即时到账。";
-  bannerText.append(bannerTitle,bannerSub);banner.append(mark,bannerText);
-  const line=(label,value,extra="")=>{const row=document.createElement("div");row.className="topup-payment-line "+extra;const l=document.createElement("span");l.textContent=label;const v=document.createElement("strong");v.textContent=value;row.append(l,v);return row;};
-  details.append(banner,line("您的付款金额",dollars(amountMinor)+" USD"),line("+ 奖励", "+"+dollars(bonusMinor),"bonus"),line("您将获得",dollars(amountMinor+bonusMinor)+" 账户余额"),line("到期时间","余额无有效期"));
-  const total=document.createElement("div");total.className="topup-payment-grand-total";const totalLabel=document.createElement("span");totalLabel.textContent="合计";const totalValue=document.createElement("strong");totalValue.textContent=dollars(amountMinor)+" USD";total.append(totalLabel,totalValue);
-  const order=document.createElement("p");order.className="topup-payment-order";order.textContent="订单 #"+String(invoice.order_id).slice(0,12);
-  const back=document.createElement("button");back.type="button";back.className="btn btn-ghost topup-payment-back";back.textContent="返回充值设置";
-  back.addEventListener("click",()=>{page.hidden=true;layout.hidden=false;});
-  summary.append(heading,details,total,order,back);
-  const payment=document.createElement("aside");payment.className="topup-payment-card";
-  const paymentHead=document.createElement("div");paymentHead.className="topup-payment-card-head";
-  const method=document.createElement("strong");method.textContent="使用 "+invoice.ticker+" ("+invoice.network+") 支付";
-  const countdown=document.createElement("strong");countdown.className="topup-payment-countdown";paymentHead.append(method,countdown);
-  const qrWrap=document.createElement("div");qrWrap.className="topup-qr-wrap";
-  const qrImage=document.createElement("img");qrImage.className="topup-qr-image";qrImage.alt="收款地址二维码";qrImage.width=220;qrImage.height=220;
-  try{const QR=await import("https://esm.sh/qrcode@1.5.4");qrImage.src=await (QR.default||QR).toDataURL(invoice.wallet_address,{width:220,margin:2,errorCorrectionLevel:"M"});qrWrap.append(qrImage);}catch{const fallback=document.createElement("p");fallback.textContent="二维码暂时无法生成，请复制收款地址支付。";qrWrap.append(fallback);}
-  const amountBlock=document.createElement("div");amountBlock.className="topup-payment-field";
-  const amountLabel=document.createElement("small");amountLabel.textContent="准确发送";
-  const amountValue=document.createElement("div");amountValue.className="topup-payment-copy-row";
-  const exact=document.createElement("code");exact.textContent=invoice.expected_amount+" "+invoice.ticker;
-  const copyAmount=document.createElement("button");copyAmount.type="button";copyAmount.textContent="复制";
-  copyAmount.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(String(invoice.expected_amount));copyAmount.textContent="已复制";}catch{copyAmount.textContent="复制失败";}});
-  amountValue.append(exact,copyAmount);amountBlock.append(amountLabel,amountValue);
-  const addressBlock=document.createElement("div");addressBlock.className="topup-payment-field";
-  const addressLabel=document.createElement("small");addressLabel.textContent="收款地址";
-  const addressValue=document.createElement("div");addressValue.className="topup-payment-copy-row";
-  const address=document.createElement("code");address.textContent=invoice.wallet_address;
-  const copyAddress=document.createElement("button");copyAddress.type="button";copyAddress.textContent="复制";
-  copyAddress.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(invoice.wallet_address);copyAddress.textContent="已复制";}catch{copyAddress.textContent="复制失败";}});
-  addressValue.append(address,copyAddress);addressBlock.append(addressLabel,addressValue);
-  const state=document.createElement("div");state.className="topup-payment-waiting";state.textContent="● 等待付款…";
-  const expiresAt=Date.parse(invoice.expires_at);
-  const updateCountdown=()=>{const seconds=Math.max(0,Math.floor((expiresAt-Date.now())/1000));countdown.textContent=seconds?("◷ "+String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0")):"报价已过期";if(!seconds)state.textContent="● 付款报价已过期，请返回重新创建订单";};
-  updateCountdown();const timer=window.setInterval(()=>{updateCountdown();if(Date.now()>=expiresAt)window.clearInterval(timer);},1000);
-  const warning=document.createElement("p");warning.className="topup-payment-warning";warning.textContent="请务必使用指定网络，并支付上方显示的精确金额。转错网络、少付或过期转账可能需要人工核验。";
-  paymentHead.append(method,countdown);payment.append(paymentHead,qrWrap,amountBlock,addressBlock,state,warning);
-  page.append(summary,payment);layout.hidden=true;page.hidden=false;
-  invoicePanel.hidden=true;
+function paymentPageUrl(invoice,amountMinor,bonusMinor){
+ const params=new URLSearchParams({order:String(invoice.order_id),asset:String(invoice.asset_code),ticker:String(invoice.ticker),network:String(invoice.network),address:String(invoice.wallet_address),amount:String(invoice.expected_amount),decimals:String(invoice.decimals),expires:String(invoice.expires_at),orderExpires:String(invoice.order_expires_at||invoice.expires_at),usdtMinor:String(amountMinor),bonusMinor:String(bonusMinor)});
+ return "payment.html?"+params.toString();
 }
 async function submitTopup(){
   if(busy||!session)return;
   if(customMode)applyCustomAmount();
   const amount=Number(amountSelect.value),assetCode=assetSelect.value;
   if(!Number.isSafeInteger(amount)||!assetCode){showInvoiceError("请选择充值金额和可用收款网络。");return;}
+  const paymentWindow=window.open("about:blank","_blank");
+  if(!paymentWindow){showInvoiceError("浏览器阻止了付款页面弹出，请允许此网站打开新窗口后重试。");return;}
   busy=true;submitButton.disabled=true;submitButton.textContent="正在创建充值订单…";
   try{
     if(!pendingOrderId){
@@ -286,10 +240,11 @@ async function submitTopup(){
     if(pendingAmountMinor!==amount)throw new Error("当前充值订单金额已锁定，请完成该订单或刷新充值页面后再创建新订单。");
     submitButton.textContent="正在生成链上收款信息…";
     const result=await api("create-crypto-invoice",{order_id:pendingOrderId,asset_code:assetCode});
-    await invoiceCard(result.invoice,amount,customMode?0:selectedBonus(amount));
+    paymentWindow.location.replace(paymentPageUrl(result.invoice,amount,customMode?0:selectedBonus(amount)));
     pendingKey=null;pendingOrderId=null;pendingAmountMinor=null;amountSelect.disabled=false;
     await refreshBalance();
   }catch(error){
+    if(paymentWindow&&!paymentWindow.closed)paymentWindow.close();
     showInvoiceError(error.message==="topup_creation_failed"?(error.message+"（服务器创建订单失败，请稍后重试）"):error.message==="topup_order_expired"?"原充值订单已过期，请重新点击继续创建新订单。":error.message==="asset_monitoring_unavailable"?"该收款网络暂不可用，系统已阻止生成付款地址。":error.message==="market_rate_unavailable"?"暂时无法取得可靠实时汇率，请稍后重试。":error.message==="asset_contract_unverified"?"该代币合约尚未核验，暂不开放收款。":error.message);
   }finally{
     busy=false;submitButton.disabled=!assets.length;amountSelect.disabled=Boolean(pendingOrderId);if(customInput)customInput.disabled=Boolean(pendingOrderId);submitButton.textContent=pendingOrderId?"继续生成此金额的收款信息":"继续";
