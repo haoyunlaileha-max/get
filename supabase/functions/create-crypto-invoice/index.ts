@@ -19,8 +19,9 @@ function scaledDecimal(value:string,scale:number):bigint {
   const [whole,fraction=""]=value.split(".");
   return BigInt(whole)*10n**BigInt(scale)+BigInt((fraction+"0".repeat(scale)).slice(0,scale));
 }
-function formatAtomic(value:string,decimals:number):string {
+function formatAtomic(value:string,decimals:number,fixedDecimals=0):string {
   const raw=BigInt(value),unit=10n**BigInt(decimals),whole=raw/unit;
+  if(fixedDecimals>0){const scale=10n**BigInt(decimals-fixedDecimals);const cents=raw/scale;const base=10n**BigInt(fixedDecimals);return (cents/base).toString()+"."+(cents%base).toString().padStart(fixedDecimals,"0");}
   const fraction=(raw%unit).toString().padStart(decimals,"0").replace(/0+$/,"");
   return fraction?whole.toString()+"."+fraction:whole.toString();
 }
@@ -73,7 +74,11 @@ Deno.serve(async(request:Request)=>{
     const usdtMinor=BigInt(order.total_minor);
     const numerator=usdtMinor*(10n**BigInt(decimals))*(10n**BigInt(priceScale));
     const denominator=100n*priceScaled;
-    const baseAtomic=(numerator+denominator-1n)/denominator;
+    let baseAtomic=(numerator+denominator-1n)/denominator;
+    if(asset.ticker==="USDT" && decimals>=2){
+      const centUnit=10n**BigInt(decimals-2);
+      baseAtomic=((baseAtomic+centUnit-1n)/centUnit)*centUnit;
+    }
     if(baseAtomic<=0n) return reply(422,{error:"quote_below_asset_precision"},origin);
     const orderExpiry=Date.parse(order.expires_at);
     if(!Number.isFinite(orderExpiry)||orderExpiry<=Date.now()) return reply(409,{error:"order_expired"},origin);
@@ -85,6 +90,6 @@ Deno.serve(async(request:Request)=>{
     if(invoiceError||!depositId){if(invoiceError?.message?.includes("order_not_payable"))return reply(409,{error:"order_not_payable"},origin);if(invoiceError?.message?.includes("order_expired"))return reply(409,{error:"order_expired"},origin);return reply(500,{error:"invoice_creation_failed"},origin);}
     const {data:deposit,error:depositError}=await admin.from("ah_crypto_deposits").select("id,expected_amount_atomic,expires_at,quote_expires_at,quoted_usdt_minor,quote_price_usdt,status").eq("id",depositId).single();
     if(depositError||!deposit)return reply(500,{error:"invoice_lookup_failed"},origin);
-    return reply(201,{invoice:{id:deposit.id,order_id:order.id,order_expires_at:order.expires_at,asset_code:asset.asset_code,ticker:asset.ticker,network:asset.network,wallet_address:asset.wallet_address,expected_amount_atomic:deposit.expected_amount_atomic,expected_amount:formatAtomic(String(deposit.expected_amount_atomic),decimals),decimals,quoted_usdt:(Number(deposit.quoted_usdt_minor)/100).toFixed(2),price_usdt:String(deposit.quote_price_usdt),expires_at:deposit.expires_at,quote_expires_at:deposit.quote_expires_at,status:deposit.status}},origin);
+    return reply(201,{invoice:{id:deposit.id,order_id:order.id,order_expires_at:order.expires_at,asset_code:asset.asset_code,ticker:asset.ticker,network:asset.network,wallet_address:asset.wallet_address,expected_amount_atomic:deposit.expected_amount_atomic,expected_amount:formatAtomic(String(deposit.expected_amount_atomic),decimals,asset.ticker==="USDT"?2:0),decimals,quoted_usdt:(Number(deposit.quoted_usdt_minor)/100).toFixed(2),price_usdt:String(deposit.quote_price_usdt),expires_at:deposit.expires_at,quote_expires_at:deposit.quote_expires_at,status:deposit.status}},origin);
   }catch(error){const message=error instanceof Error?error.message:"";if(message==="market_rate_unavailable"||message==="invalid_market_price")return reply(503,{error:"market_rate_unavailable"},origin);return reply(500,{error:"internal_server_error"},origin);}
 });
