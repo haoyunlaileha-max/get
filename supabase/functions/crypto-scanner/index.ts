@@ -229,27 +229,69 @@ async function scanEvm(db: ReturnType<typeof createClient>, asset: Asset, secret
   return transfers.length;
 }
 
+const SOLANA_SIGNATURE_PAGE_SIZE = 100;
+const SOLANA_MAX_SIGNATURE_PAGES = 10;
 async function scanSolana(db: ReturnType<typeof createClient>, asset: Asset, secret: string) {
-  const signatures = await rpc(SOL_RPC, "getSignaturesForAddress", [asset.wallet_address, { limit: 25, commitment: "confirmed" }]);
-  if (!Array.isArray(signatures)) throw new Error("solana_signatures_invalid");
+  const saved = await getCursor(db, asset.asset_code);
+  const signatures: any[] = [];
+  let before: string | undefined;
+  let cursorFound = !saved;
+  for (let pageNumber = 0; pageNumber < SOLANA_MAX_SIGNATURE_PAGES; pageNumber++) {
+    const page = await rpc(SOL_RPC, "getSignaturesForAddress", [
+      asset.wallet_address,
+      { limit: SOLANA_SIGNATURE_PAGE_SIZE, commitment: "confirmed", ...(before ? { before } : {}) },
+    ]);
+    if (!Array.isArray(page)) throw new Error("solana_signatures_invalid");
+    if (!page.length) break;
+    for (const item of page) {
+      if (saved && item.signature === saved) { cursorFound = true; break; }
+      signatures.push(item);
+    }
+    if (cursorFound) break;
+    if (page.length < SOLANA_SIGNATURE_PAGE_SIZE) break;
+    before = page[page.length - 1]?.signature;
+    if (!before) throw new Error("solana_pagination_cursor_invalid");
+  }
+  // Never advance a cursor past an unseen backlog. Degrade the asset instead so new
+  // invoices are blocked until the scanner can safely catch up.
+  if (!cursorFound) throw new Error("solana_cursor_not_found_backlog_exceeded");
+
   const transfers: Transfer[] = [];
-  for (const item of signatures) {
-    if (item.err || !item.signature) continue;
-    const tx = await rpc(SOL_RPC, "getTransaction", [item.signature, { encoding: "jsonParsed", commitment: "confirmed", maxSupportedTransactionVersion: 0 }]);
-    if (!tx || !tx.meta || tx.meta.err) continue;
-    const keys = tx.transaction?.message?.accountKeys ?? [];
-    let event = 0;
-    const instructions = [...(tx.transaction?.message?.instructions ?? []), ...(tx.meta.innerInstructions ?? []).flatMap((entry: any) => entry.instructions ?? [])];
-    for (const instruction of instructions) {
-      const parsed = instruction.parsed;
-      if (parsed?.type !== "transfer" || parsed?.info?.destination !== asset.wallet_address) continue;
-      const lamports = BigInt(String(parsed.info.lamports ?? "0"));
-      if (lamports <= 0n) continue;
-      transfers.push({ asset_code: asset.asset_code, transaction_hash: item.signature, event_index: event++, destination_address: asset.wallet_address, amount_atomic: lamports.toString(), block_height: Number(tx.slot ?? item.slot ?? 0), confirmations: item.confirmationStatus === "finalized" ? 32 : 0 });
+  const concurrency = 8;
+  for (let offset = 0; offset < signatures.length; offset += concurrency) {
+    const batch = signatures.slice(offset, offset + concurrency);
+    const transactions = await Promise.all(batch.map(async (item) => {
+      if (item.err || !item.signature) return { item, tx: null };
+      const tx = await rpc(SOL_RPC, "getTransaction", [
+        item.signature,
+        { encoding: "jsonParsed", commitment: "confirmed", maxSupportedTransactionVersion: 0 },
+      ]);
+      if (!tx || !tx.meta) throw new Error("solana_transaction_unavailable");
+      return { item, tx };
+    }));
+    for (const { item, tx } of transactions) {
+      if (!tx || tx.meta.err) continue;
+      let event = 0;
+      const instructions = [
+        ...(tx.transaction?.message?.instructions ?? []),
+        ...(tx.meta.innerInstructions ?? []).flatMap((entry: any) => entry.instructions ?? []),
+      ];
+      for (const instruction of instructions) {
+        const parsed = instruction.parsed;
+        if (parsed?.type !== "transfer" || parsed?.info?.destination !== asset.wallet_address) continue;
+        const lamports = BigInt(String(parsed.info.lamports ?? "0"));
+        if (lamports <= 0n) continue;
+        transfers.push({
+          asset_code: asset.asset_code, transaction_hash: item.signature, event_index: event++,
+          destination_address: asset.wallet_address, amount_atomic: lamports.toString(),
+          block_height: Number(tx.slot ?? item.slot ?? 0),
+          confirmations: item.confirmationStatus === "finalized" ? 32 : 0,
+        });
+      }
     }
   }
   await ingest(URL + "/functions/v1/crypto-listener", secret, transfers);
-  await markCursor(db, asset, signatures[0]?.signature ?? await getCursor(db, asset.asset_code), null);
+  await markCursor(db, asset, signatures[0]?.signature ?? saved, null);
   return transfers.length;
 }
 
